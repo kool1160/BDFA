@@ -69,7 +69,7 @@ h1 {
   grid-template-columns: 1fr;
 }
 
-.card, .panel, .ai-card {
+.card, .panel {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -97,7 +97,7 @@ h1 {
   font-size: clamp(3rem, 12vw, 5.2rem);
 }
 
-.hero-card p, .ai-card p {
+.hero-card p {
   margin: 8px 0 0;
   color: var(--muted);
 }
@@ -140,30 +140,9 @@ h1 {
   letter-spacing: -0.03em;
 }
 
-.ai-card {
-  margin-top: 14px;
-  padding: 22px;
-  display: grid;
-  gap: 16px;
-}
-
-.ai-card h2 {
-  margin: 6px 0;
-  font-size: 1.8rem;
-  letter-spacing: -0.04em;
-}
-
-.ai-card button {
-  border: 0;
-  border-radius: 999px;
-  padding: 14px 18px;
-  background: var(--surface-strong);
-}
-
 @media (min-width: 760px) {
   .app-shell { padding: 34px; }
   .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
   .hero-card { grid-column: span 2; grid-row: span 2; }
   .panel-grid { grid-template-columns: repeat(2, 1fr); }
-  .ai-card { grid-template-columns: 1fr auto; align-items: center; }
 }
