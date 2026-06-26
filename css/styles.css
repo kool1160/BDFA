@@ -66,7 +66,8 @@ h1 {
 }
 
 .dashboard-grid {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
 }
 
 .card, .panel {
@@ -78,28 +79,53 @@ h1 {
 }
 
 .card {
-  padding: 22px;
+  min-height: 116px;
+  padding: 18px;
 }
 
 .card strong {
   display: block;
-  margin-top: 8px;
-  font-size: 2rem;
+  margin-top: 10px;
+  font-size: clamp(1.45rem, 7vw, 2rem);
+  line-height: 1;
   letter-spacing: -0.055em;
 }
 
 .hero-card {
+  grid-column: 1 / -1;
+  min-height: 238px;
+  padding: 26px;
   background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07));
   border-radius: var(--radius-xl);
 }
 
 .hero-card strong {
+  margin-top: 12px;
   font-size: clamp(3rem, 12vw, 5.2rem);
 }
 
 .hero-card p {
   margin: 8px 0 0;
+  max-width: 32rem;
   color: var(--muted);
+}
+
+.dashboard-grid .card:not(.hero-card) {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.065);
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.26);
+}
+
+.dashboard-grid .card:not(.hero-card) .label {
+  font-size: 0.68rem;
+  letter-spacing: 0.075em;
+}
+
+.dashboard-grid .card:not(.hero-card) strong {
+  color: rgba(247, 247, 251, 0.94);
 }
 
 .panel-grid {
