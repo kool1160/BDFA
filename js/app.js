@@ -32,6 +32,44 @@ const data = {
   ]
 };
 
+function total(rows) {
+  return rows.reduce((sum, row) => sum + row.amount, 0);
+}
+
+function setMoneyText(targetId, amount) {
+  const target = document.getElementById(targetId);
+
+  if (target) {
+    target.textContent = money.format(amount);
+  }
+}
+
+function getDashboardTotals() {
+  const cash = total(data.accounts.filter(account => account.type === 'Cash'));
+  const investments = total(data.investments);
+  const debt = Math.abs(total(data.accounts.filter(account => account.amount < 0)));
+  const bills = total(data.bills);
+  const allocations = total(data.allocations);
+
+  return {
+    cash,
+    investments,
+    debt,
+    netWorth: cash + investments - debt,
+    availableToAllocate: cash - bills - allocations
+  };
+}
+
+function renderDashboardTotals() {
+  const totals = getDashboardTotals();
+
+  setMoneyText('availableToAllocate', totals.availableToAllocate);
+  setMoneyText('netWorth', totals.netWorth);
+  setMoneyText('cashTotal', totals.cash);
+  setMoneyText('investmentTotal', totals.investments);
+  setMoneyText('debtTotal', totals.debt);
+}
+
 function renderRows(targetId, rows) {
   const target = document.getElementById(targetId);
   target.innerHTML = rows.map(row => `
@@ -45,6 +83,7 @@ function renderRows(targetId, rows) {
   `).join('');
 }
 
+renderDashboardTotals();
 renderRows('accounts', data.accounts);
 renderRows('bills', data.bills);
 renderRows('allocations', data.allocations);
