@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BDFA</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">BDFA</p>
+      <h1>Best Damn Financial App Ever</h1>
+      <p class="subtitle">Know where every dollar belongs.</p>
+    </header>
+
+    <section class="grid dashboard-grid" aria-label="Financial dashboard">
+      <article class="card hero-card">
+        <span class="label">Available to Allocate</span>
+        <strong id="availableToAllocate">$3,142</strong>
+        <p>Bills, reserves, and goals are already spoken for.</p>
+      </article>
+      <article class="card"><span class="label">Net Worth</span><strong id="netWorth">$642,183</strong></article>
+      <article class="card"><span class="label">Cash</span><strong id="cashTotal">$14,208</strong></article>
+      <article class="card"><span class="label">Investments</span><strong id="investmentTotal">$487,642</strong></article>
+      <article class="card"><span class="label">Debt</span><strong id="debtTotal">-$40,667</strong></article>
+    </section>
+
+    <section class="panel-grid">
+      <section class="panel">
+        <button class="panel-title" data-toggle="accounts">Accounts <span>⌄</span></button>
+        <div class="panel-body" id="accounts"></div>
+      </section>
+
+      <section class="panel">
+        <button class="panel-title" data-toggle="bills">Bills <span>⌄</span></button>
+        <div class="panel-body" id="bills"></div>
+      </section>
+
+      <section class="panel">
+        <button class="panel-title" data-toggle="allocations">Allocations <span>⌄</span></button>
+        <div class="panel-body" id="allocations"></div>
+      </section>
+
+      <section class="panel">
+        <button class="panel-title" data-toggle="investments">Investments <span>⌄</span></button>
+        <div class="panel-body" id="investments"></div>
+      </section>
+    </section>
+
+    <section class="ai-card">
+      <div>
+        <span class="label">AI Assistant</span>
+        <h2>Ask BDFA anything.</h2>
+        <p>Example: Can I afford a $900 TV and still cover my reserves?</p>
+      </div>
+      <button>Coming Soon</button>
+    </section>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

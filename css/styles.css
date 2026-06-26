@@ -1,0 +1,169 @@
+:root {
+  color-scheme: dark;
+  --bg: #050507;
+  --surface: rgba(255, 255, 255, 0.08);
+  --surface-strong: rgba(255, 255, 255, 0.13);
+  --text: #f7f7fb;
+  --muted: #a9a9b5;
+  --line: rgba(255, 255, 255, 0.12);
+  --radius-xl: 30px;
+  --radius-lg: 22px;
+  --shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(80, 120, 255, 0.28), transparent 34rem),
+    radial-gradient(circle at bottom right, rgba(61, 220, 151, 0.16), transparent 28rem),
+    var(--bg);
+  color: var(--text);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+.app-shell {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 22px;
+}
+
+.hero {
+  padding: 34px 4px 20px;
+}
+
+.eyebrow, .label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 8px 0;
+  font-size: clamp(2.2rem, 7vw, 5.5rem);
+  line-height: 0.95;
+  letter-spacing: -0.075em;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.grid, .panel-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.dashboard-grid {
+  grid-template-columns: 1fr;
+}
+
+.card, .panel, .ai-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.card {
+  padding: 22px;
+}
+
+.card strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 2rem;
+  letter-spacing: -0.055em;
+}
+
+.hero-card {
+  background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07));
+  border-radius: var(--radius-xl);
+}
+
+.hero-card strong {
+  font-size: clamp(3rem, 12vw, 5.2rem);
+}
+
+.hero-card p, .ai-card p {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.panel-grid {
+  margin-top: 14px;
+}
+
+.panel-title {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 18px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.panel-body {
+  padding: 0 20px 18px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 12px;
+  padding: 13px 0;
+  border-top: 1px solid var(--line);
+}
+
+.row small {
+  display: block;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+.row strong {
+  letter-spacing: -0.03em;
+}
+
+.ai-card {
+  margin-top: 14px;
+  padding: 22px;
+  display: grid;
+  gap: 16px;
+}
+
+.ai-card h2 {
+  margin: 6px 0;
+  font-size: 1.8rem;
+  letter-spacing: -0.04em;
+}
+
+.ai-card button {
+  border: 0;
+  border-radius: 999px;
+  padding: 14px 18px;
+  background: var(--surface-strong);
+}
+
+@media (min-width: 760px) {
+  .app-shell { padding: 34px; }
+  .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
+  .hero-card { grid-column: span 2; grid-row: span 2; }
+  .panel-grid { grid-template-columns: repeat(2, 1fr); }
+  .ai-card { grid-template-columns: 1fr auto; align-items: center; }
+}
