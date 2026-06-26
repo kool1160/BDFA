@@ -129,41 +129,82 @@ h1 {
 }
 
 .panel-grid {
-  margin-top: 14px;
+  margin-top: 16px;
+}
+
+.panel {
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
 }
 
 .panel-title {
   width: 100%;
   border: 0;
   background: transparent;
-  padding: 18px 20px;
+  padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-weight: 700;
+  font-size: 1.02rem;
+  font-weight: 750;
+  letter-spacing: -0.025em;
   cursor: pointer;
 }
 
+.panel-title span {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
 .panel-body {
-  padding: 0 20px 18px;
+  padding: 0 20px 8px;
 }
 
 .row {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  padding: 13px 0;
-  border-top: 1px solid var(--line);
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 15px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.09);
+}
+
+.row strong {
+  letter-spacing: -0.035em;
+}
+
+.row > div strong {
+  display: block;
+  overflow: hidden;
+  font-size: 0.98rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .row small {
   display: block;
+  overflow: hidden;
+  margin-top: 5px;
   color: var(--muted);
-  margin-top: 3px;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.row strong {
-  letter-spacing: -0.03em;
+.row > strong:last-child {
+  font-size: 1rem;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
 }
 
 @media (min-width: 760px) {
