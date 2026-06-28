@@ -34,9 +34,9 @@ const demoData = {
     { id: 'subscriptions', name: 'Subscriptions', detail: 'Monthly', amount: 77, frequency: 'monthly' }
   ],
   allocations: [
-    { id: 'emergency-reserve', name: 'Emergency Reserve', detail: 'Target $10,000', amount: 6400 },
-    { id: 'vacation', name: 'Vacation', detail: 'Growing monthly', amount: 950 },
-    { id: 'car-maintenance', name: 'Car Maintenance', detail: 'Oil, tires, repairs', amount: 420 },
+    { id: 'emergency-reserve', name: 'Emergency Reserve', detail: 'Target $10,000', amount: 6400, targetAmount: 10000 },
+    { id: 'vacation', name: 'Vacation', detail: 'Growing monthly', amount: 950, targetAmount: 2500 },
+    { id: 'car-maintenance', name: 'Car Maintenance', detail: 'Oil, tires, repairs', amount: 420, targetAmount: 1200 },
     { id: 'hsa-contribution', name: 'HSA Contribution', detail: 'Available after bills', amount: 300 }
   ],
   investments: [
@@ -115,6 +115,31 @@ function getMonthlyBillImpact(bill) {
 
 function getMonthlyBillsTotal() {
   return data.bills.reduce((sum, bill) => sum + getMonthlyBillAmount(bill), 0);
+}
+
+function hasAllocationTarget(allocation) {
+  return typeof allocation.targetAmount === 'number' && Number.isFinite(allocation.targetAmount) && allocation.targetAmount > 0;
+}
+
+function getAllocationProgress(allocation) {
+  if (!hasAllocationTarget(allocation)) {
+    return '';
+  }
+
+  const rawPercent = (allocation.amount / allocation.targetAmount) * 100;
+  const percent = Math.min(Math.max(rawPercent, 0), 100);
+
+  return `
+    <div class="allocation-progress" aria-label="${Math.round(percent)}% funded toward ${money.format(allocation.targetAmount)} target">
+      <div class="allocation-progress-label">
+        <span>${Math.round(percent)}% funded</span>
+        <span>Target ${money.format(allocation.targetAmount)}</span>
+      </div>
+      <div class="allocation-progress-track">
+        <span style="width: ${percent}%"></span>
+      </div>
+    </div>
+  `;
 }
 
 function loadStoredRows(storageKey, targetKey) {
@@ -411,10 +436,11 @@ function renderAllocations() {
   }
 
   target.innerHTML = data.allocations.map(allocation => `
-    <div class="row editable-row">
+    <div class="row editable-row allocation-row">
       <div>
         <strong>${allocation.name}</strong>
         <small>${allocation.detail}</small>
+        ${getAllocationProgress(allocation)}
       </div>
       <strong>${money.format(allocation.amount)}</strong>
       <div class="row-actions" aria-label="Allocation actions">
@@ -435,12 +461,28 @@ function getAllocationFormData() {
   const name = document.getElementById('allocationName').value.trim();
   const detail = document.getElementById('allocationDetail').value.trim();
   const amount = Number(document.getElementById('allocationAmount').value);
+  const targetInput = document.getElementById('allocationTarget').value;
+  const targetAmount = targetInput === '' ? null : Number(targetInput);
 
-  if (!name || !detail || Number.isNaN(amount)) {
+  if (!name || !detail || Number.isNaN(amount) || (targetInput !== '' && (!Number.isFinite(targetAmount) || targetAmount <= 0))) {
     return null;
   }
 
-  return { id, name, detail, amount };
+  return { id, name, detail, amount, targetAmount };
+}
+
+function getAllocationPayload(formData) {
+  const allocation = {
+    name: formData.name,
+    detail: formData.detail,
+    amount: formData.amount
+  };
+
+  if (formData.targetAmount) {
+    allocation.targetAmount = formData.targetAmount;
+  }
+
+  return allocation;
 }
 
 function handleAllocationSubmit(event) {
@@ -452,18 +494,18 @@ function handleAllocationSubmit(event) {
     return;
   }
 
+  const allocationPayload = getAllocationPayload(formData);
+
   if (formData.id) {
     data.allocations = data.allocations.map(allocation => (
       allocation.id === formData.id
-        ? { ...allocation, name: formData.name, detail: formData.detail, amount: formData.amount }
+        ? { id: allocation.id, ...allocationPayload }
         : allocation
     ));
   } else {
     data.allocations.push({
       id: crypto.randomUUID(),
-      name: formData.name,
-      detail: formData.detail,
-      amount: formData.amount
+      ...allocationPayload
     });
   }
 
@@ -487,6 +529,7 @@ function handleAllocationActions(event) {
     document.getElementById('allocationName').value = allocation.name;
     document.getElementById('allocationDetail').value = allocation.detail;
     document.getElementById('allocationAmount').value = allocation.amount;
+    document.getElementById('allocationTarget').value = hasAllocationTarget(allocation) ? allocation.targetAmount : '';
     document.getElementById('allocationSubmit').textContent = 'Save Allocation';
     document.getElementById('allocationCancel').hidden = false;
   }
@@ -623,6 +666,14 @@ function isBasicMoneyRow(row) {
   return row && isText(row.id) && isText(row.name) && isText(row.detail) && isAmount(row.amount);
 }
 
+function isValidAllocationRow(row) {
+  return isBasicMoneyRow(row) && (
+    row.targetAmount === undefined ||
+    row.targetAmount === null ||
+    (isAmount(row.targetAmount) && row.targetAmount > 0)
+  );
+}
+
 function isValidImport(importedData) {
   if (!importedData || typeof importedData !== 'object') {
     return false;
@@ -647,7 +698,7 @@ function isValidImport(importedData) {
     Boolean(billFrequencies[bill.frequency])
   ));
 
-  return accountsValid && billsValid && allocations.every(isBasicMoneyRow) && investments.every(isBasicMoneyRow);
+  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow);
 }
 
 function applyImportedData(importedData) {
