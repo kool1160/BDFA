@@ -73,6 +73,16 @@ function getMonthlyBillAmount(bill) {
   return bill.amount / getBillFrequency(bill).months;
 }
 
+function getMonthlyBillImpact(bill) {
+  const frequency = getBillFrequency(bill);
+
+  if (frequency.months === 1) {
+    return '';
+  }
+
+  return `<small>${money.format(getMonthlyBillAmount(bill))}/mo impact</small>`;
+}
+
 function loadStoredRows(storageKey, targetKey) {
   const savedRows = localStorage.getItem(storageKey);
 
@@ -247,7 +257,10 @@ function renderBills() {
         <strong>${bill.name}</strong>
         <small>${bill.detail} · ${getBillFrequency(bill).label}</small>
       </div>
-      <strong>${money.format(bill.amount)}</strong>
+      <div class="bill-amount">
+        <strong>${money.format(bill.amount)}</strong>
+        ${getMonthlyBillImpact(bill)}
+      </div>
       <div class="row-actions" aria-label="Bill actions">
         <button type="button" data-edit-bill="${bill.id}">Edit</button>
         <button type="button" data-delete-bill="${bill.id}">Delete</button>
