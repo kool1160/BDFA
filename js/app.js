@@ -56,6 +56,14 @@ function setMoneyText(targetId, amount) {
   }
 }
 
+function setText(targetId, value) {
+  const target = document.getElementById(targetId);
+
+  if (target) {
+    target.textContent = value;
+  }
+}
+
 function getEmptyState(title, message) {
   return `
     <div class="empty-state">
@@ -81,6 +89,10 @@ function getMonthlyBillImpact(bill) {
   }
 
   return `<small>${money.format(getMonthlyBillAmount(bill))}/mo impact</small>`;
+}
+
+function getMonthlyBillsTotal() {
+  return data.bills.reduce((sum, bill) => sum + getMonthlyBillAmount(bill), 0);
 }
 
 function loadStoredRows(storageKey, targetKey) {
@@ -109,7 +121,7 @@ function getDashboardTotals() {
   const cash = total(data.accounts.filter(account => account.type === 'Cash'));
   const investments = total(data.investments);
   const debt = Math.abs(total(data.accounts.filter(account => account.amount < 0)));
-  const bills = data.bills.reduce((sum, bill) => sum + getMonthlyBillAmount(bill), 0);
+  const bills = getMonthlyBillsTotal();
   const allocations = total(data.allocations);
 
   return {
@@ -121,6 +133,13 @@ function getDashboardTotals() {
   };
 }
 
+function renderSectionSummaries() {
+  setMoneyText('accountsSummary', total(data.accounts));
+  setText('billsSummary', `${money.format(getMonthlyBillsTotal())}/mo`);
+  setMoneyText('allocationsSummary', total(data.allocations));
+  setMoneyText('investmentsSummary', total(data.investments));
+}
+
 function renderDashboardTotals() {
   const totals = getDashboardTotals();
 
@@ -129,6 +148,7 @@ function renderDashboardTotals() {
   setMoneyText('cashTotal', totals.cash);
   setMoneyText('investmentTotal', totals.investments);
   setMoneyText('debtTotal', -totals.debt);
+  renderSectionSummaries();
 }
 
 function resetAccountForm() {
