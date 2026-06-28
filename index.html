@@ -30,7 +30,7 @@
       <section class="panel">
         <button class="panel-title" data-toggle="accounts">Accounts <span>⌄</span></button>
         <div class="panel-body" id="accounts">
-          <form class="account-form" id="accountForm">
+          <form class="edit-form" id="accountForm">
             <input type="hidden" id="accountId" />
             <label>
               <span>Account name</span>
@@ -59,7 +59,28 @@
 
       <section class="panel">
         <button class="panel-title" data-toggle="bills">Bills <span>⌄</span></button>
-        <div class="panel-body" id="bills"></div>
+        <div class="panel-body" id="bills">
+          <form class="edit-form" id="billForm">
+            <input type="hidden" id="billId" />
+            <label>
+              <span>Bill name</span>
+              <input id="billName" type="text" placeholder="Mortgage" required />
+            </label>
+            <label>
+              <span>Detail</span>
+              <input id="billDetail" type="text" placeholder="Monthly reserve" required />
+            </label>
+            <label>
+              <span>Amount</span>
+              <input id="billAmount" type="number" inputmode="decimal" step="0.01" placeholder="1250" required />
+            </label>
+            <div class="form-actions">
+              <button type="submit" id="billSubmit">Add Bill</button>
+              <button type="button" id="billCancel" class="ghost-button" hidden>Cancel</button>
+            </div>
+          </form>
+          <div id="billsList"></div>
+        </div>
       </section>
 
       <section class="panel">
