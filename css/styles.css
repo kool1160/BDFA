@@ -143,8 +143,9 @@ h1 {
   border: 0;
   background: transparent;
   padding: 20px;
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 10px;
   align-items: center;
   font-size: 1.02rem;
   font-weight: 750;
@@ -152,7 +153,12 @@ h1 {
   cursor: pointer;
 }
 
-.panel-title span {
+.panel-label {
+  min-width: 0;
+  text-align: left;
+}
+
+.panel-title > span:last-child {
   display: grid;
   width: 28px;
   height: 28px;
@@ -161,6 +167,21 @@ h1 {
   background: rgba(255, 255, 255, 0.08);
   color: var(--muted);
   font-size: 0.9rem;
+}
+
+.panel-summary {
+  max-width: 9rem;
+  overflow: hidden;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: rgba(255, 255, 255, 0.065);
+  color: rgba(247, 247, 251, 0.74);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .panel-body {
