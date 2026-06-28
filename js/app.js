@@ -16,7 +16,7 @@ const billFrequencies = {
   yearly: { label: 'Yearly', months: 12 }
 };
 
-const data = {
+const demoData = {
   accounts: [
     { id: 'checking', name: 'Chase Checking', type: 'Cash', amount: 8420 },
     { id: 'savings', name: 'Huntington Savings', type: 'Cash', amount: 3211 },
@@ -43,6 +43,8 @@ const data = {
     { id: 'brokerage', name: 'Brokerage', detail: 'Taxable investing', amount: 105102 }
   ]
 };
+
+const data = structuredClone(demoData);
 
 function total(rows) {
   return rows.reduce((sum, row) => sum + row.amount, 0);
@@ -574,14 +576,44 @@ function handleInvestmentActions(event) {
   }
 }
 
+function renderAllSections() {
+  renderAccounts();
+  renderBills();
+  renderAllocations();
+  renderInvestments();
+  renderDashboardTotals();
+}
+
+function clearDemoStorage() {
+  localStorage.removeItem(accountStorageKey);
+  localStorage.removeItem(billStorageKey);
+  localStorage.removeItem(allocationStorageKey);
+  localStorage.removeItem(investmentStorageKey);
+}
+
+function resetDemoData() {
+  if (!confirm('Reset BDFA demo data back to the original mock dataset?')) {
+    return;
+  }
+
+  const freshData = structuredClone(demoData);
+  data.accounts = freshData.accounts;
+  data.bills = freshData.bills;
+  data.allocations = freshData.allocations;
+  data.investments = freshData.investments;
+  clearDemoStorage();
+  resetAccountForm();
+  resetBillForm();
+  resetAllocationForm();
+  resetInvestmentForm();
+  renderAllSections();
+}
+
 loadStoredRows(accountStorageKey, 'accounts');
 loadStoredRows(billStorageKey, 'bills');
 loadStoredRows(allocationStorageKey, 'allocations');
 loadStoredRows(investmentStorageKey, 'investments');
-renderAccountsDashboard();
-renderBills();
-renderAllocations();
-renderInvestments();
+renderAllSections();
 
 document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
 document.getElementById('accountCancel').addEventListener('click', resetAccountForm);
@@ -595,6 +627,7 @@ document.getElementById('allocationsList').addEventListener('click', handleAlloc
 document.getElementById('investmentForm').addEventListener('submit', handleInvestmentSubmit);
 document.getElementById('investmentCancel').addEventListener('click', resetInvestmentForm);
 document.getElementById('investmentsList').addEventListener('click', handleInvestmentActions);
+document.getElementById('resetDemoData').addEventListener('click', resetDemoData);
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
   button.addEventListener('click', () => {
