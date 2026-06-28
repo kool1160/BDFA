@@ -7,6 +7,7 @@ const money = new Intl.NumberFormat('en-US', {
 const accountStorageKey = 'bdfa.mockAccounts';
 const billStorageKey = 'bdfa.mockBills';
 const allocationStorageKey = 'bdfa.mockAllocations';
+const investmentStorageKey = 'bdfa.mockInvestments';
 
 const data = {
   accounts: [
@@ -29,10 +30,10 @@ const data = {
     { id: 'hsa-contribution', name: 'HSA Contribution', detail: 'Available after bills', amount: 300 }
   ],
   investments: [
-    { name: '401(k)', detail: 'Retirement', amount: 248000 },
-    { name: 'HSA', detail: 'Invested medical savings', amount: 18540 },
-    { name: 'Roth IRA', detail: 'Tax-free retirement', amount: 116000 },
-    { name: 'Brokerage', detail: 'Taxable investing', amount: 105102 }
+    { id: '401k', name: '401(k)', detail: 'Retirement', amount: 248000 },
+    { id: 'hsa', name: 'HSA', detail: 'Invested medical savings', amount: 18540 },
+    { id: 'roth-ira', name: 'Roth IRA', detail: 'Tax-free retirement', amount: 116000 },
+    { id: 'brokerage', name: 'Brokerage', detail: 'Taxable investing', amount: 105102 }
   ]
 };
 
@@ -94,19 +95,6 @@ function renderDashboardTotals() {
   setMoneyText('cashTotal', totals.cash);
   setMoneyText('investmentTotal', totals.investments);
   setMoneyText('debtTotal', -totals.debt);
-}
-
-function renderRows(targetId, rows) {
-  const target = document.getElementById(targetId);
-  target.innerHTML = rows.map(row => `
-    <div class="row">
-      <div>
-        <strong>${row.name}</strong>
-        <small>${row.detail || row.type}</small>
-      </div>
-      <strong>${money.format(row.amount)}</strong>
-    </div>
-  `).join('');
 }
 
 function resetAccountForm() {
@@ -406,13 +394,113 @@ function handleAllocationActions(event) {
   }
 }
 
+function resetInvestmentForm() {
+  document.getElementById('investmentForm').reset();
+  document.getElementById('investmentId').value = '';
+  document.getElementById('investmentSubmit').textContent = 'Add Investment';
+  document.getElementById('investmentCancel').hidden = true;
+}
+
+function renderInvestments() {
+  const target = document.getElementById('investmentsList');
+
+  target.innerHTML = data.investments.map(investment => `
+    <div class="row editable-row">
+      <div>
+        <strong>${investment.name}</strong>
+        <small>${investment.detail}</small>
+      </div>
+      <strong>${money.format(investment.amount)}</strong>
+      <div class="row-actions" aria-label="Investment actions">
+        <button type="button" data-edit-investment="${investment.id}">Edit</button>
+        <button type="button" data-delete-investment="${investment.id}">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderInvestmentsDashboard() {
+  renderInvestments();
+  renderDashboardTotals();
+}
+
+function getInvestmentFormData() {
+  const id = document.getElementById('investmentId').value;
+  const name = document.getElementById('investmentName').value.trim();
+  const detail = document.getElementById('investmentDetail').value.trim();
+  const amount = Number(document.getElementById('investmentAmount').value);
+
+  if (!name || !detail || Number.isNaN(amount)) {
+    return null;
+  }
+
+  return { id, name, detail, amount };
+}
+
+function handleInvestmentSubmit(event) {
+  event.preventDefault();
+
+  const formData = getInvestmentFormData();
+
+  if (!formData) {
+    return;
+  }
+
+  if (formData.id) {
+    data.investments = data.investments.map(investment => (
+      investment.id === formData.id
+        ? { ...investment, name: formData.name, detail: formData.detail, amount: formData.amount }
+        : investment
+    ));
+  } else {
+    data.investments.push({
+      id: crypto.randomUUID(),
+      name: formData.name,
+      detail: formData.detail,
+      amount: formData.amount
+    });
+  }
+
+  saveRows(investmentStorageKey, data.investments);
+  resetInvestmentForm();
+  renderInvestmentsDashboard();
+}
+
+function handleInvestmentActions(event) {
+  const editId = event.target.dataset.editInvestment;
+  const deleteId = event.target.dataset.deleteInvestment;
+
+  if (editId) {
+    const investment = data.investments.find(item => item.id === editId);
+
+    if (!investment) {
+      return;
+    }
+
+    document.getElementById('investmentId').value = investment.id;
+    document.getElementById('investmentName').value = investment.name;
+    document.getElementById('investmentDetail').value = investment.detail;
+    document.getElementById('investmentAmount').value = investment.amount;
+    document.getElementById('investmentSubmit').textContent = 'Save Investment';
+    document.getElementById('investmentCancel').hidden = false;
+  }
+
+  if (deleteId) {
+    data.investments = data.investments.filter(investment => investment.id !== deleteId);
+    saveRows(investmentStorageKey, data.investments);
+    resetInvestmentForm();
+    renderInvestmentsDashboard();
+  }
+}
+
 loadStoredRows(accountStorageKey, 'accounts');
 loadStoredRows(billStorageKey, 'bills');
 loadStoredRows(allocationStorageKey, 'allocations');
+loadStoredRows(investmentStorageKey, 'investments');
 renderAccountsDashboard();
 renderBills();
 renderAllocations();
-renderRows('investments', data.investments);
+renderInvestments();
 
 document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
 document.getElementById('accountCancel').addEventListener('click', resetAccountForm);
@@ -423,6 +511,9 @@ document.getElementById('billsList').addEventListener('click', handleBillActions
 document.getElementById('allocationForm').addEventListener('submit', handleAllocationSubmit);
 document.getElementById('allocationCancel').addEventListener('click', resetAllocationForm);
 document.getElementById('allocationsList').addEventListener('click', handleAllocationActions);
+document.getElementById('investmentForm').addEventListener('submit', handleInvestmentSubmit);
+document.getElementById('investmentCancel').addEventListener('click', resetInvestmentForm);
+document.getElementById('investmentsList').addEventListener('click', handleInvestmentActions);
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
   button.addEventListener('click', () => {
