@@ -23,7 +23,23 @@ Most finance apps show balances. BDFA shows purpose.
 - Plain HTML
 - Plain CSS
 - Plain JavaScript
+- Static site deployment
 - No backend yet
+
+## Local preview
+
+Open `index.html` in a browser.
+
+## Vercel deployment
+
+Import this repository into Vercel with these settings:
+
+- Framework Preset: Other
+- Build Command: None
+- Output Directory: `.`
+- Install Command: None
+
+No build step is required.
 
 ## Workflow
 
