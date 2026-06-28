@@ -207,6 +207,27 @@ h1 {
   white-space: nowrap;
 }
 
+.bill-amount {
+  text-align: right;
+}
+
+.bill-amount strong {
+  display: block;
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.bill-amount small {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.76rem;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .edit-form {
   display: grid;
   gap: 14px;
