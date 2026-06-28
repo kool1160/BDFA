@@ -70,7 +70,7 @@ h1 {
   align-items: stretch;
 }
 
-.card, .panel, .assistant-card {
+.card, .panel, .assistant-card, .reset-card {
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
@@ -375,7 +375,7 @@ h1 {
   line-height: 1.4;
 }
 
-.assistant-card {
+.assistant-card, .reset-card {
   margin-top: 18px;
   padding: 24px;
   display: grid;
@@ -384,7 +384,7 @@ h1 {
   box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
 }
 
-.assistant-card h2 {
+.assistant-card h2, .reset-card h2 {
   margin: 8px 0;
   max-width: 34rem;
   font-size: clamp(1.55rem, 6vw, 2.3rem);
@@ -392,7 +392,7 @@ h1 {
   letter-spacing: -0.055em;
 }
 
-.assistant-card p {
+.assistant-card p, .reset-card p {
   margin: 0;
   max-width: 34rem;
   color: var(--muted);
@@ -400,13 +400,31 @@ h1 {
   line-height: 1.45;
 }
 
-.assistant-card button {
+.assistant-card button, .reset-card button {
   width: fit-content;
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 12px 16px;
   background: var(--surface-strong);
   color: rgba(247, 247, 251, 0.72);
+}
+
+.reset-card {
+  background: rgba(255, 255, 255, 0.045);
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.22);
+}
+
+.reset-card button {
+  background: transparent;
+  color: rgba(247, 247, 251, 0.68);
+  cursor: pointer;
+  transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+}
+
+.reset-card button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.07);
 }
 
 @media (min-width: 760px) {
@@ -418,5 +436,5 @@ h1 {
   .panel-grid { margin-top: 22px; grid-template-columns: repeat(2, 1fr); }
   .edit-form { grid-template-columns: 1fr 0.8fr 0.8fr; align-items: end; padding: 18px; }
   .form-actions { grid-column: 1 / -1; }
-  .assistant-card { margin-top: 22px; padding: 28px; grid-template-columns: 1fr auto; align-items: center; }
+  .assistant-card, .reset-card { margin-top: 22px; padding: 28px; grid-template-columns: 1fr auto; align-items: center; }
 }
