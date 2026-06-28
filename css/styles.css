@@ -207,26 +207,26 @@ h1 {
   white-space: nowrap;
 }
 
-.account-form {
+.edit-form {
   display: grid;
   gap: 12px;
   padding: 4px 0 18px;
 }
 
-.account-form label {
+.edit-form label {
   display: grid;
   gap: 7px;
 }
 
-.account-form label span {
+.edit-form label span {
   color: var(--muted);
   font-size: 0.74rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.account-form input,
-.account-form select {
+.edit-form input,
+.edit-form select {
   width: 100%;
   min-height: 44px;
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -236,8 +236,8 @@ h1 {
   outline: 0;
 }
 
-.account-form input:focus,
-.account-form select:focus {
+.edit-form input:focus,
+.edit-form select:focus {
   border-color: rgba(255, 255, 255, 0.22);
   background: rgba(255, 255, 255, 0.095);
 }
@@ -313,7 +313,7 @@ h1 {
   .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
   .hero-card { grid-column: span 2; grid-row: span 2; padding: 32px; }
   .panel-grid { margin-top: 22px; grid-template-columns: repeat(2, 1fr); }
-  .account-form { grid-template-columns: 1fr 0.8fr 0.8fr; align-items: end; }
+  .edit-form { grid-template-columns: 1fr 0.8fr 0.8fr; align-items: end; }
   .form-actions { grid-column: 1 / -1; }
   .assistant-card { margin-top: 22px; padding: 28px; grid-template-columns: 1fr auto; align-items: center; }
 }
