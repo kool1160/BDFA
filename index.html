@@ -74,6 +74,15 @@
               <span>Amount</span>
               <input id="billAmount" type="number" inputmode="decimal" step="0.01" placeholder="1250" required />
             </label>
+            <label>
+              <span>Frequency</span>
+              <select id="billFrequency" required>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="six-months">Every 6 months</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </label>
             <div class="form-actions">
               <button type="submit" id="billSubmit">Add Bill</button>
               <button type="button" id="billCancel" class="ghost-button" hidden>Cancel</button>
