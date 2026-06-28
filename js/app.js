@@ -16,6 +16,8 @@ const billFrequencies = {
   yearly: { label: 'Yearly', months: 12 }
 };
 
+const accountTypes = ['Cash', 'Credit Card', 'Debt'];
+
 const demoData = {
   accounts: [
     { id: 'checking', name: 'Chase Checking', type: 'Cash', amount: 8420 },
@@ -117,6 +119,13 @@ function loadStoredRows(storageKey, targetKey) {
 
 function saveRows(storageKey, rows) {
   localStorage.setItem(storageKey, JSON.stringify(rows));
+}
+
+function saveAllRows() {
+  saveRows(accountStorageKey, data.accounts);
+  saveRows(billStorageKey, data.bills);
+  saveRows(allocationStorageKey, data.allocations);
+  saveRows(investmentStorageKey, data.investments);
 }
 
 function getDashboardTotals() {
@@ -584,6 +593,87 @@ function renderAllSections() {
   renderDashboardTotals();
 }
 
+function isText(value) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isAmount(value) {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function isBasicMoneyRow(row) {
+  return row && isText(row.id) && isText(row.name) && isText(row.detail) && isAmount(row.amount);
+}
+
+function isValidImport(importedData) {
+  if (!importedData || typeof importedData !== 'object') {
+    return false;
+  }
+
+  const { accounts, bills, allocations, investments } = importedData;
+
+  if (![accounts, bills, allocations, investments].every(Array.isArray)) {
+    return false;
+  }
+
+  const accountsValid = accounts.every(account => (
+    account &&
+    isText(account.id) &&
+    isText(account.name) &&
+    accountTypes.includes(account.type) &&
+    isAmount(account.amount)
+  ));
+
+  const billsValid = bills.every(bill => (
+    isBasicMoneyRow(bill) &&
+    Boolean(billFrequencies[bill.frequency])
+  ));
+
+  return accountsValid && billsValid && allocations.every(isBasicMoneyRow) && investments.every(isBasicMoneyRow);
+}
+
+function applyImportedData(importedData) {
+  data.accounts = importedData.accounts;
+  data.bills = importedData.bills;
+  data.allocations = importedData.allocations;
+  data.investments = importedData.investments;
+  saveAllRows();
+  resetAccountForm();
+  resetBillForm();
+  resetAllocationForm();
+  resetInvestmentForm();
+  renderAllSections();
+}
+
+function importDemoData(event) {
+  const [file] = event.target.files;
+
+  if (!file) {
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.addEventListener('load', () => {
+    try {
+      const importedData = JSON.parse(reader.result);
+
+      if (!isValidImport(importedData)) {
+        alert('That JSON file does not match the BDFA demo data format.');
+        return;
+      }
+
+      applyImportedData(importedData);
+    } catch {
+      alert('That file could not be read as valid JSON.');
+    } finally {
+      event.target.value = '';
+    }
+  });
+
+  reader.readAsText(file);
+}
+
 function getExportData() {
   return {
     accounts: data.accounts,
@@ -649,6 +739,7 @@ document.getElementById('allocationsList').addEventListener('click', handleAlloc
 document.getElementById('investmentForm').addEventListener('submit', handleInvestmentSubmit);
 document.getElementById('investmentCancel').addEventListener('click', resetInvestmentForm);
 document.getElementById('investmentsList').addEventListener('click', handleInvestmentActions);
+document.getElementById('importDemoData').addEventListener('change', importDemoData);
 document.getElementById('exportDemoData').addEventListener('click', exportDemoData);
 document.getElementById('resetDemoData').addEventListener('click', resetDemoData);
 
