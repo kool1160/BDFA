@@ -8,6 +8,7 @@ const accountStorageKey = 'bdfa.mockAccounts';
 const billStorageKey = 'bdfa.mockBills';
 const allocationStorageKey = 'bdfa.mockAllocations';
 const investmentStorageKey = 'bdfa.mockInvestments';
+let statusTimer;
 
 const billFrequencies = {
   monthly: { label: 'Monthly', months: 1 },
@@ -66,6 +67,23 @@ function setText(targetId, value) {
   if (target) {
     target.textContent = value;
   }
+}
+
+function showStatus(message, tone = 'success') {
+  const target = document.getElementById('statusMessage');
+
+  if (!target) {
+    return;
+  }
+
+  clearTimeout(statusTimer);
+  target.textContent = message;
+  target.dataset.tone = tone;
+  target.hidden = false;
+
+  statusTimer = setTimeout(() => {
+    target.hidden = true;
+  }, 3600);
 }
 
 function getEmptyState(title, message) {
@@ -659,13 +677,14 @@ function importDemoData(event) {
       const importedData = JSON.parse(reader.result);
 
       if (!isValidImport(importedData)) {
-        alert('That JSON file does not match the BDFA demo data format.');
+        showStatus('Import failed. That JSON file does not match the BDFA demo format.', 'error');
         return;
       }
 
       applyImportedData(importedData);
+      showStatus('Demo data imported successfully.');
     } catch {
-      alert('That file could not be read as valid JSON.');
+      showStatus('Import failed. That file could not be read as valid JSON.', 'error');
     } finally {
       event.target.value = '';
     }
@@ -694,6 +713,7 @@ function exportDemoData() {
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
+  showStatus('Demo data exported as JSON.');
 }
 
 function clearDemoStorage() {
@@ -719,6 +739,7 @@ function resetDemoData() {
   resetAllocationForm();
   resetInvestmentForm();
   renderAllSections();
+  showStatus('Demo data reset to the original mock dataset.');
 }
 
 loadStoredRows(accountStorageKey, 'accounts');
