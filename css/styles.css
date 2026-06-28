@@ -375,6 +375,24 @@ h1 {
   line-height: 1.4;
 }
 
+.status-message {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(247, 247, 251, 0.84);
+  font-size: 0.92rem;
+  line-height: 1.35;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
+}
+
+.status-message[data-tone="error"] {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(247, 247, 251, 0.9);
+}
+
 .assistant-card, .import-card, .export-card, .reset-card {
   margin-top: 18px;
   padding: 24px;
