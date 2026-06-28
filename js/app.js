@@ -5,6 +5,7 @@ const money = new Intl.NumberFormat('en-US', {
 });
 
 const accountStorageKey = 'bdfa.mockAccounts';
+const billStorageKey = 'bdfa.mockBills';
 
 const data = {
   accounts: [
@@ -14,11 +15,11 @@ const data = {
     { id: 'mortgage', name: 'Mortgage', type: 'Debt', amount: -40567 }
   ],
   bills: [
-    { name: 'Mortgage', detail: 'Monthly reserve', amount: 1259 },
-    { name: 'Consumers Energy', detail: 'Estimated monthly', amount: 182 },
-    { name: 'Gas', detail: 'Estimated monthly', amount: 78 },
-    { name: 'Car Insurance', detail: '$720 every 6 months', amount: 120 },
-    { name: 'Subscriptions', detail: 'Monthly', amount: 77 }
+    { id: 'mortgage-bill', name: 'Mortgage', detail: 'Monthly reserve', amount: 1259 },
+    { id: 'consumers-energy', name: 'Consumers Energy', detail: 'Estimated monthly', amount: 182 },
+    { id: 'gas', name: 'Gas', detail: 'Estimated monthly', amount: 78 },
+    { id: 'car-insurance', name: 'Car Insurance', detail: '$720 every 6 months', amount: 120 },
+    { id: 'subscriptions', name: 'Subscriptions', detail: 'Monthly', amount: 77 }
   ],
   allocations: [
     { name: 'Emergency Reserve', detail: 'Target $10,000', amount: 6400 },
@@ -46,26 +47,26 @@ function setMoneyText(targetId, amount) {
   }
 }
 
-function loadAccounts() {
-  const savedAccounts = localStorage.getItem(accountStorageKey);
+function loadStoredRows(storageKey, targetKey) {
+  const savedRows = localStorage.getItem(storageKey);
 
-  if (!savedAccounts) {
+  if (!savedRows) {
     return;
   }
 
   try {
-    const parsedAccounts = JSON.parse(savedAccounts);
+    const parsedRows = JSON.parse(savedRows);
 
-    if (Array.isArray(parsedAccounts)) {
-      data.accounts = parsedAccounts;
+    if (Array.isArray(parsedRows)) {
+      data[targetKey] = parsedRows;
     }
   } catch {
-    localStorage.removeItem(accountStorageKey);
+    localStorage.removeItem(storageKey);
   }
 }
 
-function saveAccounts() {
-  localStorage.setItem(accountStorageKey, JSON.stringify(data.accounts));
+function saveRows(storageKey, rows) {
+  localStorage.setItem(storageKey, JSON.stringify(rows));
 }
 
 function getDashboardTotals() {
@@ -174,7 +175,7 @@ function handleAccountSubmit(event) {
     });
   }
 
-  saveAccounts();
+  saveRows(accountStorageKey, data.accounts);
   resetAccountForm();
   renderAccountsDashboard();
 }
@@ -200,21 +201,124 @@ function handleAccountActions(event) {
 
   if (deleteId) {
     data.accounts = data.accounts.filter(account => account.id !== deleteId);
-    saveAccounts();
+    saveRows(accountStorageKey, data.accounts);
     resetAccountForm();
     renderAccountsDashboard();
   }
 }
 
-loadAccounts();
+function resetBillForm() {
+  document.getElementById('billForm').reset();
+  document.getElementById('billId').value = '';
+  document.getElementById('billSubmit').textContent = 'Add Bill';
+  document.getElementById('billCancel').hidden = true;
+}
+
+function renderBills() {
+  const target = document.getElementById('billsList');
+
+  target.innerHTML = data.bills.map(bill => `
+    <div class="row editable-row">
+      <div>
+        <strong>${bill.name}</strong>
+        <small>${bill.detail}</small>
+      </div>
+      <strong>${money.format(bill.amount)}</strong>
+      <div class="row-actions" aria-label="Bill actions">
+        <button type="button" data-edit-bill="${bill.id}">Edit</button>
+        <button type="button" data-delete-bill="${bill.id}">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderBillsDashboard() {
+  renderBills();
+  renderDashboardTotals();
+}
+
+function getBillFormData() {
+  const id = document.getElementById('billId').value;
+  const name = document.getElementById('billName').value.trim();
+  const detail = document.getElementById('billDetail').value.trim();
+  const amount = Number(document.getElementById('billAmount').value);
+
+  if (!name || !detail || Number.isNaN(amount)) {
+    return null;
+  }
+
+  return { id, name, detail, amount };
+}
+
+function handleBillSubmit(event) {
+  event.preventDefault();
+
+  const formData = getBillFormData();
+
+  if (!formData) {
+    return;
+  }
+
+  if (formData.id) {
+    data.bills = data.bills.map(bill => (
+      bill.id === formData.id
+        ? { ...bill, name: formData.name, detail: formData.detail, amount: formData.amount }
+        : bill
+    ));
+  } else {
+    data.bills.push({
+      id: crypto.randomUUID(),
+      name: formData.name,
+      detail: formData.detail,
+      amount: formData.amount
+    });
+  }
+
+  saveRows(billStorageKey, data.bills);
+  resetBillForm();
+  renderBillsDashboard();
+}
+
+function handleBillActions(event) {
+  const editId = event.target.dataset.editBill;
+  const deleteId = event.target.dataset.deleteBill;
+
+  if (editId) {
+    const bill = data.bills.find(item => item.id === editId);
+
+    if (!bill) {
+      return;
+    }
+
+    document.getElementById('billId').value = bill.id;
+    document.getElementById('billName').value = bill.name;
+    document.getElementById('billDetail').value = bill.detail;
+    document.getElementById('billAmount').value = bill.amount;
+    document.getElementById('billSubmit').textContent = 'Save Bill';
+    document.getElementById('billCancel').hidden = false;
+  }
+
+  if (deleteId) {
+    data.bills = data.bills.filter(bill => bill.id !== deleteId);
+    saveRows(billStorageKey, data.bills);
+    resetBillForm();
+    renderBillsDashboard();
+  }
+}
+
+loadStoredRows(accountStorageKey, 'accounts');
+loadStoredRows(billStorageKey, 'bills');
 renderAccountsDashboard();
-renderRows('bills', data.bills);
+renderBills();
 renderRows('allocations', data.allocations);
 renderRows('investments', data.investments);
 
 document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
 document.getElementById('accountCancel').addEventListener('click', resetAccountForm);
 document.getElementById('accountsList').addEventListener('click', handleAccountActions);
+document.getElementById('billForm').addEventListener('submit', handleBillSubmit);
+document.getElementById('billCancel').addEventListener('click', resetBillForm);
+document.getElementById('billsList').addEventListener('click', handleBillActions);
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
   button.addEventListener('click', () => {
