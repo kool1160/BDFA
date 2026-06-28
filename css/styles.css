@@ -209,37 +209,48 @@ h1 {
 
 .edit-form {
   display: grid;
-  gap: 12px;
-  padding: 4px 0 18px;
+  gap: 14px;
+  margin: 2px 0 18px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.045);
 }
 
 .edit-form label {
   display: grid;
-  gap: 7px;
+  gap: 8px;
 }
 
 .edit-form label span {
-  color: var(--muted);
-  font-size: 0.74rem;
-  letter-spacing: 0.06em;
+  color: rgba(169, 169, 181, 0.88);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.075em;
   text-transform: uppercase;
 }
 
 .edit-form input,
 .edit-form select {
   width: 100%;
-  min-height: 44px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.095);
   border-radius: 16px;
   padding: 0 14px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(5, 5, 7, 0.34);
   outline: 0;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+
+.edit-form input::placeholder {
+  color: rgba(169, 169, 181, 0.5);
 }
 
 .edit-form input:focus,
 .edit-form select:focus {
-  border-color: rgba(255, 255, 255, 0.22);
-  background: rgba(255, 255, 255, 0.095);
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.045);
 }
 
 .form-actions,
@@ -249,19 +260,48 @@ h1 {
   flex-wrap: wrap;
 }
 
+.form-actions {
+  padding-top: 2px;
+}
+
 .form-actions button,
 .row-actions button {
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.105);
   border-radius: 999px;
-  padding: 10px 13px;
-  background: rgba(255, 255, 255, 0.1);
   cursor: pointer;
+  transition: transform 140ms ease, background 140ms ease, border-color 140ms ease;
+}
+
+.form-actions button {
+  min-height: 44px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.16);
+  font-weight: 700;
+}
+
+.row-actions button {
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.085);
+  color: rgba(247, 247, 251, 0.86);
+  font-size: 0.84rem;
+}
+
+.form-actions button:hover,
+.row-actions button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .ghost-button,
 .row-actions button:last-child {
   color: var(--muted);
   background: transparent;
+}
+
+.ghost-button:hover,
+.row-actions button:last-child:hover {
+  background: rgba(255, 255, 255, 0.065);
 }
 
 .editable-row {
@@ -313,7 +353,7 @@ h1 {
   .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
   .hero-card { grid-column: span 2; grid-row: span 2; padding: 32px; }
   .panel-grid { margin-top: 22px; grid-template-columns: repeat(2, 1fr); }
-  .edit-form { grid-template-columns: 1fr 0.8fr 0.8fr; align-items: end; }
+  .edit-form { grid-template-columns: 1fr 0.8fr 0.8fr; align-items: end; padding: 18px; }
   .form-actions { grid-column: 1 / -1; }
   .assistant-card { margin-top: 22px; padding: 28px; grid-template-columns: 1fr auto; align-items: center; }
 }
