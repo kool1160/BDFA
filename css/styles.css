@@ -24,7 +24,7 @@ body {
   color: var(--text);
 }
 
-button {
+button, input, select {
   font: inherit;
   color: inherit;
 }
@@ -207,6 +207,71 @@ h1 {
   white-space: nowrap;
 }
 
+.account-form {
+  display: grid;
+  gap: 12px;
+  padding: 4px 0 18px;
+}
+
+.account-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.account-form label span {
+  color: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.account-form input,
+.account-form select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 0 14px;
+  background: rgba(255, 255, 255, 0.07);
+  outline: 0;
+}
+
+.account-form input:focus,
+.account-form select:focus {
+  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.095);
+}
+
+.form-actions,
+.row-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.form-actions button,
+.row-actions button {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  padding: 10px 13px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+}
+
+.ghost-button,
+.row-actions button:last-child {
+  color: var(--muted);
+  background: transparent;
+}
+
+.editable-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.editable-row .row-actions {
+  grid-column: 1 / -1;
+}
+
 .assistant-card {
   margin-top: 18px;
   padding: 24px;
@@ -248,5 +313,7 @@ h1 {
   .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
   .hero-card { grid-column: span 2; grid-row: span 2; padding: 32px; }
   .panel-grid { margin-top: 22px; grid-template-columns: repeat(2, 1fr); }
+  .account-form { grid-template-columns: 1fr 0.8fr 0.8fr; align-items: end; }
+  .form-actions { grid-column: 1 / -1; }
   .assistant-card { margin-top: 22px; padding: 28px; grid-template-columns: 1fr auto; align-items: center; }
 }
