@@ -9,6 +9,13 @@ const billStorageKey = 'bdfa.mockBills';
 const allocationStorageKey = 'bdfa.mockAllocations';
 const investmentStorageKey = 'bdfa.mockInvestments';
 
+const billFrequencies = {
+  monthly: { label: 'Monthly', months: 1 },
+  quarterly: { label: 'Quarterly', months: 3 },
+  'six-months': { label: 'Every 6 months', months: 6 },
+  yearly: { label: 'Yearly', months: 12 }
+};
+
 const data = {
   accounts: [
     { id: 'checking', name: 'Chase Checking', type: 'Cash', amount: 8420 },
@@ -17,11 +24,11 @@ const data = {
     { id: 'mortgage', name: 'Mortgage', type: 'Debt', amount: -40567 }
   ],
   bills: [
-    { id: 'mortgage-bill', name: 'Mortgage', detail: 'Monthly reserve', amount: 1259 },
-    { id: 'consumers-energy', name: 'Consumers Energy', detail: 'Estimated monthly', amount: 182 },
-    { id: 'gas', name: 'Gas', detail: 'Estimated monthly', amount: 78 },
-    { id: 'car-insurance', name: 'Car Insurance', detail: '$720 every 6 months', amount: 120 },
-    { id: 'subscriptions', name: 'Subscriptions', detail: 'Monthly', amount: 77 }
+    { id: 'mortgage-bill', name: 'Mortgage', detail: 'Monthly reserve', amount: 1259, frequency: 'monthly' },
+    { id: 'consumers-energy', name: 'Consumers Energy', detail: 'Estimated monthly', amount: 182, frequency: 'monthly' },
+    { id: 'gas', name: 'Gas', detail: 'Estimated monthly', amount: 78, frequency: 'monthly' },
+    { id: 'car-insurance', name: 'Car Insurance', detail: 'Policy premium', amount: 720, frequency: 'six-months' },
+    { id: 'subscriptions', name: 'Subscriptions', detail: 'Monthly', amount: 77, frequency: 'monthly' }
   ],
   allocations: [
     { id: 'emergency-reserve', name: 'Emergency Reserve', detail: 'Target $10,000', amount: 6400 },
@@ -58,6 +65,14 @@ function getEmptyState(title, message) {
   `;
 }
 
+function getBillFrequency(bill) {
+  return billFrequencies[bill.frequency] || billFrequencies.monthly;
+}
+
+function getMonthlyBillAmount(bill) {
+  return bill.amount / getBillFrequency(bill).months;
+}
+
 function loadStoredRows(storageKey, targetKey) {
   const savedRows = localStorage.getItem(storageKey);
 
@@ -84,7 +99,7 @@ function getDashboardTotals() {
   const cash = total(data.accounts.filter(account => account.type === 'Cash'));
   const investments = total(data.investments);
   const debt = Math.abs(total(data.accounts.filter(account => account.amount < 0)));
-  const bills = total(data.bills);
+  const bills = data.bills.reduce((sum, bill) => sum + getMonthlyBillAmount(bill), 0);
   const allocations = total(data.allocations);
 
   return {
@@ -213,6 +228,7 @@ function handleAccountActions(event) {
 function resetBillForm() {
   document.getElementById('billForm').reset();
   document.getElementById('billId').value = '';
+  document.getElementById('billFrequency').value = 'monthly';
   document.getElementById('billSubmit').textContent = 'Add Bill';
   document.getElementById('billCancel').hidden = true;
 }
@@ -229,7 +245,7 @@ function renderBills() {
     <div class="row editable-row">
       <div>
         <strong>${bill.name}</strong>
-        <small>${bill.detail}</small>
+        <small>${bill.detail} · ${getBillFrequency(bill).label}</small>
       </div>
       <strong>${money.format(bill.amount)}</strong>
       <div class="row-actions" aria-label="Bill actions">
@@ -250,12 +266,13 @@ function getBillFormData() {
   const name = document.getElementById('billName').value.trim();
   const detail = document.getElementById('billDetail').value.trim();
   const amount = Number(document.getElementById('billAmount').value);
+  const frequency = document.getElementById('billFrequency').value;
 
-  if (!name || !detail || Number.isNaN(amount)) {
+  if (!name || !detail || Number.isNaN(amount) || !billFrequencies[frequency]) {
     return null;
   }
 
-  return { id, name, detail, amount };
+  return { id, name, detail, amount, frequency };
 }
 
 function handleBillSubmit(event) {
@@ -270,7 +287,7 @@ function handleBillSubmit(event) {
   if (formData.id) {
     data.bills = data.bills.map(bill => (
       bill.id === formData.id
-        ? { ...bill, name: formData.name, detail: formData.detail, amount: formData.amount }
+        ? { ...bill, name: formData.name, detail: formData.detail, amount: formData.amount, frequency: formData.frequency }
         : bill
     ));
   } else {
@@ -278,7 +295,8 @@ function handleBillSubmit(event) {
       id: crypto.randomUUID(),
       name: formData.name,
       detail: formData.detail,
-      amount: formData.amount
+      amount: formData.amount,
+      frequency: formData.frequency
     });
   }
 
@@ -302,6 +320,7 @@ function handleBillActions(event) {
     document.getElementById('billName').value = bill.name;
     document.getElementById('billDetail').value = bill.detail;
     document.getElementById('billAmount').value = bill.amount;
+    document.getElementById('billFrequency').value = billFrequencies[bill.frequency] ? bill.frequency : 'monthly';
     document.getElementById('billSubmit').textContent = 'Save Bill';
     document.getElementById('billCancel').hidden = false;
   }
