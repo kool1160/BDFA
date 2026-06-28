@@ -249,6 +249,34 @@ h1 {
   white-space: nowrap;
 }
 
+.allocation-progress {
+  margin-top: 12px;
+}
+
+.allocation-progress-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(169, 169, 181, 0.9);
+  font-size: 0.76rem;
+  line-height: 1.2;
+}
+
+.allocation-progress-track {
+  overflow: hidden;
+  height: 7px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.allocation-progress-track span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: rgba(247, 247, 251, 0.72);
+}
+
 .edit-form {
   display: grid;
   gap: 14px;
