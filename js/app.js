@@ -49,6 +49,15 @@ function setMoneyText(targetId, amount) {
   }
 }
 
+function getEmptyState(title, message) {
+  return `
+    <div class="empty-state">
+      <strong>${title}</strong>
+      <p>${message}</p>
+    </div>
+  `;
+}
+
 function loadStoredRows(storageKey, targetKey) {
   const savedRows = localStorage.getItem(storageKey);
 
@@ -106,6 +115,11 @@ function resetAccountForm() {
 
 function renderAccounts() {
   const target = document.getElementById('accountsList');
+
+  if (!data.accounts.length) {
+    target.innerHTML = getEmptyState('No accounts yet', 'Add your first mock account to show cash, debt, and net worth clearly.');
+    return;
+  }
 
   target.innerHTML = data.accounts.map(account => `
     <div class="row editable-row">
@@ -206,6 +220,11 @@ function resetBillForm() {
 function renderBills() {
   const target = document.getElementById('billsList');
 
+  if (!data.bills.length) {
+    target.innerHTML = getEmptyState('No bills yet', 'Add a mock bill to keep Available to Allocate honest.');
+    return;
+  }
+
   target.innerHTML = data.bills.map(bill => `
     <div class="row editable-row">
       <div>
@@ -305,6 +324,11 @@ function resetAllocationForm() {
 function renderAllocations() {
   const target = document.getElementById('allocationsList');
 
+  if (!data.allocations.length) {
+    target.innerHTML = getEmptyState('No allocations yet', 'Add a mock allocation to give your money a clear job.');
+    return;
+  }
+
   target.innerHTML = data.allocations.map(allocation => `
     <div class="row editable-row">
       <div>
@@ -403,6 +427,11 @@ function resetInvestmentForm() {
 
 function renderInvestments() {
   const target = document.getElementById('investmentsList');
+
+  if (!data.investments.length) {
+    target.innerHTML = getEmptyState('No investments yet', 'Add a mock investment to see how it supports net worth.');
+    return;
+  }
 
   target.innerHTML = data.investments.map(investment => `
     <div class="row editable-row">
