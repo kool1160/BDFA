@@ -4,12 +4,14 @@ const money = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0
 });
 
+const accountStorageKey = 'bdfa.mockAccounts';
+
 const data = {
   accounts: [
-    { name: 'Chase Checking', type: 'Cash', amount: 8420 },
-    { name: 'Huntington Savings', type: 'Cash', amount: 3211 },
-    { name: 'Capital One', type: 'Credit Card', amount: -1104 },
-    { name: 'Mortgage', type: 'Debt', amount: -40567 }
+    { id: 'checking', name: 'Chase Checking', type: 'Cash', amount: 8420 },
+    { id: 'savings', name: 'Huntington Savings', type: 'Cash', amount: 3211 },
+    { id: 'capital-one', name: 'Capital One', type: 'Credit Card', amount: -1104 },
+    { id: 'mortgage', name: 'Mortgage', type: 'Debt', amount: -40567 }
   ],
   bills: [
     { name: 'Mortgage', detail: 'Monthly reserve', amount: 1259 },
@@ -42,6 +44,28 @@ function setMoneyText(targetId, amount) {
   if (target) {
     target.textContent = money.format(amount);
   }
+}
+
+function loadAccounts() {
+  const savedAccounts = localStorage.getItem(accountStorageKey);
+
+  if (!savedAccounts) {
+    return;
+  }
+
+  try {
+    const parsedAccounts = JSON.parse(savedAccounts);
+
+    if (Array.isArray(parsedAccounts)) {
+      data.accounts = parsedAccounts;
+    }
+  } catch {
+    localStorage.removeItem(accountStorageKey);
+  }
+}
+
+function saveAccounts() {
+  localStorage.setItem(accountStorageKey, JSON.stringify(data.accounts));
 }
 
 function getDashboardTotals() {
@@ -83,11 +107,114 @@ function renderRows(targetId, rows) {
   `).join('');
 }
 
-renderDashboardTotals();
-renderRows('accounts', data.accounts);
+function resetAccountForm() {
+  document.getElementById('accountForm').reset();
+  document.getElementById('accountId').value = '';
+  document.getElementById('accountSubmit').textContent = 'Add Account';
+  document.getElementById('accountCancel').hidden = true;
+}
+
+function renderAccounts() {
+  const target = document.getElementById('accountsList');
+
+  target.innerHTML = data.accounts.map(account => `
+    <div class="row editable-row">
+      <div>
+        <strong>${account.name}</strong>
+        <small>${account.type}</small>
+      </div>
+      <strong>${money.format(account.amount)}</strong>
+      <div class="row-actions" aria-label="Account actions">
+        <button type="button" data-edit-account="${account.id}">Edit</button>
+        <button type="button" data-delete-account="${account.id}">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAccountsDashboard() {
+  renderAccounts();
+  renderDashboardTotals();
+}
+
+function getAccountFormData() {
+  const id = document.getElementById('accountId').value;
+  const name = document.getElementById('accountName').value.trim();
+  const type = document.getElementById('accountType').value;
+  const amount = Number(document.getElementById('accountAmount').value);
+
+  if (!name || Number.isNaN(amount)) {
+    return null;
+  }
+
+  return { id, name, type, amount };
+}
+
+function handleAccountSubmit(event) {
+  event.preventDefault();
+
+  const formData = getAccountFormData();
+
+  if (!formData) {
+    return;
+  }
+
+  if (formData.id) {
+    data.accounts = data.accounts.map(account => (
+      account.id === formData.id
+        ? { ...account, name: formData.name, type: formData.type, amount: formData.amount }
+        : account
+    ));
+  } else {
+    data.accounts.push({
+      id: crypto.randomUUID(),
+      name: formData.name,
+      type: formData.type,
+      amount: formData.amount
+    });
+  }
+
+  saveAccounts();
+  resetAccountForm();
+  renderAccountsDashboard();
+}
+
+function handleAccountActions(event) {
+  const editId = event.target.dataset.editAccount;
+  const deleteId = event.target.dataset.deleteAccount;
+
+  if (editId) {
+    const account = data.accounts.find(item => item.id === editId);
+
+    if (!account) {
+      return;
+    }
+
+    document.getElementById('accountId').value = account.id;
+    document.getElementById('accountName').value = account.name;
+    document.getElementById('accountType').value = account.type;
+    document.getElementById('accountAmount').value = account.amount;
+    document.getElementById('accountSubmit').textContent = 'Save Account';
+    document.getElementById('accountCancel').hidden = false;
+  }
+
+  if (deleteId) {
+    data.accounts = data.accounts.filter(account => account.id !== deleteId);
+    saveAccounts();
+    resetAccountForm();
+    renderAccountsDashboard();
+  }
+}
+
+loadAccounts();
+renderAccountsDashboard();
 renderRows('bills', data.bills);
 renderRows('allocations', data.allocations);
 renderRows('investments', data.investments);
+
+document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
+document.getElementById('accountCancel').addEventListener('click', resetAccountForm);
+document.getElementById('accountsList').addEventListener('click', handleAccountActions);
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
   button.addEventListener('click', () => {
