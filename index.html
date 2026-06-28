@@ -111,7 +111,28 @@
 
       <section class="panel">
         <button class="panel-title" data-toggle="investments">Investments <span>⌄</span></button>
-        <div class="panel-body" id="investments"></div>
+        <div class="panel-body" id="investments">
+          <form class="edit-form" id="investmentForm">
+            <input type="hidden" id="investmentId" />
+            <label>
+              <span>Investment name</span>
+              <input id="investmentName" type="text" placeholder="401(k)" required />
+            </label>
+            <label>
+              <span>Detail</span>
+              <input id="investmentDetail" type="text" placeholder="Retirement" required />
+            </label>
+            <label>
+              <span>Amount</span>
+              <input id="investmentAmount" type="number" inputmode="decimal" step="0.01" placeholder="25000" required />
+            </label>
+            <div class="form-actions">
+              <button type="submit" id="investmentSubmit">Add Investment</button>
+              <button type="button" id="investmentCancel" class="ghost-button" hidden>Cancel</button>
+            </div>
+          </form>
+          <div id="investmentsList"></div>
+        </div>
       </section>
     </section>
 
