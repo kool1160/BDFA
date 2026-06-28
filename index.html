@@ -85,7 +85,28 @@
 
       <section class="panel">
         <button class="panel-title" data-toggle="allocations">Allocations <span>⌄</span></button>
-        <div class="panel-body" id="allocations"></div>
+        <div class="panel-body" id="allocations">
+          <form class="edit-form" id="allocationForm">
+            <input type="hidden" id="allocationId" />
+            <label>
+              <span>Allocation name</span>
+              <input id="allocationName" type="text" placeholder="Emergency Reserve" required />
+            </label>
+            <label>
+              <span>Detail</span>
+              <input id="allocationDetail" type="text" placeholder="Target $10,000" required />
+            </label>
+            <label>
+              <span>Amount</span>
+              <input id="allocationAmount" type="number" inputmode="decimal" step="0.01" placeholder="500" required />
+            </label>
+            <div class="form-actions">
+              <button type="submit" id="allocationSubmit">Add Allocation</button>
+              <button type="button" id="allocationCancel" class="ghost-button" hidden>Cancel</button>
+            </div>
+          </form>
+          <div id="allocationsList"></div>
+        </div>
       </section>
 
       <section class="panel">
