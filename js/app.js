@@ -91,7 +91,7 @@ function renderDashboardTotals() {
   setMoneyText('netWorth', totals.netWorth);
   setMoneyText('cashTotal', totals.cash);
   setMoneyText('investmentTotal', totals.investments);
-  setMoneyText('debtTotal', totals.debt);
+  setMoneyText('debtTotal', -totals.debt);
 }
 
 function renderRows(targetId, rows) {
