@@ -32,11 +32,11 @@ button {
 .app-shell {
   width: min(1180px, 100%);
   margin: 0 auto;
-  padding: 22px;
+  padding: 24px;
 }
 
 .hero {
-  padding: 34px 4px 20px;
+  padding: 36px 4px 24px;
 }
 
 .eyebrow, .label {
@@ -62,7 +62,7 @@ h1 {
 
 .grid, .panel-grid {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 .dashboard-grid {
@@ -94,7 +94,7 @@ h1 {
 .hero-card {
   grid-column: 1 / -1;
   min-height: 238px;
-  padding: 26px;
+  padding: 28px;
   background: linear-gradient(145deg, rgba(255,255,255,0.18), rgba(255,255,255,0.07));
   border-radius: var(--radius-xl);
 }
@@ -105,7 +105,7 @@ h1 {
 }
 
 .hero-card p {
-  margin: 8px 0 0;
+  margin: 10px 0 0;
   max-width: 32rem;
   color: var(--muted);
 }
@@ -129,7 +129,7 @@ h1 {
 }
 
 .panel-grid {
-  margin-top: 16px;
+  margin-top: 18px;
 }
 
 .panel {
@@ -208,8 +208,8 @@ h1 {
 }
 
 .assistant-card {
-  margin-top: 16px;
-  padding: 22px;
+  margin-top: 18px;
+  padding: 24px;
   display: grid;
   gap: 18px;
   background: linear-gradient(145deg, rgba(255,255,255,0.105), rgba(255,255,255,0.055));
@@ -242,9 +242,11 @@ h1 {
 }
 
 @media (min-width: 760px) {
-  .app-shell { padding: 34px; }
+  .app-shell { padding: 40px; }
+  .hero { padding: 44px 4px 30px; }
+  .grid, .panel-grid { gap: 18px; }
   .dashboard-grid { grid-template-columns: repeat(4, 1fr); }
-  .hero-card { grid-column: span 2; grid-row: span 2; }
-  .panel-grid { grid-template-columns: repeat(2, 1fr); }
-  .assistant-card { grid-template-columns: 1fr auto; align-items: center; }
+  .hero-card { grid-column: span 2; grid-row: span 2; padding: 32px; }
+  .panel-grid { margin-top: 22px; grid-template-columns: repeat(2, 1fr); }
+  .assistant-card { margin-top: 22px; padding: 28px; grid-template-columns: 1fr auto; align-items: center; }
 }
