@@ -6,6 +6,7 @@ const money = new Intl.NumberFormat('en-US', {
 
 const accountStorageKey = 'bdfa.mockAccounts';
 const billStorageKey = 'bdfa.mockBills';
+const allocationStorageKey = 'bdfa.mockAllocations';
 
 const data = {
   accounts: [
@@ -22,10 +23,10 @@ const data = {
     { id: 'subscriptions', name: 'Subscriptions', detail: 'Monthly', amount: 77 }
   ],
   allocations: [
-    { name: 'Emergency Reserve', detail: 'Target $10,000', amount: 6400 },
-    { name: 'Vacation', detail: 'Growing monthly', amount: 950 },
-    { name: 'Car Maintenance', detail: 'Oil, tires, repairs', amount: 420 },
-    { name: 'HSA Contribution', detail: 'Available after bills', amount: 300 }
+    { id: 'emergency-reserve', name: 'Emergency Reserve', detail: 'Target $10,000', amount: 6400 },
+    { id: 'vacation', name: 'Vacation', detail: 'Growing monthly', amount: 950 },
+    { id: 'car-maintenance', name: 'Car Maintenance', detail: 'Oil, tires, repairs', amount: 420 },
+    { id: 'hsa-contribution', name: 'HSA Contribution', detail: 'Available after bills', amount: 300 }
   ],
   investments: [
     { name: '401(k)', detail: 'Retirement', amount: 248000 },
@@ -306,11 +307,111 @@ function handleBillActions(event) {
   }
 }
 
+function resetAllocationForm() {
+  document.getElementById('allocationForm').reset();
+  document.getElementById('allocationId').value = '';
+  document.getElementById('allocationSubmit').textContent = 'Add Allocation';
+  document.getElementById('allocationCancel').hidden = true;
+}
+
+function renderAllocations() {
+  const target = document.getElementById('allocationsList');
+
+  target.innerHTML = data.allocations.map(allocation => `
+    <div class="row editable-row">
+      <div>
+        <strong>${allocation.name}</strong>
+        <small>${allocation.detail}</small>
+      </div>
+      <strong>${money.format(allocation.amount)}</strong>
+      <div class="row-actions" aria-label="Allocation actions">
+        <button type="button" data-edit-allocation="${allocation.id}">Edit</button>
+        <button type="button" data-delete-allocation="${allocation.id}">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAllocationsDashboard() {
+  renderAllocations();
+  renderDashboardTotals();
+}
+
+function getAllocationFormData() {
+  const id = document.getElementById('allocationId').value;
+  const name = document.getElementById('allocationName').value.trim();
+  const detail = document.getElementById('allocationDetail').value.trim();
+  const amount = Number(document.getElementById('allocationAmount').value);
+
+  if (!name || !detail || Number.isNaN(amount)) {
+    return null;
+  }
+
+  return { id, name, detail, amount };
+}
+
+function handleAllocationSubmit(event) {
+  event.preventDefault();
+
+  const formData = getAllocationFormData();
+
+  if (!formData) {
+    return;
+  }
+
+  if (formData.id) {
+    data.allocations = data.allocations.map(allocation => (
+      allocation.id === formData.id
+        ? { ...allocation, name: formData.name, detail: formData.detail, amount: formData.amount }
+        : allocation
+    ));
+  } else {
+    data.allocations.push({
+      id: crypto.randomUUID(),
+      name: formData.name,
+      detail: formData.detail,
+      amount: formData.amount
+    });
+  }
+
+  saveRows(allocationStorageKey, data.allocations);
+  resetAllocationForm();
+  renderAllocationsDashboard();
+}
+
+function handleAllocationActions(event) {
+  const editId = event.target.dataset.editAllocation;
+  const deleteId = event.target.dataset.deleteAllocation;
+
+  if (editId) {
+    const allocation = data.allocations.find(item => item.id === editId);
+
+    if (!allocation) {
+      return;
+    }
+
+    document.getElementById('allocationId').value = allocation.id;
+    document.getElementById('allocationName').value = allocation.name;
+    document.getElementById('allocationDetail').value = allocation.detail;
+    document.getElementById('allocationAmount').value = allocation.amount;
+    document.getElementById('allocationSubmit').textContent = 'Save Allocation';
+    document.getElementById('allocationCancel').hidden = false;
+  }
+
+  if (deleteId) {
+    data.allocations = data.allocations.filter(allocation => allocation.id !== deleteId);
+    saveRows(allocationStorageKey, data.allocations);
+    resetAllocationForm();
+    renderAllocationsDashboard();
+  }
+}
+
 loadStoredRows(accountStorageKey, 'accounts');
 loadStoredRows(billStorageKey, 'bills');
+loadStoredRows(allocationStorageKey, 'allocations');
 renderAccountsDashboard();
 renderBills();
-renderRows('allocations', data.allocations);
+renderAllocations();
 renderRows('investments', data.investments);
 
 document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
@@ -319,6 +420,9 @@ document.getElementById('accountsList').addEventListener('click', handleAccountA
 document.getElementById('billForm').addEventListener('submit', handleBillSubmit);
 document.getElementById('billCancel').addEventListener('click', resetBillForm);
 document.getElementById('billsList').addEventListener('click', handleBillActions);
+document.getElementById('allocationForm').addEventListener('submit', handleAllocationSubmit);
+document.getElementById('allocationCancel').addEventListener('click', resetAllocationForm);
+document.getElementById('allocationsList').addEventListener('click', handleAllocationActions);
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
   button.addEventListener('click', () => {
