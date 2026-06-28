@@ -312,6 +312,27 @@ h1 {
   grid-column: 1 / -1;
 }
 
+.empty-state {
+  margin: 2px 0 14px;
+  padding: 18px;
+  border: 1px dashed rgba(255, 255, 255, 0.14);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.empty-state strong {
+  display: block;
+  font-size: 1rem;
+  letter-spacing: -0.025em;
+}
+
+.empty-state p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
 .assistant-card {
   margin-top: 18px;
   padding: 24px;
