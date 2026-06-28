@@ -584,6 +584,28 @@ function renderAllSections() {
   renderDashboardTotals();
 }
 
+function getExportData() {
+  return {
+    accounts: data.accounts,
+    bills: data.bills,
+    allocations: data.allocations,
+    investments: data.investments
+  };
+}
+
+function exportDemoData() {
+  const blob = new Blob([JSON.stringify(getExportData(), null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.download = 'bdfa-demo-data.json';
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
 function clearDemoStorage() {
   localStorage.removeItem(accountStorageKey);
   localStorage.removeItem(billStorageKey);
@@ -627,6 +649,7 @@ document.getElementById('allocationsList').addEventListener('click', handleAlloc
 document.getElementById('investmentForm').addEventListener('submit', handleInvestmentSubmit);
 document.getElementById('investmentCancel').addEventListener('click', resetInvestmentForm);
 document.getElementById('investmentsList').addEventListener('click', handleInvestmentActions);
+document.getElementById('exportDemoData').addEventListener('click', exportDemoData);
 document.getElementById('resetDemoData').addEventListener('click', resetDemoData);
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
