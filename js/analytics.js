@@ -6,6 +6,14 @@ function getAnalyticsBarWidth(value, maxValue) {
   return Math.max((value / maxValue) * 100, value > 0 ? 6 : 0);
 }
 
+function getAnalyticsLegendItem(label, className) {
+  return `<span><i class="${className}" aria-hidden="true"></i>${label}</span>`;
+}
+
+function getAnalyticsLegend(rows) {
+  return `<div class="analytics-legend">${rows.map(row => getAnalyticsLegendItem(row.label, row.className)).join('')}</div>`;
+}
+
 function getAnalyticsBarRow(label, amount, maxValue, className) {
   return `
     <div class="analytics-bar-row">
@@ -20,7 +28,7 @@ function getAnalyticsBarRow(label, amount, maxValue, className) {
   `;
 }
 
-function renderAnalyticsBars(targetId, rows) {
+function renderAnalyticsBars(targetId, rows, contextText = '') {
   const target = document.getElementById(targetId);
 
   if (!target) {
@@ -28,8 +36,10 @@ function renderAnalyticsBars(targetId, rows) {
   }
 
   const maxValue = Math.max(...rows.map(row => row.amount), 0);
+  const bars = rows.map(row => getAnalyticsBarRow(row.label, row.amount, maxValue, row.className)).join('');
+  const context = contextText ? `<div class="analytics-context">${contextText}</div>` : '';
 
-  target.innerHTML = rows.map(row => getAnalyticsBarRow(row.label, row.amount, maxValue, row.className)).join('');
+  target.innerHTML = `${getAnalyticsLegend(rows)}<div class="analytics-bar-list">${bars}</div>${context}`;
 }
 
 function renderAllocationTargetOverview() {
@@ -46,7 +56,8 @@ function renderAllocationTargetOverview() {
     return;
   }
 
-  target.innerHTML = targetedAllocations.map(allocation => {
+  const completedCount = targetedAllocations.filter(allocation => allocation.amount >= allocation.targetAmount).length;
+  const rows = targetedAllocations.map(allocation => {
     const percent = Math.min(Math.max((allocation.amount / allocation.targetAmount) * 100, 0), 100);
 
     return `
@@ -61,24 +72,34 @@ function renderAllocationTargetOverview() {
       </div>
     `;
   }).join('');
+
+  target.innerHTML = `
+    <div class="analytics-legend">
+      ${getAnalyticsLegendItem('In progress', 'analytics-caution')}
+      ${getAnalyticsLegendItem('Complete', 'analytics-positive')}
+    </div>
+    <div class="analytics-bar-list">${rows}</div>
+    <div class="analytics-context">${completedCount} of ${targetedAllocations.length} targeted allocations complete.</div>
+  `;
 }
 
 function renderAnalytics() {
   const totals = getDashboardTotals();
   const bills = getMonthlyBillsTotal();
   const allocations = total(data.allocations);
+  const available = Math.max(totals.availableToAllocate, 0);
 
   renderAnalyticsBars('moneyMixChart', [
     { label: 'Cash', amount: totals.cash, className: 'analytics-positive' },
     { label: 'Investments', amount: totals.investments, className: 'analytics-growth' },
     { label: 'Debt', amount: totals.debt, className: 'analytics-debt' }
-  ]);
+  ], `Debt is shown as ${money.format(totals.debt)} for visual comparison.`);
 
   renderAnalyticsBars('monthlyFlowChart', [
     { label: 'Bills', amount: bills, className: 'analytics-caution' },
     { label: 'Allocations', amount: allocations, className: 'analytics-caution' },
-    { label: 'Available', amount: Math.max(totals.availableToAllocate, 0), className: 'analytics-positive' }
-  ]);
+    { label: 'Available', amount: available, className: 'analytics-positive' }
+  ], `${money.format(available)} remains available after current bills and allocations.`);
 
   renderAllocationTargetOverview();
 }
