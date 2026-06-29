@@ -21,6 +21,27 @@
   color: var(--money-caution) !important;
 }
 
+.dashboard-grid .card:not(.hero-card):has(.money-positive),
+.dashboard-grid .card:not(.hero-card):has(.money-growth),
+.dashboard-grid .card:not(.hero-card):has(.money-debt) {
+  border-color: rgba(255, 255, 255, 0.105);
+}
+
+.dashboard-grid .card:not(.hero-card):has(.money-positive) {
+  background: linear-gradient(145deg, rgba(159, 231, 192, 0.075), rgba(255, 255, 255, 0.052));
+  box-shadow: inset 0 0 0 1px rgba(159, 231, 192, 0.055), 0 16px 44px rgba(0, 0, 0, 0.26);
+}
+
+.dashboard-grid .card:not(.hero-card):has(.money-growth) {
+  background: linear-gradient(145deg, rgba(157, 194, 255, 0.085), rgba(255, 255, 255, 0.052));
+  box-shadow: inset 0 0 0 1px rgba(157, 194, 255, 0.06), 0 16px 44px rgba(0, 0, 0, 0.26);
+}
+
+.dashboard-grid .card:not(.hero-card):has(.money-debt) {
+  background: linear-gradient(145deg, rgba(255, 177, 166, 0.075), rgba(255, 255, 255, 0.052));
+  box-shadow: inset 0 0 0 1px rgba(255, 177, 166, 0.06), 0 16px 44px rgba(0, 0, 0, 0.26);
+}
+
 .panel-summary.money-positive,
 .panel-summary.money-growth,
 .panel-summary.money-debt,
@@ -43,6 +64,31 @@
 
 .row-money {
   text-shadow: 0 0 24px rgba(255, 255, 255, 0.05);
+}
+
+.editable-row:has(.row-money.money-positive),
+.editable-row:has(.row-money.money-growth),
+.editable-row:has(.row-money.money-debt),
+.editable-row:has(.row-money.money-caution) {
+  margin-inline: -10px;
+  padding-inline: 10px;
+  border-radius: 16px;
+}
+
+.editable-row:has(.row-money.money-positive) {
+  background: rgba(159, 231, 192, 0.035);
+}
+
+.editable-row:has(.row-money.money-growth) {
+  background: rgba(157, 194, 255, 0.04);
+}
+
+.editable-row:has(.row-money.money-debt) {
+  background: rgba(255, 177, 166, 0.04);
+}
+
+.editable-row:has(.row-money.money-caution) {
+  background: rgba(242, 213, 138, 0.032);
 }
 
 .bill-status-badge.money-caution {
