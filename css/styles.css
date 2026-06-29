@@ -249,6 +249,7 @@ h1 {
   white-space: nowrap;
 }
 
+.account-group-label,
 .bill-group-label {
   margin: 18px 0 4px;
   color: rgba(169, 169, 181, 0.78);
