@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/hero.css" />
   <link rel="stylesheet" href="css/accounts.css" />
+  <link rel="stylesheet" href="css/semantic-colors.css" />
   <link rel="stylesheet" href="css/panels.css" />
 </head>
 <body>
@@ -32,18 +33,18 @@
     <section class="grid dashboard-grid" aria-label="Financial dashboard">
       <article class="card hero-card">
         <span class="label">Available to Allocate</span>
-        <strong id="availableToAllocate">$3,142</strong>
+        <strong id="availableToAllocate" class="money-positive">$3,142</strong>
         <p>Bills, reserves, and goals are already spoken for.</p>
       </article>
-      <article class="card"><span class="label">Net Worth</span><strong id="netWorth">$642,183</strong></article>
-      <article class="card"><span class="label">Cash</span><strong id="cashTotal">$14,208</strong></article>
-      <article class="card"><span class="label">Investments</span><strong id="investmentTotal">$487,642</strong></article>
-      <article class="card"><span class="label">Debt</span><strong id="debtTotal">-$40,667</strong></article>
+      <article class="card"><span class="label">Net Worth</span><strong id="netWorth" class="money-positive">$642,183</strong></article>
+      <article class="card"><span class="label">Cash</span><strong id="cashTotal" class="money-positive">$14,208</strong></article>
+      <article class="card"><span class="label">Investments</span><strong id="investmentTotal" class="money-growth">$487,642</strong></article>
+      <article class="card"><span class="label">Debt</span><strong id="debtTotal" class="money-debt">-$40,667</strong></article>
     </section>
 
     <section class="panel-grid">
       <section class="panel">
-        <button class="panel-title" data-toggle="accounts"><span class="panel-label">Accounts<span class="panel-helper" id="accountsMix" hidden></span></span><span class="panel-summary" id="accountsSummary">$0</span><span>⌄</span></button>
+        <button class="panel-title" data-toggle="accounts"><span class="panel-label">Accounts<span class="panel-helper" id="accountsMix" hidden></span></span><span class="panel-summary money-positive" id="accountsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="accounts">
           <form class="edit-form" id="accountForm">
             <input type="hidden" id="accountId" />
@@ -73,7 +74,7 @@
       </section>
 
       <section class="panel">
-        <button class="panel-title" data-toggle="bills"><span class="panel-label">Bills<span class="panel-helper" id="billsNextDue" hidden></span></span><span class="panel-summary" id="billsSummary">$0/mo</span><span>⌄</span></button>
+        <button class="panel-title" data-toggle="bills"><span class="panel-label">Bills<span class="panel-helper" id="billsNextDue" hidden></span></span><span class="panel-summary money-caution" id="billsSummary">$0/mo</span><span>⌄</span></button>
         <div class="panel-body" id="bills">
           <form class="edit-form" id="billForm">
             <input type="hidden" id="billId" />
@@ -112,7 +113,7 @@
       </section>
 
       <section class="panel">
-        <button class="panel-title" data-toggle="allocations"><span class="panel-label">Allocations<span class="panel-helper" id="allocationsMix" hidden></span></span><span class="panel-summary" id="allocationsSummary">$0</span><span>⌄</span></button>
+        <button class="panel-title" data-toggle="allocations"><span class="panel-label">Allocations<span class="panel-helper" id="allocationsMix" hidden></span></span><span class="panel-summary money-caution" id="allocationsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="allocations">
           <form class="edit-form" id="allocationForm">
             <input type="hidden" id="allocationId" />
@@ -142,7 +143,7 @@
       </section>
 
       <section class="panel">
-        <button class="panel-title" data-toggle="investments"><span class="panel-label">Investments<span class="panel-helper" id="investmentsMix" hidden></span></span><span class="panel-summary" id="investmentsSummary">$0</span><span>⌄</span></button>
+        <button class="panel-title" data-toggle="investments"><span class="panel-label">Investments<span class="panel-helper" id="investmentsMix" hidden></span></span><span class="panel-summary money-growth" id="investmentsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="investments">
           <form class="edit-form" id="investmentForm">
             <input type="hidden" id="investmentId" />
