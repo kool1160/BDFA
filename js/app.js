@@ -128,16 +128,20 @@ function getAllocationProgress(allocation) {
 
   const rawPercent = (allocation.amount / allocation.targetAmount) * 100;
   const percent = Math.min(Math.max(rawPercent, 0), 100);
+  const remaining = Math.max(allocation.targetAmount - allocation.amount, 0);
+  const complete = allocation.amount >= allocation.targetAmount;
+  const statusText = complete ? 'Complete' : `${money.format(remaining)} left`;
 
   return `
-    <div class="allocation-progress" aria-label="${Math.round(percent)}% funded toward ${money.format(allocation.targetAmount)} target">
+    <div class="allocation-progress ${complete ? 'complete' : ''}" aria-label="${Math.round(percent)}% funded toward ${money.format(allocation.targetAmount)} target">
       <div class="allocation-progress-label">
-        <span>${Math.round(percent)}% funded</span>
+        <span>${complete ? '100% funded' : `${Math.round(percent)}% funded`}</span>
         <span>Target ${money.format(allocation.targetAmount)}</span>
       </div>
       <div class="allocation-progress-track">
         <span style="width: ${percent}%"></span>
       </div>
+      <div class="allocation-progress-status">${statusText}</div>
     </div>
   `;
 }
