@@ -277,6 +277,22 @@ h1 {
   background: rgba(247, 247, 251, 0.72);
 }
 
+.allocation-progress-status {
+  margin-top: 7px;
+  color: rgba(169, 169, 181, 0.94);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.allocation-progress.complete .allocation-progress-status {
+  color: rgba(247, 247, 251, 0.9);
+}
+
+.allocation-progress.complete .allocation-progress-track span {
+  background: rgba(247, 247, 251, 0.86);
+}
+
 .edit-form {
   display: grid;
   gap: 14px;
