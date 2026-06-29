@@ -6,6 +6,27 @@ function getBillDueDayText(bill) {
   return hasBillDueDay(bill) ? ` · Due day ${bill.dueDay}` : '';
 }
 
+function getSortedBillsForDisplay() {
+  return [...data.bills].sort((firstBill, secondBill) => {
+    const firstHasDueDay = hasBillDueDay(firstBill);
+    const secondHasDueDay = hasBillDueDay(secondBill);
+
+    if (firstHasDueDay && secondHasDueDay) {
+      return firstBill.dueDay - secondBill.dueDay;
+    }
+
+    if (firstHasDueDay) {
+      return -1;
+    }
+
+    if (secondHasDueDay) {
+      return 1;
+    }
+
+    return 0;
+  });
+}
+
 function getBillDueDayFormValue() {
   const dueDayInput = document.getElementById('billDueDay').value;
 
@@ -61,7 +82,7 @@ renderBills = function renderBillsWithDueDays() {
     return;
   }
 
-  target.innerHTML = data.bills.map(bill => `
+  target.innerHTML = getSortedBillsForDisplay().map(bill => `
     <div class="row editable-row">
       <div>
         <strong>${bill.name}</strong>
