@@ -40,3 +40,37 @@
 .panel-summary.money-caution {
   box-shadow: inset 0 0 0 1px rgba(242, 213, 138, 0.08);
 }
+
+.row-money {
+  text-shadow: 0 0 24px rgba(255, 255, 255, 0.05);
+}
+
+.bill-status-badge.money-caution {
+  border-color: rgba(242, 213, 138, 0.18);
+  background: rgba(242, 213, 138, 0.08);
+}
+
+.bill-status-badge.money-debt {
+  border-color: rgba(255, 177, 166, 0.2);
+  background: rgba(255, 177, 166, 0.08);
+}
+
+.allocation-progress-label {
+  color: rgba(242, 213, 138, 0.78);
+}
+
+.allocation-progress-status {
+  color: rgba(242, 213, 138, 0.84);
+}
+
+.allocation-progress.complete .allocation-progress-status {
+  color: var(--money-positive);
+}
+
+.allocation-progress-track span {
+  background: rgba(242, 213, 138, 0.72);
+}
+
+.allocation-progress.complete .allocation-progress-track span {
+  background: var(--money-positive);
+}
