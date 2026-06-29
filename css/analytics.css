@@ -188,6 +188,51 @@
   font-size: 0.84rem;
 }
 
+.timing-pressure-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+.timing-pressure-column {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  text-align: center;
+}
+
+.timing-pressure-track {
+  overflow: hidden;
+  display: flex;
+  align-items: end;
+  height: 84px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.timing-pressure-track span {
+  display: block;
+  width: 100%;
+  min-height: 5px;
+  border-radius: inherit;
+  background: var(--money-caution);
+}
+
+.timing-pressure-column strong {
+  color: rgba(247, 247, 251, 0.84);
+  font-size: 0.72rem;
+}
+
+.timing-pressure-column small,
+.timing-pressure-column em {
+  color: rgba(169, 169, 181, 0.78);
+  font-size: 0.64rem;
+  font-style: normal;
+  line-height: 1.15;
+}
+
 .analytics-positive { background: var(--money-positive); }
 .analytics-growth { background: var(--money-growth); }
 .analytics-debt { background: var(--money-debt); }
