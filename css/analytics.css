@@ -73,6 +73,37 @@
 
 .analytics-bars {
   display: grid;
+  gap: 13px;
+}
+
+.analytics-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.analytics-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  border-radius: 999px;
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(247, 247, 251, 0.7);
+  font-size: 0.68rem;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.analytics-legend i {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+}
+
+.analytics-bar-list {
+  display: grid;
   gap: 12px;
 }
 
@@ -115,6 +146,14 @@
 .analytics-growth { background: var(--money-growth); }
 .analytics-debt { background: var(--money-debt); }
 .analytics-caution { background: var(--money-caution); }
+
+.analytics-context {
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  padding-top: 11px;
+  color: rgba(169, 169, 181, 0.88);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
 
 .analytics-empty {
   border: 1px dashed rgba(255, 255, 255, 0.13);
