@@ -84,6 +84,10 @@
                 <option value="yearly">Yearly</option>
               </select>
             </label>
+            <label>
+              <span>Due Day</span>
+              <input id="billDueDay" type="number" inputmode="numeric" min="1" max="31" step="1" placeholder="Optional" />
+            </label>
             <div class="form-actions">
               <button type="submit" id="billSubmit">Add Bill</button>
               <button type="button" id="billCancel" class="ghost-button" hidden>Cancel</button>
@@ -191,6 +195,7 @@
   </main>
 
   <script src="js/app.js"></script>
+  <script src="js/billDueDays.js"></script>
   <script src="js/panels.js"></script>
 </body>
 </html>
