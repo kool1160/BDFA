@@ -8,21 +8,21 @@ function getBillDueDayText(bill) {
 
 function getBillDueStatus(bill) {
   if (!hasBillDueDay(bill)) {
-    return { className: '', label: '' };
+    return { className: '', label: '', group: 'no-due-day', groupLabel: 'No Due Day' };
   }
 
   const currentDay = new Date().getDate();
   const daysUntilDue = bill.dueDay - currentDay;
 
   if (daysUntilDue < 0) {
-    return { className: 'past-due', label: 'Past due' };
+    return { className: 'past-due', label: 'Past due', group: 'past-due', groupLabel: 'Past Due' };
   }
 
   if (daysUntilDue <= 3) {
-    return { className: 'due-soon', label: daysUntilDue === 0 ? 'Due today' : 'Due soon' };
+    return { className: 'due-soon', label: daysUntilDue === 0 ? 'Due today' : 'Due soon', group: 'due-soon', groupLabel: 'Due Soon' };
   }
 
-  return { className: '', label: '' };
+  return { className: '', label: '', group: 'upcoming', groupLabel: 'Upcoming' };
 }
 
 function getBillDueStatusBadge(bill) {
@@ -33,6 +33,14 @@ function getBillDueStatusBadge(bill) {
   }
 
   return `<span class="bill-status-badge">${status.label}</span>`;
+}
+
+function getBillTimingLabel(status, previousGroup) {
+  if (status.group === previousGroup) {
+    return '';
+  }
+
+  return `<div class="bill-group-label">${status.groupLabel}</div>`;
 }
 
 function getSortedBillsForDisplay() {
@@ -111,10 +119,15 @@ renderBills = function renderBillsWithDueDays() {
     return;
   }
 
+  let previousGroup = '';
+
   target.innerHTML = getSortedBillsForDisplay().map(bill => {
     const status = getBillDueStatus(bill);
+    const timingLabel = getBillTimingLabel(status, previousGroup);
+    previousGroup = status.group;
 
     return `
+      ${timingLabel}
       <div class="row editable-row bill-row ${status.className}">
         <div>
           <strong>${bill.name}</strong>
