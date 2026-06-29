@@ -14,8 +14,39 @@ function getAccountGroupLabel(account, previousType) {
   return `<div class="account-group-label">${account.type}</div>`;
 }
 
+function getAccountMixText() {
+  return accountTypeOrder
+    .map(type => {
+      const count = data.accounts.filter(account => account.type === type).length;
+      return count ? `${count} ${type}` : '';
+    })
+    .filter(Boolean)
+    .join(' • ');
+}
+
+function renderAccountsMixHelper() {
+  const target = document.getElementById('accountsMix');
+
+  if (!target) {
+    return;
+  }
+
+  const mixText = getAccountMixText();
+
+  if (!mixText) {
+    target.hidden = true;
+    target.textContent = '';
+    return;
+  }
+
+  target.textContent = mixText;
+  target.hidden = false;
+}
+
 renderAccounts = function renderGroupedAccounts() {
   const target = document.getElementById('accountsList');
+
+  renderAccountsMixHelper();
 
   if (!data.accounts.length) {
     target.innerHTML = getEmptyState('No accounts yet', 'Add your first mock account to show cash, debt, and net worth clearly.');
