@@ -177,29 +177,29 @@
       <div class="analytics-header">
         <span class="label">Analytics</span>
         <h2>Visual money insights.</h2>
-        <p>Future charts will turn accounts, bills, allocations, and investments into simple patterns you can scan fast.</p>
+        <p>Simple bar charts using your current mock data.</p>
       </div>
       <div class="analytics-grid">
         <article class="analytics-card">
           <div>
-            <strong>Cash Flow</strong>
-            <small>Placeholder for future income, bill, and allocation bars.</small>
+            <strong>Cash vs Investments vs Debt</strong>
+            <small>See where the largest parts of your money picture sit.</small>
           </div>
-          <div class="analytics-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="analytics-bars" id="moneyMixChart"></div>
         </article>
         <article class="analytics-card">
           <div>
-            <strong>Bill Timing</strong>
-            <small>Placeholder for upcoming bill pressure and due-day rhythm.</small>
+            <strong>Bills vs Allocations vs Available</strong>
+            <small>Compare monthly pressure against what is still free to assign.</small>
           </div>
-          <div class="analytics-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="analytics-bars" id="monthlyFlowChart"></div>
         </article>
         <article class="analytics-card">
           <div>
-            <strong>Progress</strong>
-            <small>Placeholder for goals, targets, and longer-term movement.</small>
+            <strong>Allocation Target Progress</strong>
+            <small>Track how close each targeted allocation is to complete.</small>
           </div>
-          <div class="analytics-placeholder" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+          <div class="analytics-bars" id="allocationProgressChart"></div>
         </article>
       </div>
     </section>
@@ -249,6 +249,7 @@
   <script src="js/billDueDays.js"></script>
   <script src="js/investmentSummary.js"></script>
   <script src="js/allocationSummary.js"></script>
+  <script src="js/analytics.js"></script>
   <script src="js/panels.js"></script>
 </body>
 </html>
