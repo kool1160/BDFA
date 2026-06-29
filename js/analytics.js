@@ -57,6 +57,37 @@ function renderAnalyticsBars(targetId, rows, contextText = '') {
   target.innerHTML = `${getAnalyticsLegend(rows)}<div class="analytics-bar-list">${bars}</div>${context}`;
 }
 
+function renderDistributionChart(totals) {
+  const target = document.getElementById('distributionChart');
+
+  if (!target) {
+    return;
+  }
+
+  const rows = [
+    { label: 'Cash', amount: totals.cash, className: 'analytics-positive' },
+    { label: 'Investments', amount: totals.investments, className: 'analytics-growth' },
+    { label: 'Debt', amount: totals.debt, className: 'analytics-debt' }
+  ];
+  const totalValue = rows.reduce((sum, row) => sum + row.amount, 0);
+  const segments = rows.map(row => `
+    <span class="${row.className}" style="width: ${getAnalyticsShare(row.amount, totalValue)}" title="${row.label}: ${getAnalyticsShare(row.amount, totalValue)}"></span>
+  `).join('');
+  const details = rows.map(row => `
+    <div class="distribution-detail">
+      <span>${row.label}</span>
+      <strong>${getAnalyticsShare(row.amount, totalValue)}</strong>
+    </div>
+  `).join('');
+
+  target.innerHTML = `
+    ${getAnalyticsLegend(rows)}
+    <div class="distribution-bar" aria-hidden="true">${segments}</div>
+    <div class="distribution-details">${details}</div>
+    <div class="analytics-context">A stacked view of the same money mix for quicker comparison.</div>
+  `;
+}
+
 function renderAllocationTargetOverview() {
   const target = document.getElementById('allocationProgressChart');
 
@@ -119,6 +150,7 @@ function renderAnalytics() {
   ], `${money.format(available)} remains available after current bills and allocations.`);
 
   renderAllocationTargetOverview();
+  renderDistributionChart(totals);
 }
 
 const baseRenderDashboardTotalsForAnalytics = renderDashboardTotals;
