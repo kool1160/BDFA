@@ -88,6 +88,59 @@ function renderDistributionChart(totals) {
   `;
 }
 
+function getBillTimingBuckets() {
+  return [
+    { label: 'Week 1', detail: 'Days 1–7', min: 1, max: 7, amount: 0 },
+    { label: 'Week 2', detail: 'Days 8–14', min: 8, max: 14, amount: 0 },
+    { label: 'Week 3', detail: 'Days 15–21', min: 15, max: 21, amount: 0 },
+    { label: 'Week 4+', detail: 'Days 22–31', min: 22, max: 31, amount: 0 }
+  ];
+}
+
+function renderBillTimingPressureChart() {
+  const target = document.getElementById('billTimingPressureChart');
+
+  if (!target) {
+    return;
+  }
+
+  const buckets = getBillTimingBuckets();
+  const datedBills = data.bills.filter(hasBillDueDay);
+
+  if (!datedBills.length) {
+    target.innerHTML = '<div class="analytics-empty">Add bill due days to see monthly timing pressure.</div>';
+    return;
+  }
+
+  datedBills.forEach(bill => {
+    const bucket = buckets.find(item => bill.dueDay >= item.min && bill.dueDay <= item.max);
+
+    if (bucket) {
+      bucket.amount += getMonthlyBillAmount(bill);
+    }
+  });
+
+  const maxValue = Math.max(...buckets.map(bucket => bucket.amount), 0);
+  const rows = buckets.map(bucket => `
+    <div class="timing-pressure-column">
+      <div class="timing-pressure-track" aria-hidden="true">
+        <span style="height: ${getAnalyticsBarWidth(bucket.amount, maxValue)}%"></span>
+      </div>
+      <strong>${bucket.label}</strong>
+      <small>${bucket.detail}</small>
+      <em>${money.format(bucket.amount)}</em>
+    </div>
+  `).join('');
+
+  target.innerHTML = `
+    <div class="analytics-legend">
+      ${getAnalyticsLegendItem('Monthly bill pressure', 'analytics-caution')}
+    </div>
+    <div class="timing-pressure-grid">${rows}</div>
+    <div class="analytics-context">Only bills with due days are included in this timing view.</div>
+  `;
+}
+
 function renderAllocationTargetOverview() {
   const target = document.getElementById('allocationProgressChart');
 
@@ -151,6 +204,7 @@ function renderAnalytics() {
 
   renderAllocationTargetOverview();
   renderDistributionChart(totals);
+  renderBillTimingPressureChart();
 }
 
 const baseRenderDashboardTotalsForAnalytics = renderDashboardTotals;
