@@ -64,6 +64,35 @@ function getSortedBillsForDisplay() {
   });
 }
 
+function getNextDueBill() {
+  const currentDay = new Date().getDate();
+
+  return data.bills
+    .filter(hasBillDueDay)
+    .map(bill => ({ bill, daysUntilDue: bill.dueDay - currentDay }))
+    .filter(item => item.daysUntilDue >= 0)
+    .sort((firstItem, secondItem) => firstItem.daysUntilDue - secondItem.daysUntilDue)[0]?.bill || null;
+}
+
+function renderNextDueBillHelper() {
+  const target = document.getElementById('billsNextDue');
+
+  if (!target) {
+    return;
+  }
+
+  const nextDueBill = getNextDueBill();
+
+  if (!nextDueBill) {
+    target.hidden = true;
+    target.textContent = '';
+    return;
+  }
+
+  target.textContent = `Next due: ${nextDueBill.name} on day ${nextDueBill.dueDay}`;
+  target.hidden = false;
+}
+
 function getBillDueDayFormValue() {
   const dueDayInput = document.getElementById('billDueDay').value;
 
@@ -113,6 +142,8 @@ function getBillPayloadWithDueDay(formData) {
 
 renderBills = function renderBillsWithDueDays() {
   const target = document.getElementById('billsList');
+
+  renderNextDueBillHelper();
 
   if (!data.bills.length) {
     target.innerHTML = getEmptyState('No bills yet', 'Add a mock bill to keep Available to Allocate honest.');
