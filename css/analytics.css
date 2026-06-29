@@ -128,6 +128,20 @@
   white-space: nowrap;
 }
 
+.analytics-bar-meta strong em {
+  display: inline-flex;
+  margin-left: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 3px 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(169, 169, 181, 0.88);
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 800;
+  vertical-align: middle;
+}
+
 .analytics-bar-track {
   overflow: hidden;
   height: 10px;
