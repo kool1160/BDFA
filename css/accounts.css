@@ -1,0 +1,10 @@
+.account-row.negative-balance {
+  margin-inline: -10px;
+  padding-inline: 10px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.account-row.negative-balance > strong:last-of-type {
+  color: rgba(247, 247, 251, 0.9);
+}
