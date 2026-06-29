@@ -1,0 +1,42 @@
+:root {
+  --money-positive: #9FE7C0;
+  --money-growth: #9DC2FF;
+  --money-debt: #FFB1A6;
+  --money-caution: #F2D58A;
+}
+
+.money-positive {
+  color: var(--money-positive) !important;
+}
+
+.money-growth {
+  color: var(--money-growth) !important;
+}
+
+.money-debt {
+  color: var(--money-debt) !important;
+}
+
+.money-caution {
+  color: var(--money-caution) !important;
+}
+
+.panel-summary.money-positive,
+.panel-summary.money-growth,
+.panel-summary.money-debt,
+.panel-summary.money-caution {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.055);
+}
+
+.panel-summary.money-positive {
+  box-shadow: inset 0 0 0 1px rgba(159, 231, 192, 0.08);
+}
+
+.panel-summary.money-growth {
+  box-shadow: inset 0 0 0 1px rgba(157, 194, 255, 0.08);
+}
+
+.panel-summary.money-caution {
+  box-shadow: inset 0 0 0 1px rgba(242, 213, 138, 0.08);
+}
