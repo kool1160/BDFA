@@ -8,6 +8,7 @@ const accountStorageKey = 'bdfa.mockAccounts';
 const billStorageKey = 'bdfa.mockBills';
 const allocationStorageKey = 'bdfa.mockAllocations';
 const investmentStorageKey = 'bdfa.mockInvestments';
+const panelStateStorageKey = 'bdfa.panelState';
 let statusTimer;
 
 const billFrequencies = {
@@ -658,6 +659,47 @@ function renderAllSections() {
   renderDashboardTotals();
 }
 
+function getSavedCollapsedPanels() {
+  const savedPanels = localStorage.getItem(panelStateStorageKey);
+
+  if (!savedPanels) {
+    return [];
+  }
+
+  try {
+    const parsedPanels = JSON.parse(savedPanels);
+    return Array.isArray(parsedPanels) ? parsedPanels : [];
+  } catch {
+    localStorage.removeItem(panelStateStorageKey);
+    return [];
+  }
+}
+
+function saveCollapsedPanels() {
+  const collapsedPanels = Array.from(document.querySelectorAll('[data-toggle]'))
+    .filter(button => button.closest('.panel').classList.contains('collapsed'))
+    .map(button => button.dataset.toggle);
+
+  localStorage.setItem(panelStateStorageKey, JSON.stringify(collapsedPanels));
+}
+
+function applySavedPanelState() {
+  const collapsedPanels = getSavedCollapsedPanels();
+
+  if (!collapsedPanels.length) {
+    return;
+  }
+
+  document.querySelectorAll('[data-toggle]').forEach(button => {
+    const panel = button.closest('.panel');
+    const body = panel.querySelector('.panel-body');
+    const shouldCollapse = collapsedPanels.includes(button.dataset.toggle);
+
+    panel.classList.toggle('collapsed', shouldCollapse);
+    body.hidden = shouldCollapse;
+  });
+}
+
 function isText(value) {
   return typeof value === 'string' && value.trim().length > 0;
 }
@@ -802,6 +844,7 @@ loadStoredRows(billStorageKey, 'bills');
 loadStoredRows(allocationStorageKey, 'allocations');
 loadStoredRows(investmentStorageKey, 'investments');
 renderAllSections();
+applySavedPanelState();
 
 document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
 document.getElementById('accountCancel').addEventListener('click', resetAccountForm);
@@ -825,5 +868,6 @@ document.querySelectorAll('[data-toggle]').forEach(button => {
     panel.classList.toggle('collapsed');
     const body = panel.querySelector('.panel-body');
     body.hidden = !body.hidden;
+    saveCollapsedPanels();
   });
 });
