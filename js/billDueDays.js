@@ -6,6 +6,35 @@ function getBillDueDayText(bill) {
   return hasBillDueDay(bill) ? ` · Due day ${bill.dueDay}` : '';
 }
 
+function getBillDueStatus(bill) {
+  if (!hasBillDueDay(bill)) {
+    return { className: '', label: '' };
+  }
+
+  const currentDay = new Date().getDate();
+  const daysUntilDue = bill.dueDay - currentDay;
+
+  if (daysUntilDue < 0) {
+    return { className: 'past-due', label: 'Past due' };
+  }
+
+  if (daysUntilDue <= 3) {
+    return { className: 'due-soon', label: daysUntilDue === 0 ? 'Due today' : 'Due soon' };
+  }
+
+  return { className: '', label: '' };
+}
+
+function getBillDueStatusBadge(bill) {
+  const status = getBillDueStatus(bill);
+
+  if (!status.label) {
+    return '';
+  }
+
+  return `<span class="bill-status-badge">${status.label}</span>`;
+}
+
 function getSortedBillsForDisplay() {
   return [...data.bills].sort((firstBill, secondBill) => {
     const firstHasDueDay = hasBillDueDay(firstBill);
@@ -82,22 +111,27 @@ renderBills = function renderBillsWithDueDays() {
     return;
   }
 
-  target.innerHTML = getSortedBillsForDisplay().map(bill => `
-    <div class="row editable-row">
-      <div>
-        <strong>${bill.name}</strong>
-        <small>${bill.detail} · ${getBillFrequency(bill).label}${getBillDueDayText(bill)}</small>
+  target.innerHTML = getSortedBillsForDisplay().map(bill => {
+    const status = getBillDueStatus(bill);
+
+    return `
+      <div class="row editable-row bill-row ${status.className}">
+        <div>
+          <strong>${bill.name}</strong>
+          <small>${bill.detail} · ${getBillFrequency(bill).label}${getBillDueDayText(bill)}</small>
+        </div>
+        <div class="bill-amount">
+          <strong>${money.format(bill.amount)}</strong>
+          ${getMonthlyBillImpact(bill)}
+          ${getBillDueStatusBadge(bill)}
+        </div>
+        <div class="row-actions" aria-label="Bill actions">
+          <button type="button" data-edit-bill="${bill.id}">Edit</button>
+          <button type="button" data-delete-bill="${bill.id}">Delete</button>
+        </div>
       </div>
-      <div class="bill-amount">
-        <strong>${money.format(bill.amount)}</strong>
-        ${getMonthlyBillImpact(bill)}
-      </div>
-      <div class="row-actions" aria-label="Bill actions">
-        <button type="button" data-edit-bill="${bill.id}">Edit</button>
-        <button type="button" data-delete-bill="${bill.id}">Delete</button>
-      </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 };
 
 function handleBillSubmitWithDueDay(event) {
