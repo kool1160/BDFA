@@ -6,6 +6,14 @@ function getAnalyticsBarWidth(value, maxValue) {
   return Math.max((value / maxValue) * 100, value > 0 ? 6 : 0);
 }
 
+function getAnalyticsShare(value, totalValue) {
+  if (!totalValue || totalValue <= 0) {
+    return '0%';
+  }
+
+  return `${Math.round((value / totalValue) * 100)}%`;
+}
+
 function getAnalyticsLegendItem(label, className) {
   return `<span><i class="${className}" aria-hidden="true"></i>${label}</span>`;
 }
@@ -14,12 +22,12 @@ function getAnalyticsLegend(rows) {
   return `<div class="analytics-legend">${rows.map(row => getAnalyticsLegendItem(row.label, row.className)).join('')}</div>`;
 }
 
-function getAnalyticsBarRow(label, amount, maxValue, className) {
+function getAnalyticsBarRow(label, amount, maxValue, className, shareText = '') {
   return `
     <div class="analytics-bar-row">
       <div class="analytics-bar-meta">
         <span>${label}</span>
-        <strong>${money.format(amount)}</strong>
+        <strong>${money.format(amount)}${shareText ? `<em>${shareText}</em>` : ''}</strong>
       </div>
       <div class="analytics-bar-track" aria-hidden="true">
         <span class="${className}" style="width: ${getAnalyticsBarWidth(amount, maxValue)}%"></span>
@@ -36,7 +44,14 @@ function renderAnalyticsBars(targetId, rows, contextText = '') {
   }
 
   const maxValue = Math.max(...rows.map(row => row.amount), 0);
-  const bars = rows.map(row => getAnalyticsBarRow(row.label, row.amount, maxValue, row.className)).join('');
+  const totalValue = rows.reduce((sum, row) => sum + row.amount, 0);
+  const bars = rows.map(row => getAnalyticsBarRow(
+    row.label,
+    row.amount,
+    maxValue,
+    row.className,
+    row.shareText || getAnalyticsShare(row.amount, totalValue)
+  )).join('');
   const context = contextText ? `<div class="analytics-context">${contextText}</div>` : '';
 
   target.innerHTML = `${getAnalyticsLegend(rows)}<div class="analytics-bar-list">${bars}</div>${context}`;
@@ -59,12 +74,14 @@ function renderAllocationTargetOverview() {
   const completedCount = targetedAllocations.filter(allocation => allocation.amount >= allocation.targetAmount).length;
   const rows = targetedAllocations.map(allocation => {
     const percent = Math.min(Math.max((allocation.amount / allocation.targetAmount) * 100, 0), 100);
+    const remaining = Math.max(allocation.targetAmount - allocation.amount, 0);
+    const detailText = percent >= 100 ? 'Complete' : `${money.format(remaining)} left`;
 
     return `
       <div class="analytics-bar-row">
         <div class="analytics-bar-meta">
           <span>${allocation.name}</span>
-          <strong>${Math.round(percent)}%</strong>
+          <strong>${Math.round(percent)}%<em>${detailText}</em></strong>
         </div>
         <div class="analytics-bar-track" aria-hidden="true">
           <span class="${percent >= 100 ? 'analytics-positive' : 'analytics-caution'}" style="width: ${Math.max(percent, 6)}%"></span>
