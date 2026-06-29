@@ -249,6 +249,15 @@ h1 {
   white-space: nowrap;
 }
 
+.bill-group-label {
+  margin: 18px 0 4px;
+  color: rgba(169, 169, 181, 0.78);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.085em;
+  text-transform: uppercase;
+}
+
 .bill-status-badge {
   display: inline-block;
   margin-top: 7px;
