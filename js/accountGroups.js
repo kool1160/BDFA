@@ -47,6 +47,10 @@ function getAccountBalanceClass(account) {
   return account.amount < 0 ? 'negative-balance' : '';
 }
 
+function getAccountMoneyClass(account) {
+  return account.amount < 0 ? 'money-debt' : 'money-positive';
+}
+
 renderAccounts = function renderGroupedAccounts() {
   const target = document.getElementById('accountsList');
 
@@ -70,7 +74,7 @@ renderAccounts = function renderGroupedAccounts() {
           <strong>${account.name}</strong>
           <small>${account.type}</small>
         </div>
-        <strong>${money.format(account.amount)}</strong>
+        <strong class="row-money ${getAccountMoneyClass(account)}">${money.format(account.amount)}</strong>
         <div class="row-actions" aria-label="Account actions">
           <button type="button" data-edit-account="${account.id}">Edit</button>
           <button type="button" data-delete-account="${account.id}">Delete</button>
