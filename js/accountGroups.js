@@ -43,6 +43,10 @@ function renderAccountsMixHelper() {
   target.hidden = false;
 }
 
+function getAccountBalanceClass(account) {
+  return account.amount < 0 ? 'negative-balance' : '';
+}
+
 renderAccounts = function renderGroupedAccounts() {
   const target = document.getElementById('accountsList');
 
@@ -61,7 +65,7 @@ renderAccounts = function renderGroupedAccounts() {
 
     return `
       ${groupLabel}
-      <div class="row editable-row">
+      <div class="row editable-row account-row ${getAccountBalanceClass(account)}">
         <div>
           <strong>${account.name}</strong>
           <small>${account.type}</small>
