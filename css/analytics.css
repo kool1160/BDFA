@@ -156,6 +156,38 @@
   border-radius: inherit;
 }
 
+.distribution-bar {
+  overflow: hidden;
+  display: flex;
+  height: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.065);
+}
+
+.distribution-bar span {
+  display: block;
+  min-width: 4px;
+}
+
+.distribution-details {
+  display: grid;
+  gap: 8px;
+}
+
+.distribution-detail {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  color: rgba(169, 169, 181, 0.88);
+  font-size: 0.78rem;
+}
+
+.distribution-detail strong {
+  color: rgba(247, 247, 251, 0.82);
+  font-size: 0.84rem;
+}
+
 .analytics-positive { background: var(--money-positive); }
 .analytics-growth { background: var(--money-growth); }
 .analytics-debt { background: var(--money-debt); }
@@ -185,7 +217,7 @@
   }
 
   .analytics-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
   }
 }
