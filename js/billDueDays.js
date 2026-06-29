@@ -32,7 +32,7 @@ function getBillDueStatusBadge(bill) {
     return '';
   }
 
-  return `<span class="bill-status-badge">${status.label}</span>`;
+  return `<span class="bill-status-badge ${status.className ? `money-${status.className === 'past-due' ? 'debt' : 'caution'}` : ''}">${status.label}</span>`;
 }
 
 function getBillTimingLabel(status, previousGroup) {
@@ -165,7 +165,7 @@ renderBills = function renderBillsWithDueDays() {
           <small>${bill.detail} · ${getBillFrequency(bill).label}${getBillDueDayText(bill)}</small>
         </div>
         <div class="bill-amount">
-          <strong>${money.format(bill.amount)}</strong>
+          <strong class="row-money money-caution">${money.format(bill.amount)}</strong>
           ${getMonthlyBillImpact(bill)}
           ${getBillDueStatusBadge(bill)}
         </div>
