@@ -1,38 +1,38 @@
 .brand-hero {
   position: relative;
   display: grid;
-  gap: 18px;
-  padding: 34px 0 28px;
+  gap: 14px;
+  padding: 24px 0 22px;
 }
 
 .brand-hero::before {
   content: "";
   position: absolute;
-  inset: 16px auto auto -22px;
-  width: 170px;
-  height: 170px;
+  inset: 12px auto auto -18px;
+  width: 138px;
+  height: 138px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.055);
-  filter: blur(34px);
+  background: rgba(255, 255, 255, 0.05);
+  filter: blur(30px);
   pointer-events: none;
 }
 
 .brand-mark {
   position: relative;
   display: grid;
-  width: 76px;
-  height: 76px;
+  width: 62px;
+  height: 62px;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 24px;
+  border-radius: 20px;
   background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.045));
-  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28);
 }
 
 .brand-mark img {
-  width: 54px;
-  height: 54px;
-  border-radius: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
   object-fit: cover;
 }
 
@@ -45,19 +45,19 @@
   width: fit-content;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 999px;
-  padding: 7px 10px;
+  padding: 6px 9px;
   background: rgba(255, 255, 255, 0.055);
   color: rgba(247, 247, 251, 0.78);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
   font-weight: 800;
 }
 
 .brand-copy h1 {
-  margin: 14px 0 0;
-  max-width: 10ch;
-  font-size: clamp(3.05rem, 16vw, 6.4rem);
-  line-height: 0.82;
-  letter-spacing: -0.09em;
+  margin: 11px 0 0;
+  max-width: 11ch;
+  font-size: clamp(2.42rem, 12.6vw, 4.9rem);
+  line-height: 0.86;
+  letter-spacing: -0.08em;
 }
 
 .brand-copy h1 span {
@@ -66,12 +66,18 @@
 
 .brand-copy .subtitle {
   width: fit-content;
-  margin-top: 18px;
+  margin-top: 14px;
   border-left: 2px solid rgba(255, 255, 255, 0.18);
-  padding-left: 12px;
+  padding-left: 10px;
   color: rgba(247, 247, 251, 0.72);
-  font-size: clamp(1rem, 3.8vw, 1.22rem);
-  line-height: 1.32;
+  font-size: clamp(0.92rem, 3.4vw, 1.08rem);
+  line-height: 1.34;
+}
+
+@media (min-width: 430px) {
+  .brand-copy h1 {
+    font-size: clamp(2.8rem, 12vw, 5.2rem);
+  }
 }
 
 @media (min-width: 760px) {
@@ -96,5 +102,6 @@
 
   .brand-copy h1 {
     max-width: 16ch;
+    font-size: clamp(3.05rem, 8vw, 6.4rem);
   }
 }
