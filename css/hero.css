@@ -2,18 +2,18 @@
   position: relative;
   isolation: isolate;
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 16px;
-  align-items: center;
+  justify-items: center;
+  gap: 18px;
   margin: 4px 0 22px;
-  padding: 42px 18px 38px;
+  padding: 48px 20px 44px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 34px;
+  text-align: center;
   background:
     linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.045)),
-    radial-gradient(circle at 16% 18%, rgba(77, 138, 255, 0.34), transparent 34%),
-    radial-gradient(circle at 82% 12%, rgba(87, 226, 170, 0.14), transparent 28%),
+    radial-gradient(circle at 50% 18%, rgba(77, 138, 255, 0.36), transparent 34%),
+    radial-gradient(circle at 72% 18%, rgba(87, 226, 170, 0.14), transparent 28%),
     linear-gradient(135deg, rgba(13, 30, 76, 0.92) 0%, rgba(7, 13, 31, 0.97) 58%, rgba(5, 5, 7, 1) 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.18),
@@ -30,7 +30,7 @@
   inset: 0;
   background:
     linear-gradient(115deg, rgba(255, 255, 255, 0.2) 0%, transparent 34%),
-    radial-gradient(circle at 18% 36%, rgba(255, 255, 255, 0.12), transparent 18%),
+    radial-gradient(circle at 50% 32%, rgba(255, 255, 255, 0.12), transparent 18%),
     radial-gradient(circle at 74% 76%, rgba(81, 226, 170, 0.09), transparent 26%);
   opacity: 0.8;
   pointer-events: none;
@@ -40,21 +40,21 @@
   content: "";
   position: absolute;
   z-index: -1;
-  left: 18px;
-  top: 16px;
-  width: 250px;
-  height: 250px;
-  transform: translate(-46%, -45%);
+  left: 50%;
+  top: 14px;
+  width: 270px;
+  height: 270px;
+  transform: translate(-50%, -44%);
   border-radius: 999px;
-  background: rgba(76, 137, 255, 0.22);
-  filter: blur(48px);
+  background: rgba(76, 137, 255, 0.24);
+  filter: blur(52px);
   pointer-events: none;
 }
 
 .brand-mark {
   position: relative;
   display: grid;
-  width: clamp(68px, 21vw, 124px);
+  width: clamp(78px, 25vw, 132px);
   aspect-ratio: 1;
   place-items: center;
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -89,12 +89,14 @@
 
 .brand-copy {
   position: relative;
+  display: grid;
+  justify-items: center;
   min-width: 0;
 }
 
 .brand-kicker {
   display: block;
-  margin: 0 0 9px;
+  margin: 0 0 10px;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   font-size: clamp(0.78rem, 2.8vw, 1.04rem);
   font-weight: 800;
@@ -108,12 +110,12 @@
 
 .brand-copy h1 {
   margin: 0;
-  max-width: 11ch;
+  max-width: 10.4ch;
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-  font-size: clamp(2.42rem, 10.8vw, 4.82rem);
+  font-size: clamp(2.72rem, 12.2vw, 5.25rem);
   font-weight: 900;
   line-height: 0.88;
-  letter-spacing: -0.078em;
+  letter-spacing: -0.082em;
   color: #f7f7fb;
   text-wrap: balance;
   text-shadow: 0 22px 48px rgba(0, 0, 0, 0.46);
@@ -124,8 +126,8 @@
 }
 
 .brand-copy .subtitle {
-  width: fit-content;
-  margin-top: 13px;
+  max-width: 28ch;
+  margin: 15px auto 0;
   color: rgba(247, 247, 251, 0.74);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
   font-size: clamp(0.92rem, 3.2vw, 1.08rem);
@@ -136,22 +138,22 @@
 
 @media (max-width: 374px) {
   .brand-hero {
-    gap: 12px;
-    padding: 34px 14px 32px;
+    gap: 15px;
+    padding: 38px 14px 36px;
     border-radius: 30px;
   }
 
   .brand-mark {
-    width: 58px;
+    width: 68px;
   }
 
   .brand-kicker {
-    margin-bottom: 7px;
+    margin-bottom: 8px;
     font-size: 0.7rem;
   }
 
   .brand-copy h1 {
-    font-size: clamp(2.04rem, 10.6vw, 2.6rem);
+    font-size: clamp(2.26rem, 12vw, 2.9rem);
   }
 
   .brand-copy .subtitle {
@@ -161,46 +163,47 @@
 
 @media (min-width: 430px) {
   .brand-hero {
-    gap: 18px;
-    padding-top: 48px;
+    gap: 20px;
+    padding-top: 56px;
+    padding-bottom: 50px;
   }
 
   .brand-copy h1 {
-    font-size: clamp(2.9rem, 9.8vw, 5.2rem);
+    font-size: clamp(3.15rem, 10.6vw, 5.55rem);
   }
 }
 
 @media (min-width: 760px) {
   .brand-hero {
-    gap: 30px;
+    gap: 28px;
     margin: 20px 0 34px;
-    padding: 78px 42px 70px;
+    padding: 84px 42px 78px;
     border-radius: 46px;
   }
 
   .brand-hero::after {
-    width: 420px;
-    height: 420px;
-    filter: blur(72px);
+    width: 460px;
+    height: 460px;
+    filter: blur(78px);
   }
 
   .brand-mark {
-    width: clamp(132px, 18vw, 184px);
+    width: clamp(132px, 15vw, 176px);
   }
 
   .brand-kicker {
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     font-size: clamp(1.05rem, 1.8vw, 1.38rem);
   }
 
   .brand-copy h1 {
-    max-width: 16ch;
-    font-size: clamp(4rem, 7.3vw, 7.3rem);
+    max-width: 13ch;
+    font-size: clamp(4.25rem, 7.1vw, 7.4rem);
     line-height: 0.9;
   }
 
   .brand-copy .subtitle {
-    margin-top: 18px;
+    margin-top: 20px;
     font-size: clamp(1rem, 1.55vw, 1.26rem);
   }
 }
