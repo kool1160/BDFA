@@ -1,27 +1,21 @@
 /**
  * BDFA Planning Engine Foundation
  *
- * This module is the future home for BDFA's reusable planning architecture.
- * It intentionally contains documentation and exported function stubs only.
+ * This module is the home for BDFA's reusable planning architecture.
  *
- * Current rules for this foundation file:
- * - No calculations.
+ * Current implementation scope:
+ * - First deterministic Planning Engine calculation only.
  * - No mock data.
- * - No business logic.
  * - No DOM access.
- * - No imports.
- * - Do not wire this file into index.html until a future planning task requires it.
+ * - No application wiring.
  */
 
 /**
  * Planning Engine
  *
- * Planned responsibility:
- * Build a normalized planning state from source financial data such as accounts,
- * bills, income, allocations, goals, assets, liabilities, and user preferences.
- *
- * The Planning Engine should become the single place where source data is shaped
- * into the inputs needed by forecasts and decisions.
+ * Responsibility:
+ * Build a normalized planning state from source financial data and produce
+ * planning outputs that downstream Forecast and Decision engines can consume.
  */
 export const PlanningEngine = {
   buildPlanningState,
@@ -33,9 +27,6 @@ export const PlanningEngine = {
  *
  * Planned responsibility:
  * Project future balances and cash timing from a planning state.
- *
- * The Forecast Engine should derive timelines, running balances, and future cash
- * positions without storing derived values permanently when they can be recomputed.
  */
 export const ForecastEngine = {
   forecastBalances,
@@ -46,9 +37,6 @@ export const ForecastEngine = {
  *
  * Planned responsibility:
  * Convert planning and forecast outputs into user-facing guidance.
- *
- * The Decision Engine should eventually calculate values such as Safe to Spend,
- * Safe to Invest, allocation recommendations, risk signals, and scenario outcomes.
  */
 export const DecisionEngine = {
   calculateSafeToSpend,
@@ -66,13 +54,21 @@ export function buildPlanningState(sourceData) {
 }
 
 /**
- * Calculate available cash from a future planning state.
+ * Calculate available cash from the Unified Financial Model.
  *
- * @param {object} planningState - Future normalized planning state.
- * @returns {undefined} Placeholder only.
+ * Current Phase 2 scope:
+ * - Sum all account balances.
+ * - Subtract all recurring bill amounts.
+ * - Ignore investments, goals, forecasting, and allocations for now.
+ *
+ * @param {object} financialModel - Unified Financial Model input.
+ * @returns {number} Available cash amount.
  */
-export function calculateAvailableCash(planningState) {
-  void planningState;
+export function calculateAvailableCash(financialModel = {}) {
+  const accountTotal = sumAmounts(financialModel.accounts, 'balance');
+  const recurringBillsTotal = sumAmounts(financialModel.recurringBills, 'amount');
+
+  return accountTotal - recurringBillsTotal;
 }
 
 /**
@@ -107,4 +103,16 @@ export function calculateSafeToSpend(planningState, forecastState) {
 export function calculateSafeToInvest(planningState, forecastState) {
   void planningState;
   void forecastState;
+}
+
+function sumAmounts(rows, amountKey) {
+  return Array.isArray(rows)
+    ? rows.reduce((sum, row) => sum + getNumericAmount(row, amountKey), 0)
+    : 0;
+}
+
+function getNumericAmount(row, amountKey) {
+  const amount = row?.[amountKey];
+
+  return typeof amount === 'number' && Number.isFinite(amount) ? amount : 0;
 }
