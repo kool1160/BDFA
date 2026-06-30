@@ -1,4 +1,5 @@
 import { buildUnifiedModelFromMockData } from './mock-data-bridge.js';
+import { calculatePlanningSummary } from './planning-engine.js';
 
 /**
  * BDFA Financial Engine Pipeline
@@ -13,8 +14,9 @@ import { buildUnifiedModelFromMockData } from './mock-data-bridge.js';
  *
  * Current implementation scope:
  * - Build a Unified Financial Model from supplied mock data.
- * - Return empty planning, forecast, and decision output containers.
- * - No planning calculations.
+ * - Return Planning Engine summary outputs plus empty forecast and decision
+ *   output containers.
+ * - Planning Engine summary calculations only.
  * - No forecasting calculations.
  * - No decision calculations.
  * - No DOM access.
@@ -60,12 +62,10 @@ export function runFinancialPipeline(mockData = {}) {
  * Run the Planning Engine step.
  *
  * @param {object} unifiedModel - Unified Financial Model input.
- * @returns {object} Empty planning output container.
+ * @returns {object} Planning Engine summary outputs.
  */
 export function runPlanningEngine(unifiedModel) {
-  void unifiedModel;
-
-  return {};
+  return calculatePlanningSummary(unifiedModel);
 }
 
 /**

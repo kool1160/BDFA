@@ -4,7 +4,7 @@
  * This module is the home for BDFA's reusable planning architecture.
  *
  * Current implementation scope:
- * - First deterministic Planning Engine calculation only.
+ * - Deterministic Planning Engine calculations only.
  * - No mock data.
  * - No DOM access.
  * - No application wiring.
@@ -20,6 +20,9 @@
 export const PlanningEngine = {
   buildPlanningState,
   calculateAvailableCash,
+  calculateRunningBalance,
+  calculateMonthlyCashFlow,
+  calculatePlanningSummary,
 };
 
 /**
@@ -72,6 +75,65 @@ export function calculateAvailableCash(financialModel = {}) {
 }
 
 /**
+ * Calculate the running balance after applying recurring monthly inflows and
+ * outflows to a starting balance.
+ *
+ * Current scope:
+ * - Begin with the supplied starting balance.
+ * - Add all recurring income amounts.
+ * - Subtract recurring bill amounts normalized to monthly equivalents.
+ * - Treat missing collections as empty arrays.
+ *
+ * @param {object} financialModel - Unified Financial Model input.
+ * @param {number} startingBalance - Starting balance before recurring activity.
+ * @returns {number} Running balance amount.
+ */
+export function calculateRunningBalance(financialModel = {}, startingBalance = 0) {
+  const normalizedStartingBalance = Number.isFinite(startingBalance)
+    ? startingBalance
+    : 0;
+
+  return normalizedStartingBalance + calculateMonthlyCashFlow(financialModel);
+}
+
+/**
+ * Calculate monthly cash flow from recurring monthly inflows and outflows.
+ *
+ * Current scope:
+ * - Add all recurring income amounts.
+ * - Subtract recurring bill amounts normalized to monthly equivalents.
+ * - Treat missing collections as empty arrays.
+ *
+ * @param {object} financialModel - Unified Financial Model input.
+ * @returns {number} Monthly cash flow amount.
+ */
+export function calculateMonthlyCashFlow(financialModel = {}) {
+  const recurringIncomeTotal = sumAmounts(financialModel.recurringIncome, 'amount');
+  const recurringBillsTotal = sumMonthlyBillAmounts(financialModel.recurringBills);
+
+  return recurringIncomeTotal - recurringBillsTotal;
+}
+
+/**
+ * Calculate the reusable Planning Engine summary from the Unified Financial
+ * Model.
+ *
+ * @param {object} financialModel - Unified Financial Model input.
+ * @returns {object} Planning summary outputs.
+ */
+export function calculatePlanningSummary(financialModel = {}) {
+  const availableCash = calculateAvailableCash(financialModel);
+  const monthlyCashFlow = calculateMonthlyCashFlow(financialModel);
+  const runningBalance = calculateRunningBalance(financialModel, availableCash);
+
+  return {
+    availableCash,
+    monthlyCashFlow,
+    runningBalance,
+  };
+}
+
+/**
  * Forecast future balances from a future planning state.
  *
  * @param {object} planningState - Future normalized planning state.
@@ -109,6 +171,38 @@ function sumAmounts(rows, amountKey) {
   return Array.isArray(rows)
     ? rows.reduce((sum, row) => sum + getNumericAmount(row, amountKey), 0)
     : 0;
+}
+
+function sumMonthlyBillAmounts(rows) {
+  return Array.isArray(rows)
+    ? rows.reduce((sum, row) => sum + getMonthlyBillAmount(row), 0)
+    : 0;
+}
+
+function getMonthlyBillAmount(row) {
+  return getNumericAmount(row, 'amount')
+    * getMonthlyFrequencyMultiplier(row?.frequency);
+}
+
+function getMonthlyFrequencyMultiplier(frequency) {
+  const normalizedFrequency = typeof frequency === 'string'
+    ? frequency.toLowerCase()
+    : frequency;
+
+  switch (normalizedFrequency) {
+    case 'six-months':
+      return 1 / 6;
+    case 'yearly':
+    case 'annual':
+      return 1 / 12;
+    case 'weekly':
+      return 52 / 12;
+    case 'biweekly':
+      return 26 / 12;
+    case 'monthly':
+    default:
+      return 1;
+  }
 }
 
 function getNumericAmount(row, amountKey) {
