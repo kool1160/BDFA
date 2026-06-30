@@ -284,6 +284,45 @@
   line-height: 1.36;
 }
 
+.monthly-planning-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: rgba(247, 247, 251, 0.82);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.legend-item i {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(247, 247, 251, 0.5);
+}
+
+.legend-income i {
+  background: rgba(76, 217, 100, 0.95);
+}
+
+.legend-bills i {
+  background: rgba(255, 204, 0, 0.95);
+}
+
+.legend-remaining i {
+  background: rgba(100, 210, 255, 0.95);
+}
+
 @media (min-width: 760px) {
   .monthly-planning-section {
     margin-top: 24px;
