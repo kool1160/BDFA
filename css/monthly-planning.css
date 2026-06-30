@@ -76,6 +76,35 @@
   letter-spacing: -0.01em;
 }
 
+.planning-horizon-selector {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: -4px 0 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 4px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.planning-horizon-selector span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 8px 6px;
+  color: rgba(169, 169, 181, 0.86);
+  font-size: 0.68rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.planning-horizon-selector .is-selected {
+  background: rgba(247, 247, 251, 0.12);
+  color: rgba(247, 247, 251, 0.96);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18);
+}
+
 .weekly-timeline {
   position: relative;
   display: grid;
@@ -579,6 +608,14 @@
 
   .month-selector-row strong {
     font-size: 1.08rem;
+  }
+
+  .planning-horizon-selector {
+    margin-bottom: 18px;
+  }
+
+  .planning-horizon-selector span {
+    font-size: 0.72rem;
   }
 
   .weekly-timeline {
