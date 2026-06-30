@@ -112,6 +112,31 @@
   white-space: nowrap;
 }
 
+.weekly-timeline .weekly-marker-today {
+  align-items: center;
+  gap: 5px;
+  border-color: rgba(76, 217, 100, 0.28);
+  background: rgba(76, 217, 100, 0.1);
+  color: rgba(247, 247, 251, 0.92);
+}
+
+.weekly-marker-today i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(76, 217, 100, 0.95);
+  box-shadow: 0 0 0 3px rgba(76, 217, 100, 0.12);
+}
+
+.weekly-marker-today em {
+  color: rgba(76, 217, 100, 0.95);
+  font-size: 0.62rem;
+  font-style: normal;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
 .bill-calendar-strip {
   display: grid;
   gap: 14px;
@@ -429,6 +454,10 @@
 
   .weekly-timeline span {
     font-size: 0.72rem;
+  }
+
+  .weekly-marker-today em {
+    font-size: 0.64rem;
   }
 
   .bill-calendar-strip {
