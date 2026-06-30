@@ -222,6 +222,43 @@
   color: var(--money-positive);
 }
 
+.cash-timing-card {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.cash-timing-copy {
+  display: grid;
+  gap: 5px;
+}
+
+.cash-timing-label {
+  color: rgba(247, 247, 251, 0.86);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.cash-timing-copy p {
+  margin: 0;
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.8rem;
+  line-height: 1.34;
+}
+
+.cash-timing-placeholder {
+  min-height: 72px;
+  border: 1px dashed rgba(255, 255, 255, 0.13);
+  border-radius: 16px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.035));
+}
+
 @media (min-width: 760px) {
   .monthly-planning-section {
     margin-top: 24px;
@@ -268,5 +305,14 @@
   .monthly-summary-item {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .cash-timing-card {
+    grid-template-columns: minmax(0, 0.8fr) minmax(280px, 1fr);
+    align-items: center;
+  }
+
+  .cash-timing-placeholder {
+    min-height: 88px;
   }
 }
