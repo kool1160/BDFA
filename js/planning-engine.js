@@ -21,6 +21,7 @@ export const PlanningEngine = {
   buildPlanningState,
   calculateAvailableCash,
   calculateRunningBalance,
+  calculateMonthlyCashFlow,
   calculatePlanningSummary,
 };
 
@@ -91,10 +92,26 @@ export function calculateRunningBalance(financialModel = {}, startingBalance = 0
   const normalizedStartingBalance = Number.isFinite(startingBalance)
     ? startingBalance
     : 0;
+
+  return normalizedStartingBalance + calculateMonthlyCashFlow(financialModel);
+}
+
+/**
+ * Calculate monthly cash flow from recurring monthly inflows and outflows.
+ *
+ * Current scope:
+ * - Add all recurring income amounts.
+ * - Subtract all recurring bill amounts.
+ * - Treat missing collections as empty arrays.
+ *
+ * @param {object} financialModel - Unified Financial Model input.
+ * @returns {number} Monthly cash flow amount.
+ */
+export function calculateMonthlyCashFlow(financialModel = {}) {
   const recurringIncomeTotal = sumAmounts(financialModel.recurringIncome, 'amount');
   const recurringBillsTotal = sumAmounts(financialModel.recurringBills, 'amount');
 
-  return normalizedStartingBalance + recurringIncomeTotal - recurringBillsTotal;
+  return recurringIncomeTotal - recurringBillsTotal;
 }
 
 /**
@@ -106,7 +123,7 @@ export function calculateRunningBalance(financialModel = {}, startingBalance = 0
  */
 export function calculatePlanningSummary(financialModel = {}) {
   const availableCash = calculateAvailableCash(financialModel);
-  const monthlyCashFlow = calculateRunningBalance(financialModel);
+  const monthlyCashFlow = calculateMonthlyCashFlow(financialModel);
   const runningBalance = calculateRunningBalance(financialModel, availableCash);
 
   return {
