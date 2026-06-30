@@ -1,70 +1,128 @@
+import { buildUnifiedFinancialModel } from './unified-model-builder.js';
+
 /**
  * BDFA Mock Data Bridge
  *
  * This module is a temporary architectural seam between the current local mock
- * dashboard data and future Planning Engine work.
+ * dashboard data and Planning Engine work.
  *
- * Its future purpose is to translate the existing mock app data shape into the
- * Unified Financial Model so Planning, Forecast, and Decision engines can be
- * developed against one shared model before real provider or manual data flows
- * are introduced.
+ * Its purpose is to translate the existing mock app data shape into the Unified
+ * Financial Model so Planning, Forecast, and Decision engines can be developed
+ * against one shared model before real provider or manual data flows are
+ * introduced.
  *
- * Current rules for this bridge:
- * - No implementation.
+ * Current implementation scope:
+ * - Source-data mapping only.
+ * - No derived values.
  * - No calculations.
  * - No mock data duplication.
  * - No DOM access.
- * - No imports.
  * - No application wiring.
  * - No backend, authentication, API, Plaid, or bank integration logic.
  */
 
 /**
- * Build a future Unified Financial Model from current local mock dashboard data.
+ * Build a Unified Financial Model from current local mock dashboard data.
  *
- * @param {object} mockData - Future current mock dashboard data input.
- * @returns {undefined} Placeholder only.
+ * @param {object} mockData - Current mock dashboard data input.
+ * @returns {object} Unified Financial Model populated with source-data sections.
  */
-export function buildUnifiedModelFromMockData(mockData) {
-  void mockData;
+export function buildUnifiedModelFromMockData(mockData = {}) {
+  return buildUnifiedFinancialModel({
+    accounts: mapMockAccounts(mockData.accounts),
+    recurringBills: mapMockBills(mockData.bills),
+    recurringIncome: mapMockIncome(mockData.recurringIncome || mockData.income),
+    investments: mapMockInvestments(mockData.investments),
+    allocations: mapMockAllocations(mockData.allocations),
+  });
 }
 
 /**
- * Map current mock account records into the future Unified Financial Model shape.
+ * Map current mock account records into the Unified Financial Model source shape.
  *
- * @param {Array<object>} mockAccounts - Future mock account records.
- * @returns {undefined} Placeholder only.
+ * @param {Array<object>} mockAccounts - Current mock account records.
+ * @returns {Array<object>} Normalized account source records.
  */
-export function mapMockAccounts(mockAccounts) {
-  void mockAccounts;
+export function mapMockAccounts(mockAccounts = []) {
+  return toArray(mockAccounts).map(account => ({
+    id: account.id,
+    name: account.name,
+    type: account.type,
+    balance: account.amount,
+    source: 'mock-dashboard',
+  }));
 }
 
 /**
- * Map current mock bill records into the future Unified Financial Model shape.
+ * Map current mock bill records into the Unified Financial Model source shape.
  *
- * @param {Array<object>} mockBills - Future mock bill records.
- * @returns {undefined} Placeholder only.
+ * @param {Array<object>} mockBills - Current mock bill records.
+ * @returns {Array<object>} Normalized recurring bill source records.
  */
-export function mapMockBills(mockBills) {
-  void mockBills;
+export function mapMockBills(mockBills = []) {
+  return toArray(mockBills).map(bill => ({
+    id: bill.id,
+    name: bill.name,
+    detail: bill.detail,
+    amount: bill.amount,
+    frequency: bill.frequency,
+    source: 'mock-dashboard',
+  }));
 }
 
 /**
- * Map current mock allocation records into the future Unified Financial Model shape.
+ * Map current mock income records into the Unified Financial Model source shape.
  *
- * @param {Array<object>} mockAllocations - Future mock allocation records.
- * @returns {undefined} Placeholder only.
+ * The current dashboard data does not yet include an income collection, so this
+ * returns an empty section unless future mock income data is provided.
+ *
+ * @param {Array<object>} mockIncome - Current mock income records.
+ * @returns {Array<object>} Normalized recurring income source records.
  */
-export function mapMockAllocations(mockAllocations) {
-  void mockAllocations;
+export function mapMockIncome(mockIncome = []) {
+  return toArray(mockIncome).map(income => ({
+    id: income.id,
+    name: income.name,
+    detail: income.detail,
+    amount: income.amount,
+    frequency: income.frequency,
+    source: 'mock-dashboard',
+  }));
 }
 
 /**
- * Map current mock investment records into the future Unified Financial Model shape.
+ * Map current mock allocation records into the Unified Financial Model source shape.
  *
- * @param {Array<object>} mockInvestments - Future mock investment records.
- * @returns {undefined} Placeholder only.
+ * @param {Array<object>} mockAllocations - Current mock allocation records.
+ * @returns {Array<object>} Normalized allocation source records.
  */
-export function mapMockInvestments(mockInvestments) {
-  void mockInvestments;
+export function mapMockAllocations(mockAllocations = []) {
+  return toArray(mockAllocations).map(allocation => ({
+    id: allocation.id,
+    name: allocation.name,
+    detail: allocation.detail,
+    amount: allocation.amount,
+    targetAmount: allocation.targetAmount,
+    source: 'mock-dashboard',
+  }));
+}
+
+/**
+ * Map current mock investment records into the Unified Financial Model source shape.
+ *
+ * @param {Array<object>} mockInvestments - Current mock investment records.
+ * @returns {Array<object>} Normalized investment source records.
+ */
+export function mapMockInvestments(mockInvestments = []) {
+  return toArray(mockInvestments).map(investment => ({
+    id: investment.id,
+    name: investment.name,
+    detail: investment.detail,
+    balance: investment.amount,
+    source: 'mock-dashboard',
+  }));
+}
+
+function toArray(value) {
+  return Array.isArray(value) ? value : [];
 }
