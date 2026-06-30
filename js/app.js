@@ -683,12 +683,20 @@ function saveCollapsedPanels() {
   localStorage.setItem(panelStateStorageKey, JSON.stringify(collapsedPanels));
 }
 
+function syncPanelToggleAriaState(button) {
+  const panel = button.closest('.panel');
+  const body = panel.querySelector('.panel-body');
+  const isExpanded = !body.hidden;
+
+  button.setAttribute('aria-expanded', String(isExpanded));
+
+  if (body.id) {
+    button.setAttribute('aria-controls', body.id);
+  }
+}
+
 function applySavedPanelState() {
   const collapsedPanels = getSavedCollapsedPanels();
-
-  if (!collapsedPanels.length) {
-    return;
-  }
 
   document.querySelectorAll('[data-toggle]').forEach(button => {
     const panel = button.closest('.panel');
@@ -697,6 +705,7 @@ function applySavedPanelState() {
 
     panel.classList.toggle('collapsed', shouldCollapse);
     body.hidden = shouldCollapse;
+    syncPanelToggleAriaState(button);
   });
 }
 
@@ -868,6 +877,7 @@ document.querySelectorAll('[data-toggle]').forEach(button => {
     panel.classList.toggle('collapsed');
     const body = panel.querySelector('.panel-body');
     body.hidden = !body.hidden;
+    syncPanelToggleAriaState(button);
     saveCollapsedPanels();
   });
 });
