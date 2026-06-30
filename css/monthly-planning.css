@@ -105,6 +105,15 @@
   line-height: 1;
 }
 
+.monthly-planning-empty {
+  margin: 14px 0 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.075);
+  padding-top: 12px;
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.78rem;
+  line-height: 1.36;
+}
+
 @media (min-width: 760px) {
   .monthly-planning-section {
     margin-top: 24px;
