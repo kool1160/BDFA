@@ -75,26 +75,52 @@
 }
 
 .bill-date-chip-list {
+  position: relative;
   display: flex;
-  gap: 8px;
+  align-items: stretch;
+  gap: 10px;
   overflow-x: auto;
-  padding-bottom: 2px;
+  margin: 0 -4px;
+  padding: 8px 4px 10px;
+  scroll-snap-type: x proximity;
+}
+
+.bill-date-chip-list::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  left: 4px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.04));
+  transform: translateY(-50%);
 }
 
 .bill-date-chip {
-  flex: 0 0 auto;
-  min-width: 72px;
+  position: relative;
+  z-index: 1;
+  flex: 0 0 84px;
   display: grid;
-  gap: 5px;
+  place-items: center;
+  gap: 6px;
+  scroll-snap-align: start;
   border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 16px;
-  padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.045);
+  border-radius: 18px;
+  padding: 12px 10px;
+  background: rgba(14, 14, 18, 0.9);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+  text-align: center;
+}
+
+.bill-date-chip:first-child {
+  border-color: rgba(76, 217, 100, 0.32);
+  background: linear-gradient(145deg, rgba(76, 217, 100, 0.16), rgba(255, 255, 255, 0.05));
+  box-shadow: 0 12px 30px rgba(76, 217, 100, 0.1), 0 12px 26px rgba(0, 0, 0, 0.2);
 }
 
 .bill-date-chip strong {
   color: rgba(247, 247, 251, 0.9);
-  font-size: 1.02rem;
+  font-size: 1.08rem;
   line-height: 1;
 }
 
@@ -103,6 +129,11 @@
   font-size: 0.72rem;
   font-weight: 750;
   line-height: 1;
+}
+
+.bill-date-chip:first-child strong,
+.bill-date-chip:first-child span {
+  color: rgba(247, 247, 251, 0.96);
 }
 
 .monthly-planning-empty {
@@ -176,6 +207,17 @@
 
   .bill-calendar-strip {
     align-items: center;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) minmax(340px, auto);
+  }
+
+  .bill-date-chip-list {
+    justify-content: flex-end;
+    margin: 0;
+    padding-inline: 0;
+  }
+
+  .bill-date-chip-list::before {
+    right: 0;
+    left: 0;
   }
 }
