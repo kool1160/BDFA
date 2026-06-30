@@ -1,17 +1,24 @@
+import { buildUnifiedModelFromMockData } from './mock-data-bridge.js';
+
 /**
  * BDFA Financial Engine Pipeline
  *
- * This module will eventually coordinate BDFA's reusable financial engines from
- * one deterministic execution flow.
+ * This module coordinates BDFA's reusable financial engines from one
+ * deterministic execution flow.
  *
  * Pipeline execution should remain deterministic and side-effect free: given the
- * same validated Unified Financial Model, it should return the same derived
- * outputs without mutating source data, touching the DOM, performing network
- * calls, or writing to storage.
+ * same input data, it should return the same Planning State-compatible object
+ * without mutating source data, touching the DOM, performing network calls, or
+ * writing to storage.
  *
- * This file intentionally contains documentation and exported function stubs
- * only. It has no implementation, calculations, mock data, imports, or
- * application wiring.
+ * Current implementation scope:
+ * - Build a Unified Financial Model from supplied mock data.
+ * - Return empty planning, forecast, and decision output containers.
+ * - No planning calculations.
+ * - No forecasting calculations.
+ * - No decision calculations.
+ * - No DOM access.
+ * - No application wiring.
  */
 
 /**
@@ -26,43 +33,63 @@
  */
 
 /**
- * Run the full future financial engine pipeline.
+ * Run the financial engine pipeline against supplied mock data.
  *
- * @param {object} sourceData - Future source data input.
- * @returns {undefined} Placeholder only.
+ * @param {object} mockData - Current mock dashboard data input.
+ * @returns {object} Planning State-compatible output.
  */
-export function runFinancialPipeline(sourceData) {
-  void sourceData;
+export function runFinancialPipeline(mockData = {}) {
+  const financialModel = buildUnifiedModelFromMockData(mockData);
+  const planningOutputs = runPlanningEngine(financialModel);
+  const forecastOutputs = runForecastEngine(planningOutputs);
+  const decisionOutputs = runDecisionEngine(planningOutputs, forecastOutputs);
+
+  return {
+    financialModel,
+    planningOutputs,
+    forecastOutputs,
+    decisionOutputs,
+    metadata: {
+      source: 'mock-dashboard',
+      pipelineVersion: 'phase-2-skeleton',
+    },
+  };
 }
 
 /**
- * Run the future Planning Engine step.
+ * Run the Planning Engine step.
  *
- * @param {object} unifiedModel - Future validated Unified Financial Model input.
- * @returns {undefined} Placeholder only.
+ * @param {object} unifiedModel - Unified Financial Model input.
+ * @returns {object} Empty planning output container.
  */
 export function runPlanningEngine(unifiedModel) {
   void unifiedModel;
+
+  return {};
 }
 
 /**
- * Run the future Forecast Engine step.
+ * Run the Forecast Engine step.
  *
- * @param {object} planningOutputs - Future Planning Engine outputs.
- * @returns {undefined} Placeholder only.
+ * @param {object} planningOutputs - Planning Engine outputs.
+ * @returns {object} Empty forecast output container.
  */
 export function runForecastEngine(planningOutputs) {
   void planningOutputs;
+
+  return {};
 }
 
 /**
- * Run the future Decision Engine step.
+ * Run the Decision Engine step.
  *
- * @param {object} planningOutputs - Future Planning Engine outputs.
- * @param {object} forecastOutputs - Future Forecast Engine outputs.
- * @returns {undefined} Placeholder only.
+ * @param {object} planningOutputs - Planning Engine outputs.
+ * @param {object} forecastOutputs - Forecast Engine outputs.
+ * @returns {object} Empty decision output container.
  */
 export function runDecisionEngine(planningOutputs, forecastOutputs) {
   void planningOutputs;
   void forecastOutputs;
+
+  return {};
 }
