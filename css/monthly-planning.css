@@ -114,6 +114,43 @@
   line-height: 1.36;
 }
 
+.monthly-income-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 18px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.monthly-income-row div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.monthly-income-row span {
+  color: rgba(247, 247, 251, 0.88);
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.monthly-income-row p {
+  margin: 0;
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.74rem;
+  line-height: 1.3;
+}
+
+.monthly-income-row strong {
+  color: var(--money-positive);
+  font-size: 0.96rem;
+  white-space: nowrap;
+}
+
 @media (min-width: 760px) {
   .monthly-planning-section {
     margin-top: 24px;
