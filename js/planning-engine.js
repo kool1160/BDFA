@@ -80,7 +80,7 @@ export function calculateAvailableCash(financialModel = {}) {
  *
  * Current scope:
  * - Begin with the supplied starting balance.
- * - Add all recurring income amounts.
+ * - Add recurring income amounts normalized to monthly equivalents.
  * - Subtract recurring bill amounts normalized to monthly equivalents.
  * - Treat missing collections as empty arrays.
  *
@@ -100,7 +100,7 @@ export function calculateRunningBalance(financialModel = {}, startingBalance = 0
  * Calculate monthly cash flow from recurring monthly inflows and outflows.
  *
  * Current scope:
- * - Add all recurring income amounts.
+ * - Add recurring income amounts normalized to monthly equivalents.
  * - Subtract recurring bill amounts normalized to monthly equivalents.
  * - Treat missing collections as empty arrays.
  *
@@ -108,8 +108,8 @@ export function calculateRunningBalance(financialModel = {}, startingBalance = 0
  * @returns {number} Monthly cash flow amount.
  */
 export function calculateMonthlyCashFlow(financialModel = {}) {
-  const recurringIncomeTotal = sumAmounts(financialModel.recurringIncome, 'amount');
-  const recurringBillsTotal = sumMonthlyBillAmounts(financialModel.recurringBills);
+  const recurringIncomeTotal = sumMonthlyAmounts(financialModel.recurringIncome);
+  const recurringBillsTotal = sumMonthlyAmounts(financialModel.recurringBills);
 
   return recurringIncomeTotal - recurringBillsTotal;
 }
@@ -173,13 +173,13 @@ function sumAmounts(rows, amountKey) {
     : 0;
 }
 
-function sumMonthlyBillAmounts(rows) {
+function sumMonthlyAmounts(rows) {
   return Array.isArray(rows)
-    ? rows.reduce((sum, row) => sum + getMonthlyBillAmount(row), 0)
+    ? rows.reduce((sum, row) => sum + getMonthlyAmount(row), 0)
     : 0;
 }
 
-function getMonthlyBillAmount(row) {
+function getMonthlyAmount(row) {
   return getNumericAmount(row, 'amount')
     * getMonthlyFrequencyMultiplier(row?.frequency);
 }
