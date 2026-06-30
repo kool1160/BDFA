@@ -235,6 +235,16 @@
   color: rgba(218, 143, 255, 0.95);
 }
 
+.income-event-marker {
+  background: rgba(76, 217, 100, 0.13);
+  color: rgba(76, 217, 100, 0.96);
+}
+
+.income-event-side {
+  background: rgba(48, 209, 88, 0.1);
+  color: rgba(93, 230, 124, 0.95);
+}
+
 .bill-calendar-strip {
   display: grid;
   gap: 14px;
