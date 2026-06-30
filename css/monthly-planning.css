@@ -137,6 +137,54 @@
   text-transform: uppercase;
 }
 
+.daily-date-strip {
+  display: grid;
+  grid-auto-columns: minmax(58px, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  overflow-x: auto;
+  margin: -4px -2px 16px;
+  padding: 4px 2px 10px;
+  scroll-snap-type: x proximity;
+}
+
+.daily-date-strip span {
+  display: grid;
+  place-items: center;
+  gap: 5px;
+  min-width: 58px;
+  scroll-snap-align: start;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 9px 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.daily-date-strip small {
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.66rem;
+  font-weight: 850;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.daily-date-strip strong {
+  color: rgba(247, 247, 251, 0.9);
+  font-size: 0.98rem;
+  line-height: 1;
+}
+
+.daily-date-strip .daily-date-today {
+  border-color: rgba(76, 217, 100, 0.32);
+  background: linear-gradient(145deg, rgba(76, 217, 100, 0.16), rgba(255, 255, 255, 0.045));
+  box-shadow: 0 12px 24px rgba(76, 217, 100, 0.08);
+}
+
+.daily-date-strip .daily-date-today small,
+.daily-date-strip .daily-date-today strong {
+  color: rgba(247, 247, 251, 0.96);
+}
+
 .bill-calendar-strip {
   display: grid;
   gap: 14px;
@@ -458,6 +506,17 @@
 
   .weekly-marker-today em {
     font-size: 0.64rem;
+  }
+
+  .daily-date-strip {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-flow: initial;
+    margin-bottom: 18px;
+    overflow-x: visible;
+  }
+
+  .daily-date-strip span {
+    min-width: 0;
   }
 
   .bill-calendar-strip {
