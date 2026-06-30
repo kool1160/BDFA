@@ -245,6 +245,31 @@
   color: rgba(93, 230, 124, 0.95);
 }
 
+.running-balance-row {
+  display: grid;
+  grid-auto-columns: minmax(58px, 1fr);
+  grid-auto-flow: column;
+  gap: 8px;
+  overflow-x: auto;
+  margin: -8px -2px 16px;
+  padding: 0 2px 10px;
+  scroll-snap-type: x proximity;
+}
+
+.running-balance-row span {
+  min-width: 58px;
+  scroll-snap-align: start;
+  border: 1px solid rgba(76, 217, 100, 0.16);
+  border-radius: 999px;
+  padding: 6px 7px;
+  background: rgba(76, 217, 100, 0.07);
+  color: var(--money-positive);
+  font-size: 0.66rem;
+  font-weight: 850;
+  text-align: center;
+  white-space: nowrap;
+}
+
 .bill-calendar-strip {
   display: grid;
   gap: 14px;
@@ -576,6 +601,17 @@
   }
 
   .daily-date-strip span {
+    min-width: 0;
+  }
+
+  .running-balance-row {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-auto-flow: initial;
+    margin-bottom: 18px;
+    overflow-x: visible;
+  }
+
+  .running-balance-row span {
     min-width: 0;
   }
 
