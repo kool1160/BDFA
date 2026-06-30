@@ -15,3 +15,7 @@ export * from './unified-financial-model.js';
 export * from './source-data-adapters.js';
 export * from './financial-model-validator.js';
 export * from './derived-output-contracts.js';
+export * from './mock-data-bridge.js';
+export * from './unified-model-builder.js';
+export * from './financial-engine-pipeline.js';
+export * from './planning-state.js';
