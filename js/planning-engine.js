@@ -4,7 +4,7 @@
  * This module is the home for BDFA's reusable planning architecture.
  *
  * Current implementation scope:
- * - First deterministic Planning Engine calculation only.
+ * - Deterministic Planning Engine calculations only.
  * - No mock data.
  * - No DOM access.
  * - No application wiring.
@@ -20,6 +20,8 @@
 export const PlanningEngine = {
   buildPlanningState,
   calculateAvailableCash,
+  calculateRunningBalance,
+  calculatePlanningSummary,
 };
 
 /**
@@ -69,6 +71,49 @@ export function calculateAvailableCash(financialModel = {}) {
   const recurringBillsTotal = sumAmounts(financialModel.recurringBills, 'amount');
 
   return accountTotal - recurringBillsTotal;
+}
+
+/**
+ * Calculate the running balance after applying recurring monthly inflows and
+ * outflows to a starting balance.
+ *
+ * Current scope:
+ * - Begin with the supplied starting balance.
+ * - Add all recurring income amounts.
+ * - Subtract all recurring bill amounts.
+ * - Treat missing collections as empty arrays.
+ *
+ * @param {object} financialModel - Unified Financial Model input.
+ * @param {number} startingBalance - Starting balance before recurring activity.
+ * @returns {number} Running balance amount.
+ */
+export function calculateRunningBalance(financialModel = {}, startingBalance = 0) {
+  const normalizedStartingBalance = Number.isFinite(startingBalance)
+    ? startingBalance
+    : 0;
+  const recurringIncomeTotal = sumAmounts(financialModel.recurringIncome, 'amount');
+  const recurringBillsTotal = sumAmounts(financialModel.recurringBills, 'amount');
+
+  return normalizedStartingBalance + recurringIncomeTotal - recurringBillsTotal;
+}
+
+/**
+ * Calculate the reusable Planning Engine summary from the Unified Financial
+ * Model.
+ *
+ * @param {object} financialModel - Unified Financial Model input.
+ * @returns {object} Planning summary outputs.
+ */
+export function calculatePlanningSummary(financialModel = {}) {
+  const availableCash = calculateAvailableCash(financialModel);
+  const monthlyCashFlow = calculateRunningBalance(financialModel);
+  const runningBalance = calculateRunningBalance(financialModel, availableCash);
+
+  return {
+    availableCash,
+    monthlyCashFlow,
+    runningBalance,
+  };
 }
 
 /**
