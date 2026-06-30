@@ -185,6 +185,56 @@
   color: rgba(247, 247, 251, 0.96);
 }
 
+.daily-date-strip .day-events {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.bill-event-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-width: 0;
+  border-radius: 999px;
+  padding: 3px 5px;
+  color: rgba(247, 247, 251, 0.88);
+  font-size: 0.56rem;
+  font-weight: 850;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.bill-event-marker::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.bill-event-rent {
+  background: rgba(100, 210, 255, 0.12);
+  color: rgba(100, 210, 255, 0.95);
+}
+
+.bill-event-electric {
+  background: rgba(255, 204, 0, 0.12);
+  color: rgba(255, 214, 10, 0.95);
+}
+
+.bill-event-phone {
+  background: rgba(191, 90, 242, 0.13);
+  color: rgba(218, 143, 255, 0.95);
+}
+
 .bill-calendar-strip {
   display: grid;
   gap: 14px;
