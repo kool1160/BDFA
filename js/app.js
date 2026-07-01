@@ -869,15 +869,4 @@ document.getElementById('investmentCancel').addEventListener('click', resetInves
 document.getElementById('investmentsList').addEventListener('click', handleInvestmentActions);
 document.getElementById('importDemoData').addEventListener('change', importDemoData);
 document.getElementById('exportDemoData').addEventListener('click', exportDemoData);
-document.getElementById('resetDemoData').addEventListener('click', resetDemoData);
-
-document.querySelectorAll('[data-toggle]').forEach(button => {
-  button.addEventListener('click', () => {
-    const panel = button.closest('.panel');
-    panel.classList.toggle('collapsed');
-    const body = panel.querySelector('.panel-body');
-    body.hidden = !body.hidden;
-    syncPanelToggleAriaState(button);
-    saveCollapsedPanels();
-  });
-});
+document.getElementById('resetButton').addEventListener('click', resetDemoData);
