@@ -61,7 +61,7 @@ export function buildPlanningState(sourceData) {
  *
  * Current Phase 2 scope:
  * - Sum all account balances.
- * - Subtract all recurring bill amounts.
+ * - Subtract recurring bill amounts normalized to monthly equivalents.
  * - Ignore investments, goals, forecasting, and allocations for now.
  *
  * @param {object} financialModel - Unified Financial Model input.
@@ -69,7 +69,7 @@ export function buildPlanningState(sourceData) {
  */
 export function calculateAvailableCash(financialModel = {}) {
   const accountTotal = sumAmounts(financialModel.accounts, 'balance');
-  const recurringBillsTotal = sumAmounts(financialModel.recurringBills, 'amount');
+  const recurringBillsTotal = sumMonthlyAmounts(financialModel.recurringBills);
 
   return accountTotal - recurringBillsTotal;
 }
@@ -122,9 +122,10 @@ export function calculateMonthlyCashFlow(financialModel = {}) {
  * @returns {object} Planning summary outputs.
  */
 export function calculatePlanningSummary(financialModel = {}) {
+  const accountTotal = sumAmounts(financialModel.accounts, 'balance');
   const availableCash = calculateAvailableCash(financialModel);
   const monthlyCashFlow = calculateMonthlyCashFlow(financialModel);
-  const runningBalance = calculateRunningBalance(financialModel, availableCash);
+  const runningBalance = calculateRunningBalance(financialModel, accountTotal);
 
   return {
     availableCash,
