@@ -50,6 +50,35 @@ const demoData = {
 
 const data = structuredClone(demoData);
 
+window.BDFA = window.BDFA || {};
+
+function deepFreeze(value) {
+  if (!value || typeof value !== 'object') {
+    return value;
+  }
+
+  Object.freeze(value);
+
+  Object.values(value).forEach(childValue => {
+    if (childValue && typeof childValue === 'object' && !Object.isFrozen(childValue)) {
+      deepFreeze(childValue);
+    }
+  });
+
+  return value;
+}
+
+function getSourceData() {
+  return deepFreeze(structuredClone({
+    accounts: data.accounts,
+    bills: data.bills,
+    allocations: data.allocations,
+    investments: data.investments
+  }));
+}
+
+window.BDFA.getSourceData = getSourceData;
+
 function total(rows) {
   return rows.reduce((sum, row) => sum + row.amount, 0);
 }
