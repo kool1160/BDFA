@@ -68,7 +68,7 @@ function deepFreeze(value) {
   return value;
 }
 
-function getRuntimeSourceData() {
+function getSourceData() {
   return deepFreeze(structuredClone({
     accounts: data.accounts,
     bills: data.bills,
@@ -79,7 +79,7 @@ function getRuntimeSourceData() {
   }));
 }
 
-window.BDFA.getRuntimeSourceData = getRuntimeSourceData;
+window.BDFA.getSourceData = getSourceData;
 
 function total(rows) {
   return rows.reduce((sum, row) => sum + row.amount, 0);
