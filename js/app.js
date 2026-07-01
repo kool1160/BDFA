@@ -769,34 +769,33 @@ function applyImportedData(importedData) {
   renderAllSections();
 }
 
-function importDemoData(event) {
-  const [file] = event.target.files;
+function importDemoData() {
+  const importField = document.getElementById('importData');
+  const rawImport = importField ? importField.value.trim() : '';
 
-  if (!file) {
+  if (!rawImport) {
+    showStatus('Import failed. Paste exported BDFA JSON before importing.', 'error');
     return;
   }
 
-  const reader = new FileReader();
+  try {
+    const importedData = JSON.parse(rawImport);
 
-  reader.addEventListener('load', () => {
-    try {
-      const importedData = JSON.parse(reader.result);
-
-      if (!isValidImport(importedData)) {
-        showStatus('Import failed. That JSON file does not match the BDFA demo format.', 'error');
-        return;
-      }
-
-      applyImportedData(importedData);
-      showStatus('Demo data imported successfully.');
-    } catch {
-      showStatus('Import failed. That file could not be read as valid JSON.', 'error');
-    } finally {
-      event.target.value = '';
+    if (!isValidImport(importedData)) {
+      showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
+      return;
     }
-  });
 
-  reader.readAsText(file);
+    applyImportedData(importedData);
+
+    if (importField) {
+      importField.value = '';
+    }
+
+    showStatus('Demo data imported successfully.');
+  } catch {
+    showStatus('Import failed. That text could not be read as valid JSON.', 'error');
+  }
 }
 
 function getExportData() {
@@ -809,7 +808,14 @@ function getExportData() {
 }
 
 function exportDemoData() {
-  const blob = new Blob([JSON.stringify(getExportData(), null, 2)], { type: 'application/json' });
+  const exportedJson = JSON.stringify(getExportData(), null, 2);
+  const exportField = document.getElementById('exportData');
+
+  if (exportField) {
+    exportField.value = exportedJson;
+  }
+
+  const blob = new Blob([exportedJson], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
 
@@ -855,29 +861,46 @@ loadStoredRows(investmentStorageKey, 'investments');
 renderAllSections();
 applySavedPanelState();
 
-document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
-document.getElementById('accountCancel').addEventListener('click', resetAccountForm);
-document.getElementById('accountsList').addEventListener('click', handleAccountActions);
-document.getElementById('billForm').addEventListener('submit', handleBillSubmit);
-document.getElementById('billCancel').addEventListener('click', resetBillForm);
-document.getElementById('billsList').addEventListener('click', handleBillActions);
-document.getElementById('allocationForm').addEventListener('submit', handleAllocationSubmit);
-document.getElementById('allocationCancel').addEventListener('click', resetAllocationForm);
-document.getElementById('allocationsList').addEventListener('click', handleAllocationActions);
-document.getElementById('investmentForm').addEventListener('submit', handleInvestmentSubmit);
-document.getElementById('investmentCancel').addEventListener('click', resetInvestmentForm);
-document.getElementById('investmentsList').addEventListener('click', handleInvestmentActions);
-document.getElementById('importDemoData').addEventListener('change', importDemoData);
-document.getElementById('exportDemoData').addEventListener('click', exportDemoData);
-document.getElementById('resetDemoData').addEventListener('click', resetDemoData);
+function addOptionalEventListener(id, eventName, handler, options) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.addEventListener(eventName, handler, options);
+  }
+}
+
+function togglePanel(button) {
+  const panel = button.closest('.panel');
+  const body = panel ? panel.querySelector('.panel-body') : null;
+
+  if (!panel || !body) {
+    return;
+  }
+
+  const shouldCollapse = !body.hidden;
+
+  panel.classList.toggle('collapsed', shouldCollapse);
+  body.hidden = shouldCollapse;
+  syncPanelToggleAriaState(button);
+  saveCollapsedPanels();
+}
+
+addOptionalEventListener('accountForm', 'submit', handleAccountSubmit);
+addOptionalEventListener('accountCancel', 'click', resetAccountForm);
+addOptionalEventListener('accountsList', 'click', handleAccountActions);
+addOptionalEventListener('billForm', 'submit', handleBillSubmit);
+addOptionalEventListener('billCancel', 'click', resetBillForm);
+addOptionalEventListener('billsList', 'click', handleBillActions);
+addOptionalEventListener('allocationForm', 'submit', handleAllocationSubmit);
+addOptionalEventListener('allocationCancel', 'click', resetAllocationForm);
+addOptionalEventListener('allocationsList', 'click', handleAllocationActions);
+addOptionalEventListener('investmentForm', 'submit', handleInvestmentSubmit);
+addOptionalEventListener('investmentCancel', 'click', resetInvestmentForm);
+addOptionalEventListener('investmentsList', 'click', handleInvestmentActions);
+addOptionalEventListener('importButton', 'click', importDemoData);
+addOptionalEventListener('exportButton', 'click', exportDemoData);
+addOptionalEventListener('resetButton', 'click', resetDemoData);
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
-  button.addEventListener('click', () => {
-    const panel = button.closest('.panel');
-    panel.classList.toggle('collapsed');
-    const body = panel.querySelector('.panel-body');
-    body.hidden = !body.hidden;
-    syncPanelToggleAriaState(button);
-    saveCollapsedPanels();
-  });
+  button.addEventListener('click', () => togglePanel(button));
 });
