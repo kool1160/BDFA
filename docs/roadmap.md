@@ -29,3 +29,7 @@
 - Add AI assistant
 - Ask questions about affordability, savings, investments, and allocation
 - Explain why Available to Allocate changed
+
+## Current engine wiring status
+
+The reusable financial engine files are ES modules that exist as architecture foundations, but they are not currently loaded by the static dashboard. Future wiring should use `type="module"` or an equivalent module-aware approach when a scoped engine-integration task connects them.
