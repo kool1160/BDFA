@@ -769,6 +769,30 @@ function applyImportedData(importedData) {
   renderAllSections();
 }
 
+function importDemoDataText() {
+  const importField = document.getElementById('importData');
+  const importValue = importField ? importField.value.trim() : '';
+
+  if (!importValue) {
+    showStatus('Import failed. Paste exported BDFA JSON first.', 'error');
+    return;
+  }
+
+  try {
+    const importedData = JSON.parse(importValue);
+
+    if (!isValidImport(importedData)) {
+      showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
+      return;
+    }
+
+    applyImportedData(importedData);
+    showStatus('Demo data imported successfully.');
+  } catch {
+    showStatus('Import failed. That text could not be read as valid JSON.', 'error');
+  }
+}
+
 function importDemoData(event) {
   const [file] = event.target.files;
 
@@ -809,9 +833,15 @@ function getExportData() {
 }
 
 function exportDemoData() {
-  const blob = new Blob([JSON.stringify(getExportData(), null, 2)], { type: 'application/json' });
+  const exportValue = JSON.stringify(getExportData(), null, 2);
+  const exportField = document.getElementById('exportData');
+  const blob = new Blob([exportValue], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
+
+  if (exportField) {
+    exportField.value = exportValue;
+  }
 
   link.href = url;
   link.download = 'bdfa-demo-data.json';
@@ -855,18 +885,27 @@ loadStoredRows(investmentStorageKey, 'investments');
 renderAllSections();
 applySavedPanelState();
 
-document.getElementById('accountForm').addEventListener('submit', handleAccountSubmit);
-document.getElementById('accountCancel').addEventListener('click', resetAccountForm);
-document.getElementById('accountsList').addEventListener('click', handleAccountActions);
-document.getElementById('billForm').addEventListener('submit', handleBillSubmit);
-document.getElementById('billCancel').addEventListener('click', resetBillForm);
-document.getElementById('billsList').addEventListener('click', handleBillActions);
-document.getElementById('allocationForm').addEventListener('submit', handleAllocationSubmit);
-document.getElementById('allocationCancel').addEventListener('click', resetAllocationForm);
-document.getElementById('allocationsList').addEventListener('click', handleAllocationActions);
-document.getElementById('investmentForm').addEventListener('submit', handleInvestmentSubmit);
-document.getElementById('investmentCancel').addEventListener('click', resetInvestmentForm);
-document.getElementById('investmentsList').addEventListener('click', handleInvestmentActions);
-document.getElementById('importDemoData').addEventListener('change', importDemoData);
-document.getElementById('exportDemoData').addEventListener('click', exportDemoData);
-document.getElementById('resetButton').addEventListener('click', resetDemoData);
+function addElementListener(id, eventName, handler, options) {
+  const element = document.getElementById(id);
+
+  if (element) {
+    element.addEventListener(eventName, handler, options);
+  }
+}
+
+addElementListener('accountForm', 'submit', handleAccountSubmit);
+addElementListener('accountCancel', 'click', resetAccountForm);
+addElementListener('accountsList', 'click', handleAccountActions);
+addElementListener('billForm', 'submit', handleBillSubmit);
+addElementListener('billCancel', 'click', resetBillForm);
+addElementListener('billsList', 'click', handleBillActions);
+addElementListener('allocationForm', 'submit', handleAllocationSubmit);
+addElementListener('allocationCancel', 'click', resetAllocationForm);
+addElementListener('allocationsList', 'click', handleAllocationActions);
+addElementListener('investmentForm', 'submit', handleInvestmentSubmit);
+addElementListener('investmentCancel', 'click', resetInvestmentForm);
+addElementListener('investmentsList', 'click', handleInvestmentActions);
+addElementListener('importDemoData', 'change', importDemoData);
+addElementListener('importButton', 'click', importDemoDataText);
+addElementListener('exportButton', 'click', exportDemoData);
+addElementListener('resetButton', 'click', resetDemoData);
