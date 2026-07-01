@@ -54,6 +54,15 @@ function total(rows) {
   return rows.reduce((sum, row) => sum + row.amount, 0);
 }
 
+function setMoneyTone(element, amount) {
+  if (!element) {
+    return;
+  }
+
+  element.classList.toggle('money-debt', amount < 0);
+  element.classList.toggle('money-positive', amount >= 0);
+}
+
 function setMoneyText(targetId, amount) {
   const target = document.getElementById(targetId);
 
@@ -203,8 +212,11 @@ function renderDashboardTotals() {
   const totals = getDashboardTotals();
 
   setMoneyText('availableToAllocate', totals.availableToAllocate);
+  setMoneyTone(document.getElementById('availableToAllocate'), totals.availableToAllocate);
   setMoneyText('netWorth', totals.netWorth);
+  setMoneyTone(document.getElementById('netWorth'), totals.netWorth);
   setMoneyText('cashTotal', totals.cash);
+  setMoneyTone(document.getElementById('cashTotal'), totals.cash);
   setMoneyText('investmentTotal', totals.investments);
   setMoneyText('debtTotal', -totals.debt);
   renderSectionSummaries();
