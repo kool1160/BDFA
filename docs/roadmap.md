@@ -29,3 +29,7 @@
 - Add AI assistant
 - Ask questions about affordability, savings, investments, and allocation
 - Explain why Available to Allocate changed
+
+## Current engine wiring status
+
+The reusable financial engine modules exist as architecture foundations, but the static application shell is not yet wired to consume them at runtime. Current dashboard, Monthly Flow, and Analytics rendering continue to use the existing plain JavaScript mock-data flow until a future scoped engine-integration task explicitly connects those modules.
