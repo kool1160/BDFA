@@ -73,9 +73,7 @@ function getSourceData() {
     accounts: data.accounts,
     bills: data.bills,
     allocations: data.allocations,
-    investments: data.investments,
-    recurringIncome: [],
-    goals: []
+    investments: data.investments
   }));
 }
 
