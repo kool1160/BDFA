@@ -386,13 +386,56 @@
   color: rgba(247, 247, 251, 0.96);
 }
 
-.monthly-planning-empty {
+.monthly-flow-bills-list {
+  display: grid;
+  gap: 8px;
   margin: 14px 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.075);
   padding-top: 12px;
+}
+
+.monthly-flow-bill-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.monthly-flow-bill-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.monthly-flow-bill-copy strong {
+  overflow: hidden;
+  color: rgba(247, 247, 251, 0.9);
+  font-size: 0.8rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.monthly-flow-bill-copy span,
+.monthly-flow-bills-empty {
   color: rgba(169, 169, 181, 0.82);
-  font-size: 0.78rem;
-  line-height: 1.36;
+  font-size: 0.74rem;
+  line-height: 1.34;
+}
+
+.monthly-flow-bill-amount {
+  flex: 0 0 auto;
+  color: var(--money-caution);
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.monthly-flow-bills-empty {
+  margin: 0;
 }
 
 .monthly-income-row {
