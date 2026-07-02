@@ -147,6 +147,24 @@ function getMonthlyFlowRemainingBillsThisMonth(bills) {
   }, { count: 0, total: 0 });
 }
 
+function getMonthlyFlowNextBillDue(bills) {
+  const currentDay = getMonthlyFlowCurrentDay();
+
+  return bills.reduce((nextBill, bill) => {
+    const dueDay = getMonthlyFlowBillDueDay(bill);
+
+    if (dueDay === null || dueDay < currentDay) {
+      return nextBill;
+    }
+
+    if (!nextBill || dueDay < nextBill.dueDay) {
+      return { bill, dueDay };
+    }
+
+    return nextBill;
+  }, null);
+}
+
 function renderMonthlyFlowRemainingBillsSummary(bills) {
   const countTarget = document.getElementById('monthlyFlowRemainingBillsCount');
   const totalTarget = document.getElementById('monthlyFlowRemainingBillsTotal');
@@ -161,6 +179,36 @@ function renderMonthlyFlowRemainingBillsSummary(bills) {
   }
 
   return summary;
+}
+
+function renderMonthlyFlowNextBillDue(bills) {
+  const labelTarget = document.getElementById('monthlyFlowNextBillLabel');
+  const detailsTarget = document.getElementById('monthlyFlowNextBillDetails');
+  const nextBillDue = getMonthlyFlowNextBillDue(bills);
+
+  if (!labelTarget && !detailsTarget) {
+    return;
+  }
+
+  if (!nextBillDue) {
+    if (labelTarget) {
+      labelTarget.textContent = 'Next bill due: None this month';
+    }
+
+    if (detailsTarget) {
+      detailsTarget.textContent = 'No remaining dated bills';
+    }
+
+    return;
+  }
+
+  if (labelTarget) {
+    labelTarget.textContent = `Next bill due: ${getMonthlyFlowBillName(nextBillDue.bill)}`;
+  }
+
+  if (detailsTarget) {
+    detailsTarget.textContent = `Due ${nextBillDue.dueDay} · ${getMonthlyFlowBillAmount(nextBillDue.bill)}`;
+  }
 }
 
 function getMonthlyFlowAccountRawAmount(account) {
@@ -308,6 +356,7 @@ function renderMonthlyFlow(sourceData) {
   const estimatedMonthlyBills = renderMonthlyFlowBillSummary(bills);
   const remainingBillsSummary = renderMonthlyFlowRemainingBillsSummary(bills);
 
+  renderMonthlyFlowNextBillDue(bills);
   renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsSummary.total);
 
   if (!target) {
