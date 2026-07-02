@@ -299,6 +299,7 @@ function handleAccountSubmit(event) {
   saveRows(accountStorageKey, data.accounts);
   resetAccountForm();
   renderAccountsDashboard();
+  dispatchSourceDataChanged();
 }
 
 function handleAccountActions(event) {
@@ -325,6 +326,7 @@ function handleAccountActions(event) {
     saveRows(accountStorageKey, data.accounts);
     resetAccountForm();
     renderAccountsDashboard();
+    dispatchSourceDataChanged();
   }
 }
 
@@ -409,6 +411,7 @@ function handleBillSubmit(event) {
   saveRows(billStorageKey, data.bills);
   resetBillForm();
   renderBillsDashboard();
+  dispatchSourceDataChanged();
 }
 
 function handleBillActions(event) {
@@ -436,6 +439,7 @@ function handleBillActions(event) {
     saveRows(billStorageKey, data.bills);
     resetBillForm();
     renderBillsDashboard();
+    dispatchSourceDataChanged();
   }
 }
 
@@ -531,6 +535,7 @@ function handleAllocationSubmit(event) {
   saveRows(allocationStorageKey, data.allocations);
   resetAllocationForm();
   renderAllocationsDashboard();
+  dispatchSourceDataChanged();
 }
 
 function handleAllocationActions(event) {
@@ -558,6 +563,7 @@ function handleAllocationActions(event) {
     saveRows(allocationStorageKey, data.allocations);
     resetAllocationForm();
     renderAllocationsDashboard();
+    dispatchSourceDataChanged();
   }
 }
 
@@ -636,6 +642,7 @@ function handleInvestmentSubmit(event) {
   saveRows(investmentStorageKey, data.investments);
   resetInvestmentForm();
   renderInvestmentsDashboard();
+  dispatchSourceDataChanged();
 }
 
 function handleInvestmentActions(event) {
@@ -662,6 +669,7 @@ function handleInvestmentActions(event) {
     saveRows(investmentStorageKey, data.investments);
     resetInvestmentForm();
     renderInvestmentsDashboard();
+    dispatchSourceDataChanged();
   }
 }
 
@@ -781,6 +789,7 @@ function applyImportedData(importedData) {
   resetAllocationForm();
   resetInvestmentForm();
   renderAllSections();
+  dispatchSourceDataChanged();
 }
 
 function importDemoData() {
@@ -827,6 +836,14 @@ function getRuntimeSourceData() {
 
 window.BDFA.getSourceData = getRuntimeSourceData;
 
+function dispatchSourceDataChanged() {
+  window.dispatchEvent(new CustomEvent('bdfa:source-data-changed', {
+    detail: {
+      sourceData: getRuntimeSourceData()
+    }
+  }));
+}
+
 function exportDemoData() {
   const exportedJson = JSON.stringify(getExportData(), null, 2);
   const exportField = document.getElementById('exportData');
@@ -871,6 +888,7 @@ function resetDemoData() {
   resetAllocationForm();
   resetInvestmentForm();
   renderAllSections();
+  dispatchSourceDataChanged();
   showStatus('Demo data reset to the original mock dataset.');
 }
 
