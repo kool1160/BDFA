@@ -299,7 +299,7 @@ function handleAccountSubmit(event) {
   saveRows(accountStorageKey, data.accounts);
   resetAccountForm();
   renderAccountsDashboard();
-  dispatchSourceDataChanged();
+  dispatchSourceDataUpdated();
 }
 
 function handleAccountActions(event) {
@@ -326,7 +326,7 @@ function handleAccountActions(event) {
     saveRows(accountStorageKey, data.accounts);
     resetAccountForm();
     renderAccountsDashboard();
-    dispatchSourceDataChanged();
+    dispatchSourceDataUpdated();
   }
 }
 
@@ -411,7 +411,7 @@ function handleBillSubmit(event) {
   saveRows(billStorageKey, data.bills);
   resetBillForm();
   renderBillsDashboard();
-  dispatchSourceDataChanged();
+  dispatchSourceDataUpdated();
 }
 
 function handleBillActions(event) {
@@ -439,7 +439,7 @@ function handleBillActions(event) {
     saveRows(billStorageKey, data.bills);
     resetBillForm();
     renderBillsDashboard();
-    dispatchSourceDataChanged();
+    dispatchSourceDataUpdated();
   }
 }
 
@@ -535,7 +535,7 @@ function handleAllocationSubmit(event) {
   saveRows(allocationStorageKey, data.allocations);
   resetAllocationForm();
   renderAllocationsDashboard();
-  dispatchSourceDataChanged();
+  dispatchSourceDataUpdated();
 }
 
 function handleAllocationActions(event) {
@@ -563,7 +563,7 @@ function handleAllocationActions(event) {
     saveRows(allocationStorageKey, data.allocations);
     resetAllocationForm();
     renderAllocationsDashboard();
-    dispatchSourceDataChanged();
+    dispatchSourceDataUpdated();
   }
 }
 
@@ -642,7 +642,7 @@ function handleInvestmentSubmit(event) {
   saveRows(investmentStorageKey, data.investments);
   resetInvestmentForm();
   renderInvestmentsDashboard();
-  dispatchSourceDataChanged();
+  dispatchSourceDataUpdated();
 }
 
 function handleInvestmentActions(event) {
@@ -669,7 +669,7 @@ function handleInvestmentActions(event) {
     saveRows(investmentStorageKey, data.investments);
     resetInvestmentForm();
     renderInvestmentsDashboard();
-    dispatchSourceDataChanged();
+    dispatchSourceDataUpdated();
   }
 }
 
@@ -789,7 +789,7 @@ function applyImportedData(importedData) {
   resetAllocationForm();
   resetInvestmentForm();
   renderAllSections();
-  dispatchSourceDataChanged();
+  dispatchSourceDataUpdated();
 }
 
 function importDemoData() {
@@ -836,11 +836,9 @@ function getRuntimeSourceData() {
 
 window.BDFA.getSourceData = getRuntimeSourceData;
 
-function dispatchSourceDataChanged() {
-  window.dispatchEvent(new CustomEvent('bdfa:source-data-changed', {
-    detail: {
-      sourceData: getRuntimeSourceData()
-    }
+function dispatchSourceDataUpdated() {
+  window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
+    detail: getRuntimeSourceData()
   }));
 }
 
@@ -888,7 +886,7 @@ function resetDemoData() {
   resetAllocationForm();
   resetInvestmentForm();
   renderAllSections();
-  dispatchSourceDataChanged();
+  dispatchSourceDataUpdated();
   showStatus('Demo data reset to the original mock dataset.');
 }
 
