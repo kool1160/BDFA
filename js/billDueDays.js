@@ -206,6 +206,7 @@ function handleBillSubmitWithDueDay(event) {
   saveRows(billStorageKey, data.bills);
   resetBillForm();
   renderBillsDashboard();
+  dispatchSourceDataUpdated();
 }
 
 function syncBillDueDayEditValue(event) {
