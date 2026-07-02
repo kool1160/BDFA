@@ -99,9 +99,73 @@ function getMonthlyFlowBillsEstimate(bills) {
   return bills.reduce((total, bill) => total + getMonthlyFlowBillMonthlyAmount(bill), 0);
 }
 
+function getMonthlyFlowAccountRawAmount(account) {
+  const amount = Number(account && (account.balance ?? account.amount ?? account.currentBalance));
+
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function getMonthlyFlowAccountType(account) {
+  return account && typeof account.type === 'string' ? account.type.trim().toLowerCase() : '';
+}
+
+function isMonthlyFlowCashAccount(account) {
+  const type = getMonthlyFlowAccountType(account);
+  const name = account && typeof account.name === 'string' ? account.name.trim().toLowerCase() : '';
+  const detail = account && typeof account.detail === 'string' ? account.detail.trim().toLowerCase() : '';
+  const cashAccountTypes = ['checking', 'savings', 'cash'];
+  const excludedTerms = [
+    'credit card',
+    'credit-card',
+    'debt',
+    'loan',
+    'mortgage',
+    'investment',
+    'investments',
+    'brokerage',
+    'retirement'
+  ];
+  const accountDescriptor = `${type} ${name} ${detail}`;
+
+  if (cashAccountTypes.includes(type)) {
+    return true;
+  }
+
+  if (excludedTerms.some(term => accountDescriptor.includes(term))) {
+    return false;
+  }
+
+  return getMonthlyFlowAccountRawAmount(account) >= 0;
+}
+
+function getMonthlyFlowCashAvailable(accounts) {
+  return accounts.reduce((total, account) => (
+    isMonthlyFlowCashAccount(account) ? total + getMonthlyFlowAccountRawAmount(account) : total
+  ), 0);
+}
+
+function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills) {
+  const cashAvailableTarget = document.getElementById('monthlyFlowCashAvailable');
+  const cashAfterBillsTarget = document.getElementById('monthlyFlowCashAfterBills');
+  const cashAvailable = getMonthlyFlowCashAvailable(accounts);
+  const cashAfterBills = cashAvailable - estimatedMonthlyBills;
+
+  if (cashAvailableTarget) {
+    cashAvailableTarget.textContent = monthlyFlowMoney.format(cashAvailable);
+  }
+
+  if (cashAfterBillsTarget) {
+    cashAfterBillsTarget.textContent = monthlyFlowMoney.format(cashAfterBills);
+    cashAfterBillsTarget.classList.toggle('monthly-flow-cash-negative', cashAfterBills < 0);
+    cashAfterBillsTarget.classList.toggle('money-debt', cashAfterBills < 0);
+    cashAfterBillsTarget.classList.toggle('money-positive', cashAfterBills >= 0);
+  }
+}
+
 function renderMonthlyFlowBillSummary(bills) {
   const countTarget = document.getElementById('monthlyFlowBillsCount');
   const estimateTarget = document.getElementById('monthlyFlowBillsEstimate');
+  const estimatedMonthlyBills = getMonthlyFlowBillsEstimate(bills);
 
   if (countTarget) {
     const billCount = bills.length;
@@ -109,8 +173,10 @@ function renderMonthlyFlowBillSummary(bills) {
   }
 
   if (estimateTarget) {
-    estimateTarget.textContent = `Estimated monthly bills: ${monthlyFlowMoney.format(getMonthlyFlowBillsEstimate(bills))}`;
+    estimateTarget.textContent = `Estimated monthly bills: ${monthlyFlowMoney.format(estimatedMonthlyBills)}`;
   }
+
+  return estimatedMonthlyBills;
 }
 
 function getMonthlyFlowBillMeta(bill) {
@@ -161,8 +227,10 @@ function renderMonthlyFlowBills(target, bills) {
 function renderMonthlyFlow(sourceData) {
   const target = document.getElementById('monthlyFlowBillsList');
   const bills = sourceData && Array.isArray(sourceData.bills) ? sourceData.bills : [];
+  const accounts = sourceData && Array.isArray(sourceData.accounts) ? sourceData.accounts : [];
+  const estimatedMonthlyBills = renderMonthlyFlowBillSummary(bills);
 
-  renderMonthlyFlowBillSummary(bills);
+  renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills);
 
   if (!target) {
     return;
@@ -177,7 +245,7 @@ function renderMonthlyFlow(sourceData) {
 }
 
 function refreshMonthlyFlow(event) {
-  const sourceData = getMonthlyFlowSourceData(event) || { bills: [] };
+  const sourceData = getMonthlyFlowSourceData(event) || { accounts: [], bills: [] };
 
   monthlyFlowSourceData = sourceData;
   renderMonthlyFlow(monthlyFlowSourceData);
