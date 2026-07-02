@@ -406,6 +406,28 @@
   line-height: 1.34;
 }
 
+.monthly-flow-next-bill {
+  display: grid;
+  gap: 5px;
+  margin: 10px 0 0;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.monthly-flow-next-bill span {
+  color: rgba(247, 247, 251, 0.9);
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
+.monthly-flow-next-bill strong {
+  color: rgba(169, 169, 181, 0.84);
+  font-size: 0.74rem;
+  line-height: 1.34;
+}
+
 .monthly-flow-cash-snapshot {
   display: grid;
   gap: 8px;
