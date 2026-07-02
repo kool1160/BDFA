@@ -50,6 +50,8 @@ const demoData = {
 
 const data = structuredClone(demoData);
 
+window.BDFA = window.BDFA || {};
+
 function total(rows) {
   return rows.reduce((sum, row) => sum + row.amount, 0);
 }
@@ -818,6 +820,15 @@ function getExportData() {
     investments: data.investments
   };
 }
+
+function getRuntimeSourceData() {
+  return structuredClone(getExportData());
+}
+
+Object.defineProperty(window.BDFA, 'sourceData', {
+  get: getRuntimeSourceData,
+  enumerable: true
+});
 
 function exportDemoData() {
   const exportedJson = JSON.stringify(getExportData(), null, 2);
