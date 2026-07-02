@@ -76,6 +76,33 @@ function getMonthlyFlowBillFrequencyLabel(bill) {
   return monthlyFlowBillFrequencyLabels[bill.frequency] || bill.frequency.trim();
 }
 
+function getMonthlyFlowBillDueDay(bill) {
+  const dueDay = Number(bill && bill.dueDay);
+
+  return Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31 ? dueDay : null;
+}
+
+function getMonthlyFlowSortedBills(bills) {
+  return bills.slice().sort((firstBill, secondBill) => {
+    const firstDueDay = getMonthlyFlowBillDueDay(firstBill);
+    const secondDueDay = getMonthlyFlowBillDueDay(secondBill);
+
+    if (firstDueDay === null && secondDueDay === null) {
+      return 0;
+    }
+
+    if (firstDueDay === null) {
+      return 1;
+    }
+
+    if (secondDueDay === null) {
+      return -1;
+    }
+
+    return firstDueDay - secondDueDay;
+  });
+}
+
 function getMonthlyFlowBillMonthlyAmount(bill) {
   const amount = getMonthlyFlowBillRawAmount(bill);
   const frequency = bill && typeof bill.frequency === 'string' ? bill.frequency : '';
@@ -181,11 +208,9 @@ function renderMonthlyFlowBillSummary(bills) {
 
 function getMonthlyFlowBillMeta(bill) {
   const meta = [getMonthlyFlowBillFrequencyLabel(bill)];
-  const dueDay = Number(bill && bill.dueDay);
+  const dueDay = getMonthlyFlowBillDueDay(bill);
 
-  if (Number.isInteger(dueDay) && dueDay >= 1 && dueDay <= 31) {
-    meta.push(`Due ${dueDay}`);
-  }
+  meta.push(dueDay === null ? 'Due day not set' : `Due ${dueDay}`);
 
   return meta.join(' · ');
 }
@@ -241,7 +266,7 @@ function renderMonthlyFlow(sourceData) {
     return;
   }
 
-  renderMonthlyFlowBills(target, bills);
+  renderMonthlyFlowBills(target, getMonthlyFlowSortedBills(bills));
 }
 
 function refreshMonthlyFlow(event) {
