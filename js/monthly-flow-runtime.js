@@ -58,14 +58,14 @@ function getMonthlyFlowBillName(bill) {
   return bill && typeof bill.name === 'string' && bill.name.trim() ? bill.name.trim() : 'Unnamed bill';
 }
 
-function getMonthlyFlowBillAmount(bill) {
+function getMonthlyFlowBillRawAmount(bill) {
   const amount = Number(bill && bill.amount);
 
-  if (!Number.isFinite(amount)) {
-    return monthlyFlowMoney.format(0);
-  }
+  return Number.isFinite(amount) ? amount : 0;
+}
 
-  return monthlyFlowMoney.format(amount);
+function getMonthlyFlowBillAmount(bill) {
+  return monthlyFlowMoney.format(getMonthlyFlowBillRawAmount(bill));
 }
 
 function getMonthlyFlowBillFrequencyLabel(bill) {
@@ -74,6 +74,43 @@ function getMonthlyFlowBillFrequencyLabel(bill) {
   }
 
   return monthlyFlowBillFrequencyLabels[bill.frequency] || bill.frequency.trim();
+}
+
+function getMonthlyFlowBillMonthlyAmount(bill) {
+  const amount = getMonthlyFlowBillRawAmount(bill);
+  const frequency = bill && typeof bill.frequency === 'string' ? bill.frequency : '';
+
+  if (frequency === 'quarterly') {
+    return amount / 3;
+  }
+
+  if (frequency === 'six-months') {
+    return amount / 6;
+  }
+
+  if (frequency === 'yearly') {
+    return amount / 12;
+  }
+
+  return amount;
+}
+
+function getMonthlyFlowBillsEstimate(bills) {
+  return bills.reduce((total, bill) => total + getMonthlyFlowBillMonthlyAmount(bill), 0);
+}
+
+function renderMonthlyFlowBillSummary(bills) {
+  const countTarget = document.getElementById('monthlyFlowBillsCount');
+  const estimateTarget = document.getElementById('monthlyFlowBillsEstimate');
+
+  if (countTarget) {
+    const billCount = bills.length;
+    countTarget.textContent = `${billCount} ${billCount === 1 ? 'bill' : 'bills'}`;
+  }
+
+  if (estimateTarget) {
+    estimateTarget.textContent = `Estimated monthly bills: ${monthlyFlowMoney.format(getMonthlyFlowBillsEstimate(bills))}`;
+  }
 }
 
 function getMonthlyFlowBillMeta(bill) {
@@ -123,12 +160,13 @@ function renderMonthlyFlowBills(target, bills) {
 
 function renderMonthlyFlow(sourceData) {
   const target = document.getElementById('monthlyFlowBillsList');
+  const bills = sourceData && Array.isArray(sourceData.bills) ? sourceData.bills : [];
+
+  renderMonthlyFlowBillSummary(bills);
 
   if (!target) {
     return;
   }
-
-  const bills = sourceData && Array.isArray(sourceData.bills) ? sourceData.bills : [];
 
   if (!bills.length) {
     renderMonthlyFlowEmptyState(target);
