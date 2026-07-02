@@ -825,10 +825,7 @@ function getRuntimeSourceData() {
   return structuredClone(getExportData());
 }
 
-Object.defineProperty(window.BDFA, 'sourceData', {
-  get: getRuntimeSourceData,
-  enumerable: true
-});
+window.BDFA.getSourceData = getRuntimeSourceData;
 
 function exportDemoData() {
   const exportedJson = JSON.stringify(getExportData(), null, 2);
