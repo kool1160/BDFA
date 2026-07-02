@@ -126,6 +126,41 @@ function getMonthlyFlowBillsEstimate(bills) {
   return bills.reduce((total, bill) => total + getMonthlyFlowBillMonthlyAmount(bill), 0);
 }
 
+function getMonthlyFlowCurrentDay() {
+  const today = new Date();
+
+  return today.getDate();
+}
+
+function getMonthlyFlowRemainingBillsThisMonth(bills) {
+  const currentDay = getMonthlyFlowCurrentDay();
+
+  return bills.reduce((summary, bill) => {
+    const dueDay = getMonthlyFlowBillDueDay(bill);
+
+    if (dueDay !== null && dueDay >= currentDay) {
+      summary.count += 1;
+      summary.total += getMonthlyFlowBillRawAmount(bill);
+    }
+
+    return summary;
+  }, { count: 0, total: 0 });
+}
+
+function renderMonthlyFlowRemainingBillsSummary(bills) {
+  const countTarget = document.getElementById('monthlyFlowRemainingBillsCount');
+  const totalTarget = document.getElementById('monthlyFlowRemainingBillsTotal');
+  const summary = getMonthlyFlowRemainingBillsThisMonth(bills);
+
+  if (countTarget) {
+    countTarget.textContent = `Remaining this month: ${summary.count} ${summary.count === 1 ? 'bill' : 'bills'}`;
+  }
+
+  if (totalTarget) {
+    totalTarget.textContent = `Remaining bill total: ${monthlyFlowMoney.format(summary.total)}`;
+  }
+}
+
 function getMonthlyFlowAccountRawAmount(account) {
   const amount = Number(account && (account.balance ?? account.amount ?? account.currentBalance));
 
@@ -255,6 +290,7 @@ function renderMonthlyFlow(sourceData) {
   const accounts = sourceData && Array.isArray(sourceData.accounts) ? sourceData.accounts : [];
   const estimatedMonthlyBills = renderMonthlyFlowBillSummary(bills);
 
+  renderMonthlyFlowRemainingBillsSummary(bills);
   renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills);
 
   if (!target) {
