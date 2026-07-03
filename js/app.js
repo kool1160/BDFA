@@ -1169,7 +1169,7 @@ window.BDFA.getSourceData = getRuntimeSourceData;
 
 function dispatchSourceDataUpdated() {
   window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
-    detail: getRuntimeSourceData()
+    detail: window.BDFA.getSourceData()
   }));
 }
 
