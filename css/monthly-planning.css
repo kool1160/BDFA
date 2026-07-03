@@ -477,6 +477,13 @@
   color: var(--money-debt);
 }
 
+.monthly-flow-lowest-point-detail {
+  color: rgba(247, 247, 251, 0.68);
+  font-size: 0.76rem;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
 .monthly-flow-bills-summary strong,
 .monthly-flow-next-bill span {
   color: rgba(247, 247, 251, 0.9);
