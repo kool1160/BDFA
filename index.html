@@ -217,10 +217,10 @@
         <p>A clean planning surface for upcoming bills and cash timing.</p>
       </div>
       <div class="monthly-planning-card" aria-label="Monthly Flow planning card">
-        <div class="month-selector-row" aria-label="Static month selector">
-          <button type="button" aria-label="Previous month">‹</button>
-          <strong>July 2026</strong>
-          <button type="button" aria-label="Next month">›</button>
+        <div class="month-selector-row" aria-label="Month selector">
+          <button id="monthlyFlowPreviousMonth" type="button" aria-label="Previous month">‹</button>
+          <strong id="monthlyFlowSelectedMonthLabel">July 2026</strong>
+          <button id="monthlyFlowNextMonth" type="button" aria-label="Next month">›</button>
         </div>
         <div class="planning-horizon-selector" aria-label="Static planning horizon selector">
           <span>Week</span>
@@ -228,14 +228,14 @@
           <span>Quarter</span>
           <span>Year</span>
         </div>
-        <div class="weekly-timeline" aria-label="Static weekly timeline">
+        <div id="monthlyFlowWeeklyTimeline" class="weekly-timeline" aria-label="Monthly Flow week selector">
           <span>Week 1</span>
           <span class="weekly-marker-today">Week 2<i aria-hidden="true"></i><em>Today</em></span>
           <span>Week 3</span>
           <span>Week 4</span>
           <span>Week 5</span>
         </div>
-        <div class="daily-date-strip" aria-label="Static daily date strip">
+        <div id="monthlyFlowDailyDateStrip" class="daily-date-strip" aria-label="Monthly Flow day strip">
           <span><small>Mon</small><strong>06</strong><span class="day-events"><b class="bill-event-marker bill-event-rent">Rent</b></span></span>
           <span><small>Tue</small><strong>07</strong></span>
           <span class="daily-date-today"><small>Wed</small><strong>08</strong><span class="day-events"><b class="bill-event-marker bill-event-electric">Electric</b><b class="bill-event-marker income-event-marker income-event-payday">Payday</b></span></span>
@@ -244,7 +244,7 @@
           <span><small>Sat</small><strong>11</strong><span class="day-events"><b class="bill-event-marker bill-event-phone">Phone</b></span></span>
           <span><small>Sun</small><strong>12</strong></span>
         </div>
-        <div class="running-balance-row" aria-label="Static running balance placeholders">
+        <div id="monthlyFlowRunningBalanceRow" class="running-balance-row" aria-label="Monthly Flow projected balance chips">
           <span>$3,820</span>
           <span>$3,820</span>
           <span>$5,940</span>
@@ -258,7 +258,7 @@
             <span class="bill-calendar-strip-label">Bill Calendar</span>
             <p>Upcoming dated bills will line up here.</p>
           </div>
-          <div class="bill-date-chip-list" aria-label="Static bill date placeholders">
+          <div id="monthlyFlowBillDateChipList" class="bill-date-chip-list" aria-label="Monthly Flow bill dates">
             <span class="bill-date-chip"><strong>01</strong><span>Rent</span></span>
             <span class="bill-date-chip"><strong>08</strong><span>Power</span></span>
             <span class="bill-date-chip"><strong>15</strong><span>Auto</span></span>

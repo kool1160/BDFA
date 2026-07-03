@@ -7,6 +7,8 @@
 window.BDFA = window.BDFA || {};
 
 let monthlyFlowSourceData;
+let monthlyFlowSelectedMonth = getMonthlyFlowMonthState(new Date());
+let monthlyFlowActiveWeek = getMonthlyFlowDefaultWeek();
 
 const monthlyFlowMoney = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -152,17 +154,85 @@ function getMonthlyFlowCurrentMonthKey() {
   return `${today.getFullYear()}-${month}`;
 }
 
-function isMonthlyFlowBillRemainingThisMonth(bill, currentDay) {
+function getMonthlyFlowMonthState(date) {
+  const safeDate = date instanceof Date && !Number.isNaN(date.getTime()) ? date : new Date();
+  const year = safeDate.getFullYear();
+  const monthIndex = safeDate.getMonth();
+  const month = String(monthIndex + 1).padStart(2, '0');
+
+  return {
+    year,
+    monthIndex,
+    key: `${year}-${month}`
+  };
+}
+
+function getMonthlyFlowSelectedMonthDate(day) {
+  return new Date(monthlyFlowSelectedMonth.year, monthlyFlowSelectedMonth.monthIndex, day || 1);
+}
+
+function getMonthlyFlowDaysInSelectedMonth() {
+  return new Date(monthlyFlowSelectedMonth.year, monthlyFlowSelectedMonth.monthIndex + 1, 0).getDate();
+}
+
+function isMonthlyFlowSelectedMonthCurrent() {
+  return monthlyFlowSelectedMonth.key === getMonthlyFlowCurrentMonthKey();
+}
+
+function isMonthlyFlowSelectedMonthPast() {
+  return monthlyFlowSelectedMonth.key < getMonthlyFlowCurrentMonthKey();
+}
+
+function getMonthlyFlowMonthLabel() {
+  return getMonthlyFlowSelectedMonthDate(1).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric'
+  });
+}
+
+function getMonthlyFlowWeekRanges() {
+  const daysInMonth = getMonthlyFlowDaysInSelectedMonth();
+  const ranges = [];
+
+  for (let startDay = 1; startDay <= daysInMonth; startDay += 7) {
+    ranges.push({
+      week: ranges.length + 1,
+      startDay,
+      endDay: Math.min(startDay + 6, daysInMonth)
+    });
+  }
+
+  return ranges;
+}
+
+function getMonthlyFlowDefaultWeek() {
+  if (!isMonthlyFlowSelectedMonthCurrent()) {
+    return 1;
+  }
+
+  const currentDay = getMonthlyFlowCurrentDay();
+  const matchingWeek = getMonthlyFlowWeekRanges().find(week => currentDay >= week.startDay && currentDay <= week.endDay);
+
+  return matchingWeek ? matchingWeek.week : 1;
+}
+
+function resetMonthlyFlowActiveWeek() {
+  monthlyFlowActiveWeek = getMonthlyFlowDefaultWeek();
+}
+
+function isMonthlyFlowBillRelevantForSelectedMonth(bill) {
   const dueDay = getMonthlyFlowBillDueDay(bill);
 
-  return dueDay !== null && dueDay >= currentDay;
+  if (dueDay === null || isMonthlyFlowSelectedMonthPast()) {
+    return false;
+  }
+
+  return !isMonthlyFlowSelectedMonthCurrent() || dueDay >= getMonthlyFlowCurrentDay();
 }
 
 function getMonthlyFlowRemainingBillsThisMonth(bills) {
-  const currentDay = getMonthlyFlowCurrentDay();
-
   return bills.reduce((summary, bill) => {
-    if (isMonthlyFlowBillRemainingThisMonth(bill, currentDay)) {
+    if (isMonthlyFlowBillRelevantForSelectedMonth(bill)) {
       summary.count += 1;
       summary.total += getMonthlyFlowBillRawAmount(bill);
     }
@@ -172,12 +242,10 @@ function getMonthlyFlowRemainingBillsThisMonth(bills) {
 }
 
 function getMonthlyFlowNextBillDue(bills) {
-  const currentDay = getMonthlyFlowCurrentDay();
-
   return bills.reduce((nextBill, bill) => {
     const dueDay = getMonthlyFlowBillDueDay(bill);
 
-    if (dueDay === null || dueDay < currentDay) {
+    if (dueDay === null || !isMonthlyFlowBillRelevantForSelectedMonth(bill)) {
       return nextBill;
     }
 
@@ -482,19 +550,33 @@ function getMonthlyFlowIncomePayDay(income) {
   return null;
 }
 
-function getMonthlyFlowIncomePayDayThisMonth(income) {
+function getMonthlyFlowIncomePayDayForSelectedMonth(income) {
   const nextPayDay = income && income.nextPayDay;
+
+  if (isMonthlyFlowSelectedMonthPast()) {
+    return null;
+  }
 
   if (typeof nextPayDay === 'string') {
     const dayText = nextPayDay.trim();
     const dateMatch = dayText.match(/^(\d{4}-\d{2})-(\d{2})(?:$|T)/);
 
-    if (dateMatch && dateMatch[1] !== getMonthlyFlowCurrentMonthKey()) {
+    if (dateMatch && dateMatch[1] !== monthlyFlowSelectedMonth.key) {
       return null;
     }
   }
 
-  return getMonthlyFlowIncomePayDay(income);
+  const payDay = getMonthlyFlowIncomePayDay(income);
+
+  if (payDay === null) {
+    return null;
+  }
+
+  if (isMonthlyFlowSelectedMonthCurrent() && payDay < getMonthlyFlowCurrentDay()) {
+    return null;
+  }
+
+  return payDay;
 }
 
 function getMonthlyFlowSortedIncome(recurringIncome) {
@@ -526,7 +608,6 @@ function getMonthlyFlowIncomeMeta(income) {
 }
 
 function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
-  const currentDay = getMonthlyFlowCurrentDay();
   const sortedBills = getMonthlyFlowSortedBills(Array.isArray(bills) ? bills : []);
   const sortedIncome = getMonthlyFlowSortedIncome(Array.isArray(recurringIncome) ? recurringIncome : []);
   const billRows = sortedBills.map(bill => ({ bill, projectedAfterBill: null }));
@@ -536,7 +617,7 @@ function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
   billRows.forEach((billRowData, index) => {
     const dueDay = getMonthlyFlowBillDueDay(billRowData.bill);
 
-    if (dueDay !== null && dueDay >= currentDay) {
+    if (dueDay !== null && isMonthlyFlowBillRelevantForSelectedMonth(billRowData.bill)) {
       timelineEvents.push({
         day: dueDay,
         type: 'bill',
@@ -549,9 +630,9 @@ function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
   });
 
   incomeRows.forEach((incomeRowData, index) => {
-    const payDay = getMonthlyFlowIncomePayDayThisMonth(incomeRowData.income);
+    const payDay = getMonthlyFlowIncomePayDayForSelectedMonth(incomeRowData.income);
 
-    if (payDay !== null && payDay >= currentDay) {
+    if (payDay !== null) {
       timelineEvents.push({
         day: payDay,
         type: 'income',
@@ -723,6 +804,185 @@ function renderMonthlyFlowIncome(incomeRows) {
   target.replaceChildren(fragment);
 }
 
+function renderMonthlyFlowMonthControls() {
+  const labelTarget = document.getElementById('monthlyFlowSelectedMonthLabel');
+
+  if (labelTarget) {
+    labelTarget.textContent = getMonthlyFlowMonthLabel();
+  }
+}
+
+function renderMonthlyFlowWeekSelector() {
+  const target = document.getElementById('monthlyFlowWeeklyTimeline');
+
+  if (!target) {
+    return;
+  }
+
+  const todayDay = getMonthlyFlowCurrentDay();
+  const isCurrentMonth = isMonthlyFlowSelectedMonthCurrent();
+  const ranges = getMonthlyFlowWeekRanges();
+
+  if (!ranges.some(week => week.week === monthlyFlowActiveWeek)) {
+    resetMonthlyFlowActiveWeek();
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  ranges.forEach(week => {
+    const weekButton = document.createElement('span');
+    const containsToday = isCurrentMonth && todayDay >= week.startDay && todayDay <= week.endDay;
+
+    weekButton.textContent = `Week ${week.week}`;
+    weekButton.classList.toggle('is-selected', week.week === monthlyFlowActiveWeek);
+    weekButton.classList.toggle('weekly-marker-today', containsToday);
+
+    if (containsToday) {
+      const marker = document.createElement('i');
+      const todayLabel = document.createElement('em');
+
+      marker.setAttribute('aria-hidden', 'true');
+      todayLabel.textContent = 'Today';
+      weekButton.append(marker, todayLabel);
+    }
+
+    weekButton.addEventListener('click', () => {
+      monthlyFlowActiveWeek = week.week;
+      renderMonthlyFlow(monthlyFlowSourceData || {});
+    });
+
+    fragment.append(weekButton);
+  });
+
+  target.replaceChildren(fragment);
+}
+
+function getMonthlyFlowEventsByDay(bills, recurringIncome) {
+  const eventsByDay = new Map();
+
+  getMonthlyFlowSortedBills(Array.isArray(bills) ? bills : []).forEach(bill => {
+    const dueDay = getMonthlyFlowBillDueDay(bill);
+
+    if (dueDay !== null && isMonthlyFlowBillRelevantForSelectedMonth(bill)) {
+      const events = eventsByDay.get(dueDay) || [];
+
+      events.push({ type: 'bill', name: getMonthlyFlowTimelineBillName(bill) });
+      eventsByDay.set(dueDay, events);
+    }
+  });
+
+  getMonthlyFlowSortedIncome(Array.isArray(recurringIncome) ? recurringIncome : []).forEach(income => {
+    const payDay = getMonthlyFlowIncomePayDayForSelectedMonth(income);
+
+    if (payDay !== null) {
+      const events = eventsByDay.get(payDay) || [];
+
+      events.push({ type: 'income', name: getMonthlyFlowIncomeName(income) });
+      eventsByDay.set(payDay, events);
+    }
+  });
+
+  return eventsByDay;
+}
+
+function renderMonthlyFlowDayStrip(bills, recurringIncome, timelineEvents, cashAvailable) {
+  const dayTarget = document.getElementById('monthlyFlowDailyDateStrip');
+  const balanceTarget = document.getElementById('monthlyFlowRunningBalanceRow');
+
+  if (!dayTarget && !balanceTarget) {
+    return;
+  }
+
+  const week = getMonthlyFlowWeekRanges().find(weekRange => weekRange.week === monthlyFlowActiveWeek) || getMonthlyFlowWeekRanges()[0];
+  const eventsByDay = getMonthlyFlowEventsByDay(bills, recurringIncome);
+  const timelineEventEntries = Array.isArray(timelineEvents) ? timelineEvents : [];
+  let eventIndex = 0;
+  let runningBalance = Number.isFinite(cashAvailable) ? cashAvailable : 0;
+
+  const dayFragment = document.createDocumentFragment();
+  const balanceFragment = document.createDocumentFragment();
+  const todayDay = getMonthlyFlowCurrentDay();
+
+  for (let day = week.startDay; day <= week.endDay; day += 1) {
+    const date = getMonthlyFlowSelectedMonthDate(day);
+    const dayCell = document.createElement('span');
+    const dayName = document.createElement('small');
+    const dayNumber = document.createElement('strong');
+    const balanceChip = document.createElement('span');
+    const dayEvents = eventsByDay.get(day) || [];
+
+    while (eventIndex < timelineEventEntries.length && timelineEventEntries[eventIndex].day <= day) {
+      runningBalance = timelineEventEntries[eventIndex].balanceAfterEvent;
+      eventIndex += 1;
+    }
+
+    dayCell.classList.toggle('daily-date-today', isMonthlyFlowSelectedMonthCurrent() && day === todayDay);
+    dayName.textContent = date.toLocaleDateString('en-US', { weekday: 'short' });
+    dayNumber.textContent = String(day).padStart(2, '0');
+    dayCell.append(dayName, dayNumber);
+
+    if (dayEvents.length) {
+      const eventWrapper = document.createElement('span');
+
+      eventWrapper.className = 'day-events';
+      dayEvents.forEach(event => {
+        const eventMarker = document.createElement('b');
+
+        eventMarker.className = `bill-event-marker ${event.type === 'income' ? 'income-event-marker income-event-payday' : 'bill-event-rent'}`;
+        eventMarker.textContent = event.name;
+        eventWrapper.append(eventMarker);
+      });
+      dayCell.append(eventWrapper);
+    }
+
+    balanceChip.textContent = monthlyFlowMoney.format(runningBalance);
+    dayFragment.append(dayCell);
+    balanceFragment.append(balanceChip);
+  }
+
+  if (dayTarget) {
+    dayTarget.replaceChildren(dayFragment);
+  }
+
+  if (balanceTarget) {
+    balanceTarget.replaceChildren(balanceFragment);
+  }
+}
+
+function renderMonthlyFlowBillCalendarStrip(bills) {
+  const target = document.getElementById('monthlyFlowBillDateChipList');
+
+  if (!target) {
+    return;
+  }
+
+  const relevantBills = getMonthlyFlowSortedBills(Array.isArray(bills) ? bills : [])
+    .filter(isMonthlyFlowBillRelevantForSelectedMonth);
+  const fragment = document.createDocumentFragment();
+
+  if (!relevantBills.length) {
+    const emptyChip = document.createElement('span');
+
+    emptyChip.className = 'bill-date-chip';
+    emptyChip.textContent = 'No future dated bills';
+    fragment.append(emptyChip);
+  } else {
+    relevantBills.forEach(bill => {
+      const chip = document.createElement('span');
+      const day = document.createElement('strong');
+      const name = document.createElement('span');
+
+      chip.className = 'bill-date-chip';
+      day.textContent = String(getMonthlyFlowBillDueDay(bill)).padStart(2, '0');
+      name.textContent = getMonthlyFlowBillName(bill);
+      chip.append(day, name);
+      fragment.append(chip);
+    });
+  }
+
+  target.replaceChildren(fragment);
+}
+
 function renderMonthlyFlow(sourceData) {
   const target = document.getElementById('monthlyFlowBillsList');
   const bills = sourceData && Array.isArray(sourceData.bills) ? sourceData.bills : [];
@@ -732,6 +992,10 @@ function renderMonthlyFlow(sourceData) {
   renderMonthlyFlowRemainingBillsSummary(bills);
   const cashAvailable = getMonthlyFlowCashAvailable(accounts);
   const timeline = createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable);
+  renderMonthlyFlowMonthControls();
+  renderMonthlyFlowWeekSelector();
+  renderMonthlyFlowDayStrip(bills, recurringIncome, timeline.timelineEvents, cashAvailable);
+  renderMonthlyFlowBillCalendarStrip(bills);
 
   renderMonthlyFlowNextBillDue(bills);
   renderMonthlyFlowCashSnapshot(
@@ -765,6 +1029,32 @@ function refreshMonthlyFlow(event) {
   renderMonthlyFlow(monthlyFlowSourceData);
 }
 
+function shiftMonthlyFlowSelectedMonth(offset) {
+  const nextMonthDate = new Date(monthlyFlowSelectedMonth.year, monthlyFlowSelectedMonth.monthIndex + offset, 1);
+
+  monthlyFlowSelectedMonth = getMonthlyFlowMonthState(nextMonthDate);
+  resetMonthlyFlowActiveWeek();
+  renderMonthlyFlow(monthlyFlowSourceData || { accounts: [], bills: [], recurringIncome: [] });
+}
+
+function wireMonthlyFlowMonthControls() {
+  const previousButton = document.getElementById('monthlyFlowPreviousMonth');
+  const nextButton = document.getElementById('monthlyFlowNextMonth');
+
+  if (previousButton) {
+    previousButton.addEventListener('click', () => {
+      shiftMonthlyFlowSelectedMonth(-1);
+    });
+  }
+
+  if (nextButton) {
+    nextButton.addEventListener('click', () => {
+      shiftMonthlyFlowSelectedMonth(1);
+    });
+  }
+}
+
 window.BDFA.refreshMonthlyFlow = refreshMonthlyFlow;
 window.addEventListener('bdfa:source-data-updated', refreshMonthlyFlow);
+wireMonthlyFlowMonthControls();
 refreshMonthlyFlow();
