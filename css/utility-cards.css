@@ -1,3 +1,4 @@
+.auth-card,
 .assistant-card,
 .import-card,
 .export-card,
@@ -8,6 +9,7 @@
   border-color: rgba(255, 255, 255, 0.105);
 }
 
+.auth-card::before,
 .assistant-card::before,
 .import-card::before,
 .export-card::before,
@@ -19,6 +21,7 @@
   background: radial-gradient(circle at top right, rgba(255, 255, 255, 0.08), transparent 16rem);
 }
 
+.auth-card > *,
 .assistant-card > *,
 .import-card > *,
 .export-card > *,
@@ -26,6 +29,7 @@
   position: relative;
 }
 
+.auth-card .label,
 .assistant-card .label,
 .import-card .label,
 .export-card .label,
@@ -41,6 +45,7 @@
   font-weight: 800;
 }
 
+.auth-card h2,
 .assistant-card h2,
 .import-card h2,
 .export-card h2,
@@ -50,12 +55,18 @@
   color: rgba(247, 247, 251, 0.96);
 }
 
+.auth-card p,
 .assistant-card p,
 .import-card p,
 .export-card p,
 .reset-card p {
   max-width: 31rem;
   color: rgba(169, 169, 181, 0.92);
+}
+
+.auth-card {
+  border-color: rgba(159, 231, 192, 0.14);
+  background: linear-gradient(145deg, rgba(159, 231, 192, 0.08), rgba(255, 255, 255, 0.04));
 }
 
 .assistant-card {
@@ -78,6 +89,7 @@
   background: linear-gradient(145deg, rgba(255, 177, 166, 0.045), rgba(255, 255, 255, 0.035));
 }
 
+.auth-card button,
 .assistant-card button,
 .import-card .file-button,
 .export-card button,
@@ -88,6 +100,11 @@
   font-weight: 800;
   letter-spacing: -0.015em;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+}
+
+.auth-card button {
+  background: rgba(159, 231, 192, 0.12);
+  color: rgba(159, 231, 192, 0.94);
 }
 
 .assistant-card button {
@@ -113,7 +130,51 @@
   color: rgba(255, 177, 166, 0.82);
 }
 
+.auth-form {
+  display: grid;
+  gap: 12px;
+}
+
+.auth-form label {
+  display: grid;
+  gap: 7px;
+  color: rgba(247, 247, 251, 0.76);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.auth-form input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.095);
+  border-radius: 16px;
+  padding: 0 14px;
+  background: rgba(5, 5, 7, 0.34);
+  outline: 0;
+}
+
+.auth-status {
+  width: fit-content;
+  padding: 9px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.055);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.auth-status[data-tone="success"] {
+  border-color: rgba(159, 231, 192, 0.22);
+  color: rgba(159, 231, 192, 0.95);
+}
+
+.auth-status[data-tone="error"] {
+  border-color: rgba(255, 177, 166, 0.2);
+  color: rgba(255, 177, 166, 0.95);
+}
+
 @media (min-width: 760px) {
+  .auth-card,
   .assistant-card,
   .import-card,
   .export-card,
@@ -121,6 +182,7 @@
     gap: 24px;
   }
 
+  .auth-card button,
   .assistant-card button,
   .import-card .file-button,
   .export-card button,
