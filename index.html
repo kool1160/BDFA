@@ -219,14 +219,15 @@
       <div class="monthly-planning-card" aria-label="Monthly Flow planning card">
         <div class="month-selector-row" aria-label="Month selector">
           <button id="monthlyFlowPreviousMonth" type="button" aria-label="Previous month">‹</button>
-          <strong id="monthlyFlowSelectedMonthLabel">July 2026</strong>
+          <strong id="monthlyFlowSelectedMonthLabel" aria-live="polite">July 2026</strong>
           <button id="monthlyFlowNextMonth" type="button" aria-label="Next month">›</button>
+          <button id="monthlyFlowCurrentMonth" class="current-month-shortcut" type="button" aria-label="Return to current month" hidden>Current month</button>
         </div>
-        <div class="planning-horizon-selector" aria-label="Static planning horizon selector">
-          <span>Week</span>
+        <div class="planning-horizon-selector" aria-label="Planning horizon selector. Month is active; other horizons are not available yet." title="Month is active. Week, Quarter, and Year are not wired yet.">
+          <span aria-disabled="true">Week</span>
           <span class="is-selected">Month</span>
-          <span>Quarter</span>
-          <span>Year</span>
+          <span aria-disabled="true">Quarter</span>
+          <span aria-disabled="true">Year</span>
         </div>
         <div id="monthlyFlowWeeklyTimeline" class="weekly-timeline" aria-label="Monthly Flow week selector">
           <span>Week 1</span>
@@ -256,7 +257,7 @@
         <div class="bill-calendar-strip">
           <div class="bill-calendar-strip-copy">
             <span class="bill-calendar-strip-label">Bill Calendar</span>
-            <p>Upcoming dated bills will line up here.</p>
+            <p id="monthlyFlowBillCalendarHelper">Upcoming dated bills for this month.</p>
           </div>
           <div id="monthlyFlowBillDateChipList" class="bill-date-chip-list" aria-label="Monthly Flow bill dates">
             <span class="bill-date-chip"><strong>01</strong><span>Rent</span></span>
