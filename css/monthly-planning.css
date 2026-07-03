@@ -462,6 +462,22 @@
   color: var(--money-debt);
 }
 
+.monthly-flow-cash-snapshot strong.monthly-flow-cash-status {
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.74rem;
+}
+
+.monthly-flow-cash-snapshot strong.monthly-flow-cash-status-safe {
+  background: rgba(54, 211, 153, 0.12);
+  color: var(--money-positive);
+}
+
+.monthly-flow-cash-snapshot strong.monthly-flow-cash-status-negative {
+  background: rgba(255, 107, 107, 0.12);
+  color: var(--money-debt);
+}
+
 .monthly-flow-bills-list {
   display: grid;
   gap: 8px;

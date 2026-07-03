@@ -275,6 +275,7 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainin
   const cashAfterBillsTarget = document.getElementById('monthlyFlowCashAfterBills');
   const projectedAfterRemainingBillsTarget = document.getElementById('monthlyFlowProjectedAfterRemainingBills');
   const lowestProjectedCashTarget = document.getElementById('monthlyFlowLowestProjectedCash');
+  const cashStatusTarget = document.getElementById('monthlyFlowCashStatus');
   const cashAvailable = getMonthlyFlowCashAvailable(accounts);
   const cashAfterBills = cashAvailable - estimatedMonthlyBills;
   const projectedAfterRemainingBills = cashAvailable - remainingBillsTotal;
@@ -296,6 +297,14 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainin
   if (lowestProjectedCashTarget) {
     lowestProjectedCashTarget.textContent = monthlyFlowMoney.format(lowestProjectedCash);
     applyMonthlyFlowMoneyTone(lowestProjectedCashTarget, lowestProjectedCash);
+  }
+
+  if (cashStatusTarget) {
+    const isCashStatusNegative = lowestProjectedCash < 0;
+
+    cashStatusTarget.textContent = isCashStatusNegative ? 'Cash dips below $0' : 'Looks safe';
+    cashStatusTarget.classList.toggle('monthly-flow-cash-status-negative', isCashStatusNegative);
+    cashStatusTarget.classList.toggle('monthly-flow-cash-status-safe', !isCashStatusNegative);
   }
 }
 
