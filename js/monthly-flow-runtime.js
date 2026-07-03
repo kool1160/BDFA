@@ -190,6 +190,23 @@ function getMonthlyFlowMonthLabel() {
   });
 }
 
+function getMonthlyFlowMonthShortLabel() {
+  return getMonthlyFlowSelectedMonthDate(1).toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric'
+  });
+}
+
+function getMonthlyFlowMonthName() {
+  return getMonthlyFlowSelectedMonthDate(1).toLocaleDateString('en-US', {
+    month: 'long'
+  });
+}
+
+function getMonthlyFlowSelectedMonthContextPhrase() {
+  return isMonthlyFlowSelectedMonthCurrent() ? 'this month' : getMonthlyFlowMonthName();
+}
+
 function getMonthlyFlowWeekRanges() {
   const daysInMonth = getMonthlyFlowDaysInSelectedMonth();
   const ranges = [];
@@ -263,11 +280,13 @@ function renderMonthlyFlowRemainingBillsSummary(bills) {
   const summary = getMonthlyFlowRemainingBillsThisMonth(bills);
 
   if (countTarget) {
-    countTarget.textContent = `Remaining this month: ${summary.count} ${summary.count === 1 ? 'bill' : 'bills'}`;
+    const contextPhrase = getMonthlyFlowSelectedMonthContextPhrase();
+    countTarget.textContent = `Remaining ${isMonthlyFlowSelectedMonthCurrent() ? contextPhrase : `in ${contextPhrase}`}: ${summary.count} ${summary.count === 1 ? 'bill' : 'bills'}`;
   }
 
   if (totalTarget) {
-    totalTarget.textContent = `Remaining bill total: ${monthlyFlowMoney.format(summary.total)}`;
+    const totalLabel = isMonthlyFlowSelectedMonthCurrent() ? 'Remaining bill total' : `${getMonthlyFlowMonthName()} bill total`;
+    totalTarget.textContent = `${totalLabel}: ${monthlyFlowMoney.format(summary.total)}`;
   }
 
   return summary;
@@ -284,18 +303,24 @@ function renderMonthlyFlowNextBillDue(bills) {
 
   if (!nextBillDue) {
     if (labelTarget) {
-      labelTarget.textContent = 'Next bill due: None this month';
+      labelTarget.textContent = isMonthlyFlowSelectedMonthCurrent()
+        ? 'Next bill due: None this month'
+        : `Next bill in ${getMonthlyFlowMonthName()}: None`;
     }
 
     if (detailsTarget) {
-      detailsTarget.textContent = 'No remaining dated bills';
+      detailsTarget.textContent = isMonthlyFlowSelectedMonthCurrent()
+        ? 'No remaining dated bills'
+        : `No future dated bills for ${getMonthlyFlowMonthName()}`;
     }
 
     return;
   }
 
   if (labelTarget) {
-    labelTarget.textContent = `Next bill due: ${getMonthlyFlowBillName(nextBillDue.bill)}`;
+    labelTarget.textContent = isMonthlyFlowSelectedMonthCurrent()
+      ? `Next bill due: ${getMonthlyFlowBillName(nextBillDue.bill)}`
+      : `Next bill in ${getMonthlyFlowMonthName()}: ${getMonthlyFlowBillName(nextBillDue.bill)}`;
   }
 
   if (detailsTarget) {
@@ -377,7 +402,9 @@ function getMonthlyFlowLowestCashPoint(cashAvailable, timelineEvents) {
 
 function getMonthlyFlowLowestCashPointText(lowestPoint) {
   if (!lowestPoint || !lowestPoint.event) {
-    return 'Lowest point: starting cash';
+    return isMonthlyFlowSelectedMonthCurrent()
+      ? 'Lowest point: starting cash'
+      : `Lowest point: starting cash for ${getMonthlyFlowMonthName()}`;
   }
 
   const amount = Number(lowestPoint.amount);
@@ -711,6 +738,18 @@ function createMonthlyFlowTimelineRow(timelineEvent, isLowestPoint) {
   return row;
 }
 
+function getMonthlyFlowCashTimelineEmptyText() {
+  if (isMonthlyFlowSelectedMonthCurrent()) {
+    return 'No upcoming cash events this month.';
+  }
+
+  if (isMonthlyFlowSelectedMonthPast()) {
+    return `No future cash events for ${getMonthlyFlowMonthName()}.`;
+  }
+
+  return `No cash events scheduled for ${getMonthlyFlowMonthName()}.`;
+}
+
 function renderMonthlyFlowCashTimeline(cashAvailable, timelineEvents, lowestPoint) {
   const target = document.getElementById('monthlyFlowCashTimeline');
 
@@ -735,7 +774,7 @@ function renderMonthlyFlowCashTimeline(cashAvailable, timelineEvents, lowestPoin
     const emptyState = document.createElement('p');
 
     emptyState.className = 'monthly-flow-timeline-empty';
-    emptyState.textContent = 'No upcoming cash events this month.';
+    emptyState.textContent = getMonthlyFlowCashTimelineEmptyText();
     fragment.append(emptyState);
   } else {
     events.forEach(timelineEvent => {
@@ -804,11 +843,28 @@ function renderMonthlyFlowIncome(incomeRows) {
   target.replaceChildren(fragment);
 }
 
+function resetMonthlyFlowSelectedMonthToCurrent() {
+  monthlyFlowSelectedMonth = getMonthlyFlowMonthState(new Date());
+  resetMonthlyFlowActiveWeek();
+  renderMonthlyFlow(monthlyFlowSourceData || { accounts: [], bills: [], recurringIncome: [] });
+}
+
 function renderMonthlyFlowMonthControls() {
   const labelTarget = document.getElementById('monthlyFlowSelectedMonthLabel');
+  const currentButton = document.getElementById('monthlyFlowCurrentMonth');
 
   if (labelTarget) {
     labelTarget.textContent = getMonthlyFlowMonthLabel();
+    labelTarget.setAttribute('aria-label', `Selected month: ${getMonthlyFlowMonthLabel()}`);
+  }
+
+  if (currentButton) {
+    const isCurrentMonth = isMonthlyFlowSelectedMonthCurrent();
+
+    currentButton.hidden = isCurrentMonth;
+    currentButton.disabled = isCurrentMonth;
+    currentButton.setAttribute('aria-label', `Return to current month from ${getMonthlyFlowMonthShortLabel()}`);
+    currentButton.classList.toggle('is-muted', isCurrentMonth);
   }
 }
 
@@ -949,8 +1005,37 @@ function renderMonthlyFlowDayStrip(bills, recurringIncome, timelineEvents, cashA
   }
 }
 
+function getMonthlyFlowBillCalendarHelperText() {
+  if (isMonthlyFlowSelectedMonthCurrent()) {
+    return 'Upcoming dated bills for this month.';
+  }
+
+  if (isMonthlyFlowSelectedMonthPast()) {
+    return `No future bill events for ${getMonthlyFlowMonthName()}.`;
+  }
+
+  return `Dated bills for ${getMonthlyFlowMonthName()}.`;
+}
+
+function getMonthlyFlowBillCalendarEmptyText() {
+  if (isMonthlyFlowSelectedMonthCurrent()) {
+    return 'No remaining dated bills';
+  }
+
+  if (isMonthlyFlowSelectedMonthPast()) {
+    return 'No future dated bills';
+  }
+
+  return `No dated bills in ${getMonthlyFlowMonthName()}`;
+}
+
 function renderMonthlyFlowBillCalendarStrip(bills) {
+  const helperTarget = document.getElementById('monthlyFlowBillCalendarHelper');
   const target = document.getElementById('monthlyFlowBillDateChipList');
+
+  if (helperTarget) {
+    helperTarget.textContent = getMonthlyFlowBillCalendarHelperText();
+  }
 
   if (!target) {
     return;
@@ -964,7 +1049,7 @@ function renderMonthlyFlowBillCalendarStrip(bills) {
     const emptyChip = document.createElement('span');
 
     emptyChip.className = 'bill-date-chip';
-    emptyChip.textContent = 'No future dated bills';
+    emptyChip.textContent = getMonthlyFlowBillCalendarEmptyText();
     fragment.append(emptyChip);
   } else {
     relevantBills.forEach(bill => {
@@ -1040,6 +1125,7 @@ function shiftMonthlyFlowSelectedMonth(offset) {
 function wireMonthlyFlowMonthControls() {
   const previousButton = document.getElementById('monthlyFlowPreviousMonth');
   const nextButton = document.getElementById('monthlyFlowNextMonth');
+  const currentButton = document.getElementById('monthlyFlowCurrentMonth');
 
   if (previousButton) {
     previousButton.addEventListener('click', () => {
@@ -1051,6 +1137,10 @@ function wireMonthlyFlowMonthControls() {
     nextButton.addEventListener('click', () => {
       shiftMonthlyFlowSelectedMonth(1);
     });
+  }
+
+  if (currentButton) {
+    currentButton.addEventListener('click', resetMonthlyFlowSelectedMonthToCurrent);
   }
 }
 
