@@ -17,11 +17,27 @@
     )) || viewSections.find(section => section.dataset.mobileView === selectedView) || null;
   }
 
+  function setSectionDisplay(section, isMobile, isActive) {
+    if (!isMobile) {
+      section.hidden = false;
+      section.style.removeProperty('display');
+      return;
+    }
+
+    section.hidden = !isActive;
+
+    if (isActive) {
+      section.style.removeProperty('display');
+    } else {
+      section.style.display = 'none';
+    }
+  }
+
   function setSectionVisibility(isMobile) {
     viewSections.forEach(section => {
       const isActive = !isMobile || section.dataset.mobileView === selectedView;
 
-      section.hidden = !isActive;
+      setSectionDisplay(section, isMobile, isActive);
 
       if ('inert' in section) {
         section.inert = isMobile && !isActive;
