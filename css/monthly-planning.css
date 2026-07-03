@@ -524,6 +524,87 @@
   margin: 10px 0 0;
 }
 
+.monthly-flow-timeline-section {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.monthly-flow-timeline-section h3 {
+  margin: 0;
+  color: rgba(247, 247, 251, 0.9);
+  font-size: 0.84rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.monthly-flow-timeline-list {
+  display: grid;
+  gap: 8px;
+}
+
+.monthly-flow-timeline-starting-row,
+.monthly-flow-timeline-row,
+.monthly-flow-timeline-empty {
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.045);
+}
+
+.monthly-flow-timeline-starting-row,
+.monthly-flow-timeline-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.monthly-flow-timeline-row-income {
+  border-color: rgba(76, 217, 100, 0.14);
+  background: rgba(76, 217, 100, 0.055);
+}
+
+.monthly-flow-timeline-details,
+.monthly-flow-timeline-starting-row span,
+.monthly-flow-timeline-empty {
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.74rem;
+  line-height: 1.34;
+}
+
+.monthly-flow-timeline-details {
+  min-width: 0;
+}
+
+.monthly-flow-timeline-details.money-positive {
+  color: rgba(169, 169, 181, 0.82);
+}
+
+.monthly-flow-timeline-details.monthly-flow-cash-negative {
+  color: var(--money-debt);
+}
+
+.monthly-flow-timeline-starting-row strong,
+.monthly-flow-timeline-amount {
+  flex: 0 0 auto;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.monthly-flow-timeline-starting-row strong,
+.monthly-flow-timeline-amount-income {
+  color: var(--money-positive);
+}
+
+.monthly-flow-timeline-amount-bill {
+  color: var(--money-caution);
+}
+
+.monthly-flow-timeline-empty {
+  margin: 0;
+}
+
 .monthly-flow-bill-row {
   display: flex;
   align-items: center;

@@ -67,6 +67,10 @@ function getMonthlyFlowBillName(bill) {
   return bill && typeof bill.name === 'string' && bill.name.trim() ? bill.name.trim() : 'Unnamed bill';
 }
 
+function getMonthlyFlowTimelineBillName(bill) {
+  return bill && typeof bill.name === 'string' && bill.name.trim() ? bill.name.trim() : 'Bill';
+}
+
 function getMonthlyFlowBillRawAmount(bill) {
   const amount = Number(bill && bill.amount);
 
@@ -499,7 +503,8 @@ function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
         type: 'bill',
         sortOrder: 1,
         index,
-        amount: getMonthlyFlowBillRawAmount(billRowData.bill)
+        amount: getMonthlyFlowBillRawAmount(billRowData.bill),
+        name: getMonthlyFlowTimelineBillName(billRowData.bill)
       });
     }
   });
@@ -513,7 +518,8 @@ function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
         type: 'income',
         sortOrder: 0,
         index,
-        amount: getMonthlyFlowIncomeRawAmount(incomeRowData.income)
+        amount: getMonthlyFlowIncomeRawAmount(incomeRowData.income),
+        name: getMonthlyFlowIncomeName(incomeRowData.income)
       });
     }
   });
@@ -542,15 +548,74 @@ function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
       billRows[timelineEvent.index].projectedAfterBill = runningBalance;
     }
 
+    timelineEvent.balanceAfterEvent = runningBalance;
     lowestProjectedCash = Math.min(lowestProjectedCash, runningBalance);
   });
 
   return {
     billRows,
     incomeRows,
+    timelineEvents,
     projectedAfterRemainingBills: runningBalance,
     lowestProjectedCash
   };
+}
+
+function createMonthlyFlowTimelineRow(timelineEvent) {
+  const row = document.createElement('div');
+  const details = document.createElement('div');
+  const amount = document.createElement('span');
+  const typeLabel = timelineEvent.type === 'income' ? 'Income' : 'Bill';
+  const signedAmount = timelineEvent.type === 'income' ? timelineEvent.amount : -timelineEvent.amount;
+
+  row.className = `monthly-flow-timeline-row monthly-flow-timeline-row-${timelineEvent.type}`;
+  details.className = 'monthly-flow-timeline-details';
+  amount.className = 'monthly-flow-timeline-amount';
+
+  details.textContent = `Day ${timelineEvent.day} · ${typeLabel} · ${timelineEvent.name} · Balance ${monthlyFlowMoney.format(timelineEvent.balanceAfterEvent)}`;
+  amount.textContent = `${signedAmount >= 0 ? '+' : '-'}${monthlyFlowMoney.format(Math.abs(signedAmount))}`;
+  amount.classList.toggle('monthly-flow-timeline-amount-income', timelineEvent.type === 'income');
+  amount.classList.toggle('monthly-flow-timeline-amount-bill', timelineEvent.type === 'bill');
+  applyMonthlyFlowMoneyTone(details, timelineEvent.balanceAfterEvent);
+
+  row.append(details, amount);
+
+  return row;
+}
+
+function renderMonthlyFlowCashTimeline(cashAvailable, timelineEvents) {
+  const target = document.getElementById('monthlyFlowCashTimeline');
+
+  if (!target) {
+    return;
+  }
+
+  const events = Array.isArray(timelineEvents) ? timelineEvents : [];
+  const fragment = document.createDocumentFragment();
+  const startingRow = document.createElement('div');
+  const startingLabel = document.createElement('span');
+  const startingAmount = document.createElement('strong');
+
+  startingRow.className = 'monthly-flow-timeline-starting-row';
+  startingLabel.textContent = 'Starting cash:';
+  startingAmount.textContent = monthlyFlowMoney.format(cashAvailable);
+  applyMonthlyFlowMoneyTone(startingAmount, cashAvailable);
+  startingRow.append(startingLabel, startingAmount);
+  fragment.append(startingRow);
+
+  if (!events.length) {
+    const emptyState = document.createElement('p');
+
+    emptyState.className = 'monthly-flow-timeline-empty';
+    emptyState.textContent = 'No upcoming cash events this month.';
+    fragment.append(emptyState);
+  } else {
+    events.forEach(timelineEvent => {
+      fragment.append(createMonthlyFlowTimelineRow(timelineEvent));
+    });
+  }
+
+  target.replaceChildren(fragment);
 }
 
 function renderMonthlyFlowIncomeEmptyState(target) {
@@ -626,6 +691,7 @@ function renderMonthlyFlow(sourceData) {
     timeline.projectedAfterRemainingBills,
     timeline.lowestProjectedCash
   );
+  renderMonthlyFlowCashTimeline(cashAvailable, timeline.timelineEvents);
   renderMonthlyFlowIncome(timeline.incomeRows);
 
   if (!target) {
