@@ -578,41 +578,71 @@
   margin: 0;
 }
 
-.monthly-income-row {
+.monthly-flow-income-section {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.monthly-flow-income-section h3 {
+  margin: 0;
+  color: rgba(247, 247, 251, 0.9);
+  font-size: 0.84rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.monthly-flow-income-list {
+  display: grid;
+  gap: 8px;
+}
+
+.monthly-flow-income-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin-top: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 18px;
-  padding: 12px;
-  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(76, 217, 100, 0.14);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(76, 217, 100, 0.055);
 }
 
-.monthly-income-row div {
+.monthly-flow-income-copy {
   display: grid;
-  gap: 4px;
+  gap: 3px;
   min-width: 0;
 }
 
-.monthly-income-row span {
-  color: rgba(247, 247, 251, 0.88);
+.monthly-flow-income-copy strong {
+  overflow: hidden;
+  color: rgba(247, 247, 251, 0.9);
   font-size: 0.8rem;
+  font-weight: 850;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.monthly-flow-income-copy span,
+.monthly-flow-income-empty {
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.74rem;
+  line-height: 1.34;
+}
+
+.monthly-flow-income-amount {
+  flex: 0 0 auto;
+  color: var(--money-positive);
+  font-size: 0.82rem;
   font-weight: 850;
 }
 
-.monthly-income-row p {
+.monthly-flow-income-empty {
   margin: 0;
-  color: rgba(169, 169, 181, 0.82);
-  font-size: 0.74rem;
-  line-height: 1.3;
-}
-
-.monthly-income-row strong {
-  color: var(--money-positive);
-  font-size: 0.96rem;
-  white-space: nowrap;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 16px;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.045);
 }
 
 .monthly-summary-bar {
