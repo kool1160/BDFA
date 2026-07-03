@@ -6,12 +6,18 @@
   const viewSections = Array.from(document.querySelectorAll('[data-mobile-view]'));
   const navItems = Array.from(document.querySelectorAll('[data-mobile-view-target]'));
 
+  function getActiveViewSection() {
+    return viewSections.find(section => section.dataset.mobileView === selectedView) || null;
+  }
+
   function setSectionVisibility(isMobile) {
     viewSections.forEach(section => {
       const isActive = !isMobile || section.dataset.mobileView === selectedView;
+
       section.hidden = !isActive;
+
       if ('inert' in section) {
-        section.inert = !isActive;
+        section.inert = isMobile && !isActive;
       }
     });
   }
@@ -19,7 +25,9 @@
   function setNavState() {
     navItems.forEach(item => {
       const isActive = item.dataset.mobileViewTarget === selectedView;
+
       item.classList.toggle('is-active', isActive);
+
       if (isActive) {
         item.setAttribute('aria-current', 'page');
       } else {
@@ -28,26 +36,43 @@
     });
   }
 
-  function applyMobileView({ scrollToTop = false } = {}) {
+  function scrollSelectedViewIntoPlace() {
+    const activeSection = getActiveViewSection();
+
+    if (!activeSection) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      activeSection.scrollIntoView({
+        block: 'start',
+        behavior: 'smooth'
+      });
+    });
+  }
+
+  function applyMobileView({ scrollToView = false } = {}) {
     const isMobile = mobileViewQuery.matches;
+
     document.body.classList.toggle('has-mobile-views', isMobile);
     setSectionVisibility(isMobile);
     setNavState();
 
-    if (isMobile && scrollToTop) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isMobile && scrollToView) {
+      scrollSelectedViewIntoPlace();
     }
   }
 
   navItems.forEach(item => {
     item.addEventListener('click', () => {
       const nextView = item.dataset.mobileViewTarget;
+
       if (!nextView || nextView === selectedView) {
         return;
       }
 
       selectedView = nextView;
-      applyMobileView({ scrollToTop: true });
+      applyMobileView({ scrollToView: true });
     });
   });
 
