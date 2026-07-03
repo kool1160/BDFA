@@ -270,10 +270,11 @@ function applyMonthlyFlowMoneyTone(target, amount) {
   target.classList.toggle('money-positive', amount >= 0);
 }
 
-function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsTotal) {
+function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsTotal, lowestProjectedCash) {
   const cashAvailableTarget = document.getElementById('monthlyFlowCashAvailable');
   const cashAfterBillsTarget = document.getElementById('monthlyFlowCashAfterBills');
   const projectedAfterRemainingBillsTarget = document.getElementById('monthlyFlowProjectedAfterRemainingBills');
+  const lowestProjectedCashTarget = document.getElementById('monthlyFlowLowestProjectedCash');
   const cashAvailable = getMonthlyFlowCashAvailable(accounts);
   const cashAfterBills = cashAvailable - estimatedMonthlyBills;
   const projectedAfterRemainingBills = cashAvailable - remainingBillsTotal;
@@ -291,6 +292,11 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainin
     projectedAfterRemainingBillsTarget.textContent = monthlyFlowMoney.format(projectedAfterRemainingBills);
     applyMonthlyFlowMoneyTone(projectedAfterRemainingBillsTarget, projectedAfterRemainingBills);
   }
+
+  if (lowestProjectedCashTarget) {
+    lowestProjectedCashTarget.textContent = monthlyFlowMoney.format(lowestProjectedCash);
+    applyMonthlyFlowMoneyTone(lowestProjectedCashTarget, lowestProjectedCash);
+  }
 }
 
 function getMonthlyFlowBillRunningBalances(bills, cashAvailable) {
@@ -306,6 +312,16 @@ function getMonthlyFlowBillRunningBalances(bills, cashAvailable) {
 
     return { bill, projectedAfterBill: runningBalance };
   });
+}
+
+function getMonthlyFlowLowestProjectedCash(billRows, cashAvailable) {
+  return billRows.reduce((lowestProjectedCash, billRowData) => {
+    if (billRowData.projectedAfterBill === null) {
+      return lowestProjectedCash;
+    }
+
+    return Math.min(lowestProjectedCash, billRowData.projectedAfterBill);
+  }, cashAvailable);
 }
 
 function renderMonthlyFlowBillSummary(bills) {
@@ -386,9 +402,11 @@ function renderMonthlyFlow(sourceData) {
   const estimatedMonthlyBills = renderMonthlyFlowBillSummary(bills);
   const remainingBillsSummary = renderMonthlyFlowRemainingBillsSummary(bills);
   const cashAvailable = getMonthlyFlowCashAvailable(accounts);
+  const billRows = getMonthlyFlowBillRunningBalances(sortedBills, cashAvailable);
+  const lowestProjectedCash = getMonthlyFlowLowestProjectedCash(billRows, cashAvailable);
 
   renderMonthlyFlowNextBillDue(bills);
-  renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsSummary.total);
+  renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsSummary.total, lowestProjectedCash);
 
   if (!target) {
     return;
@@ -399,7 +417,7 @@ function renderMonthlyFlow(sourceData) {
     return;
   }
 
-  renderMonthlyFlowBills(target, getMonthlyFlowBillRunningBalances(sortedBills, cashAvailable));
+  renderMonthlyFlowBills(target, billRows);
 }
 
 function refreshMonthlyFlow(event) {
