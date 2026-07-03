@@ -290,6 +290,45 @@ function applyMonthlyFlowMoneyTone(target, amount) {
   target.classList.toggle('money-positive', amount >= 0);
 }
 
+function getMonthlyFlowLowestCashPoint(cashAvailable, timelineEvents) {
+  const events = Array.isArray(timelineEvents) ? timelineEvents : [];
+
+  return events.reduce((lowestPoint, timelineEvent) => {
+    const balanceAfterEvent = Number(timelineEvent && timelineEvent.balanceAfterEvent);
+
+    if (!Number.isFinite(balanceAfterEvent) || balanceAfterEvent >= lowestPoint.amount) {
+      return lowestPoint;
+    }
+
+    return {
+      amount: balanceAfterEvent,
+      event: timelineEvent
+    };
+  }, { amount: Number.isFinite(cashAvailable) ? cashAvailable : 0, event: null });
+}
+
+function getMonthlyFlowLowestCashPointText(lowestPoint) {
+  if (!lowestPoint || !lowestPoint.event) {
+    return 'Lowest point: starting cash';
+  }
+
+  const amount = Number(lowestPoint.amount);
+  const event = lowestPoint.event;
+  const eventName = typeof event.name === 'string' && event.name.trim()
+    ? event.name.trim()
+    : event.type === 'income' ? 'Income source' : 'Bill';
+
+  return `Lowest point: ${monthlyFlowMoney.format(Number.isFinite(amount) ? amount : 0)} after ${eventName} on day ${event.day}`;
+}
+
+function renderMonthlyFlowLowestCashPointDetail(lowestPoint) {
+  const target = document.getElementById('monthlyFlowLowestCashPointDetail');
+
+  if (target) {
+    target.textContent = getMonthlyFlowLowestCashPointText(lowestPoint);
+  }
+}
+
 function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, projectedAfterRemainingBills, lowestProjectedCash) {
   const cashAvailableTarget = document.getElementById('monthlyFlowCashAvailable');
   const cashAfterBillsTarget = document.getElementById('monthlyFlowCashAfterBills');
@@ -536,8 +575,8 @@ function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
     return firstEvent.index - secondEvent.index;
   });
 
-  let runningBalance = cashAvailable;
-  let lowestProjectedCash = cashAvailable;
+  let runningBalance = Number.isFinite(cashAvailable) ? cashAvailable : 0;
+  let lowestProjectedCash = runningBalance;
 
   timelineEvents.forEach(timelineEvent => {
     if (timelineEvent.type === 'income') {
@@ -691,6 +730,7 @@ function renderMonthlyFlow(sourceData) {
     timeline.projectedAfterRemainingBills,
     timeline.lowestProjectedCash
   );
+  renderMonthlyFlowLowestCashPointDetail(getMonthlyFlowLowestCashPoint(cashAvailable, timeline.timelineEvents));
   renderMonthlyFlowCashTimeline(cashAvailable, timeline.timelineEvents);
   renderMonthlyFlowIncome(timeline.incomeRows);
 
