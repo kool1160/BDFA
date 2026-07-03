@@ -5,9 +5,16 @@
 
   const viewSections = Array.from(document.querySelectorAll('[data-mobile-view]'));
   const navItems = Array.from(document.querySelectorAll('[data-mobile-view-target]'));
+  const openPanelTargetsByView = {
+    bills: 'bills',
+    income: 'recurringIncome'
+  };
 
-  function getActiveViewSection() {
-    return viewSections.find(section => section.dataset.mobileView === selectedView) || null;
+  function getActiveViewStart() {
+    return viewSections.find(section => (
+      section.dataset.mobileView === selectedView &&
+      section.classList.contains('mobile-view-header')
+    )) || viewSections.find(section => section.dataset.mobileView === selectedView) || null;
   }
 
   function setSectionVisibility(isMobile) {
@@ -36,8 +43,41 @@
     });
   }
 
+  function openPanel(targetId) {
+    if (!targetId) {
+      return;
+    }
+
+    const panelBody = document.getElementById(targetId);
+    const panel = panelBody ? panelBody.closest('.panel') : null;
+    const button = panel ? panel.querySelector(`[data-toggle="${targetId}"]`) : null;
+
+    if (!panel || !panelBody) {
+      return;
+    }
+
+    panel.classList.remove('collapsed');
+    panelBody.hidden = false;
+
+    if (button) {
+      button.setAttribute('aria-expanded', 'true');
+
+      if (panelBody.id) {
+        button.setAttribute('aria-controls', panelBody.id);
+      }
+    }
+  }
+
+  function prepareSelectedView(isMobile) {
+    if (!isMobile) {
+      return;
+    }
+
+    openPanel(openPanelTargetsByView[selectedView]);
+  }
+
   function scrollSelectedViewIntoPlace() {
-    const activeSection = getActiveViewSection();
+    const activeSection = getActiveViewStart();
 
     if (!activeSection) {
       return;
@@ -56,6 +96,7 @@
 
     document.body.classList.toggle('has-mobile-views', isMobile);
     setSectionVisibility(isMobile);
+    prepareSelectedView(isMobile);
     setNavState();
 
     if (isMobile && scrollToView) {
@@ -67,7 +108,7 @@
     item.addEventListener('click', () => {
       const nextView = item.dataset.mobileViewTarget;
 
-      if (!nextView || nextView === selectedView) {
+      if (!nextView) {
         return;
       }
 
