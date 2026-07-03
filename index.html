@@ -36,7 +36,7 @@
       </div>
     </header>
 
-    <section class="grid dashboard-grid" aria-label="Financial dashboard">
+    <section class="grid dashboard-grid" data-mobile-view="overview" aria-label="Financial dashboard">
       <article class="card hero-card">
         <span class="label">Available to Allocate</span>
         <strong id="availableToAllocate" class="money-positive">$3,142</strong>
@@ -49,7 +49,7 @@
     </section>
 
     <section class="panel-grid">
-      <section class="panel">
+      <section class="panel" data-mobile-view="overview">
         <button class="panel-title" data-toggle="accounts"><span class="panel-label"><span class="section-heading"><span class="section-icon positive-icon" aria-hidden="true">$</span><span>Accounts</span></span><span class="panel-helper" id="accountsMix" hidden></span></span><span class="panel-summary money-positive" id="accountsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="accounts">
           <form class="edit-form" id="accountForm">
@@ -79,7 +79,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-mobile-view="bills">
         <button class="panel-title" data-toggle="bills"><span class="panel-label"><span class="section-heading"><span class="section-icon caution-icon" aria-hidden="true">•</span><span>Bills</span></span><span class="panel-helper" id="billsNextDue" hidden></span></span><span class="panel-summary money-caution" id="billsSummary">$0/mo</span><span>⌄</span></button>
         <div class="panel-body" id="bills">
           <form class="edit-form" id="billForm">
@@ -118,7 +118,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-mobile-view="overview">
         <button class="panel-title" data-toggle="allocations"><span class="panel-label"><span class="section-heading"><span class="section-icon caution-icon" aria-hidden="true">◌</span><span>Allocations</span></span><span class="panel-helper" id="allocationsMix" hidden></span></span><span class="panel-summary money-caution" id="allocationsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="allocations">
           <form class="edit-form" id="allocationForm">
@@ -148,7 +148,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-mobile-view="income">
         <button class="panel-title" data-toggle="recurringIncome"><span class="panel-label"><span class="section-heading"><span class="section-icon positive-icon" aria-hidden="true">+</span><span>Recurring Income</span></span></span><span class="panel-summary money-positive" id="recurringIncomeSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="recurringIncome">
           <form class="edit-form" id="recurringIncomeForm">
@@ -183,7 +183,7 @@
         </div>
       </section>
 
-      <section class="panel">
+      <section class="panel" data-mobile-view="overview">
         <button class="panel-title" data-toggle="investments"><span class="panel-label"><span class="section-heading"><span class="section-icon growth-icon" aria-hidden="true">↗</span><span>Investments</span></span><span class="panel-helper" id="investmentsMix" hidden></span></span><span class="panel-summary money-growth" id="investmentsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="investments">
           <form class="edit-form" id="investmentForm">
@@ -210,7 +210,7 @@
       </section>
     </section>
 
-    <section class="monthly-planning-section" aria-label="Monthly Flow">
+    <section class="monthly-planning-section" data-mobile-view="flow" aria-label="Monthly Flow">
       <div class="monthly-planning-header">
         <span class="label">Monthly Flow</span>
         <h2>Plan the month before it happens.</h2>
@@ -378,7 +378,7 @@
       </div>
     </section>
 
-    <section class="analytics-section" aria-label="Analytics">
+    <section class="analytics-section" data-mobile-view="analytics" aria-label="Analytics">
       <div class="analytics-header">
         <span class="label">Analytics</span>
         <h2>Visual money insights.</h2>
@@ -423,7 +423,7 @@
       </div>
     </section>
 
-    <section class="utility-grid" aria-label="Data tools">
+    <section class="utility-grid" data-mobile-view="overview" aria-label="Data tools">
       <article class="assistant-card utility-card">
         <div>
           <span class="label">Smart Assistant</span>
@@ -459,6 +459,14 @@
     </section>
   </main>
 
+  <nav class="mobile-bottom-nav" aria-label="Mobile app views">
+    <button type="button" class="mobile-bottom-nav-item" data-mobile-view-target="overview" aria-current="page">Overview</button>
+    <button type="button" class="mobile-bottom-nav-item" data-mobile-view-target="flow">Flow</button>
+    <button type="button" class="mobile-bottom-nav-item" data-mobile-view-target="bills">Bills</button>
+    <button type="button" class="mobile-bottom-nav-item" data-mobile-view-target="income">Income</button>
+    <button type="button" class="mobile-bottom-nav-item" data-mobile-view-target="analytics">Analytics</button>
+  </nav>
+
   <!-- Dashboard enhancement scripts depend on globals from app.js and must stay in this order. -->
   <script src="js/app.js"></script>
   <script src="js/accountGroups.js"></script>
@@ -467,5 +475,6 @@
   <script src="js/allocationSummary.js"></script>
   <script src="js/monthly-flow-runtime.js"></script>
   <script src="js/analytics.js"></script>
+  <script src="js/mobile-views.js"></script>
 </body>
 </html>
