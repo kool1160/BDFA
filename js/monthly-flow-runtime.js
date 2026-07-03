@@ -600,16 +600,19 @@ function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
   };
 }
 
-function createMonthlyFlowTimelineRow(timelineEvent) {
+function createMonthlyFlowTimelineRow(timelineEvent, isLowestPoint) {
   const row = document.createElement('div');
   const details = document.createElement('div');
   const amount = document.createElement('span');
+  const label = document.createElement('span');
   const typeLabel = timelineEvent.type === 'income' ? 'Income' : 'Bill';
   const signedAmount = timelineEvent.type === 'income' ? timelineEvent.amount : -timelineEvent.amount;
 
   row.className = `monthly-flow-timeline-row monthly-flow-timeline-row-${timelineEvent.type}`;
+  row.classList.toggle('monthly-flow-timeline-row-lowest', Boolean(isLowestPoint));
   details.className = 'monthly-flow-timeline-details';
   amount.className = 'monthly-flow-timeline-amount';
+  label.className = 'monthly-flow-timeline-lowest-label';
 
   details.textContent = `Day ${timelineEvent.day} · ${typeLabel} · ${timelineEvent.name} · Balance ${monthlyFlowMoney.format(timelineEvent.balanceAfterEvent)}`;
   amount.textContent = `${signedAmount >= 0 ? '+' : '-'}${monthlyFlowMoney.format(Math.abs(signedAmount))}`;
@@ -617,12 +620,17 @@ function createMonthlyFlowTimelineRow(timelineEvent) {
   amount.classList.toggle('monthly-flow-timeline-amount-bill', timelineEvent.type === 'bill');
   applyMonthlyFlowMoneyTone(details, timelineEvent.balanceAfterEvent);
 
+  if (isLowestPoint) {
+    label.textContent = 'Lowest point';
+    details.append(label);
+  }
+
   row.append(details, amount);
 
   return row;
 }
 
-function renderMonthlyFlowCashTimeline(cashAvailable, timelineEvents) {
+function renderMonthlyFlowCashTimeline(cashAvailable, timelineEvents, lowestPoint) {
   const target = document.getElementById('monthlyFlowCashTimeline');
 
   if (!target) {
@@ -650,7 +658,9 @@ function renderMonthlyFlowCashTimeline(cashAvailable, timelineEvents) {
     fragment.append(emptyState);
   } else {
     events.forEach(timelineEvent => {
-      fragment.append(createMonthlyFlowTimelineRow(timelineEvent));
+      const isLowestPoint = Boolean(lowestPoint && lowestPoint.event === timelineEvent);
+
+      fragment.append(createMonthlyFlowTimelineRow(timelineEvent, isLowestPoint));
     });
   }
 
@@ -730,8 +740,10 @@ function renderMonthlyFlow(sourceData) {
     timeline.projectedAfterRemainingBills,
     timeline.lowestProjectedCash
   );
-  renderMonthlyFlowLowestCashPointDetail(getMonthlyFlowLowestCashPoint(cashAvailable, timeline.timelineEvents));
-  renderMonthlyFlowCashTimeline(cashAvailable, timeline.timelineEvents);
+  const lowestPoint = getMonthlyFlowLowestCashPoint(cashAvailable, timeline.timelineEvents);
+
+  renderMonthlyFlowLowestCashPointDetail(lowestPoint);
+  renderMonthlyFlowCashTimeline(cashAvailable, timeline.timelineEvents, lowestPoint);
   renderMonthlyFlowIncome(timeline.incomeRows);
 
   if (!target) {

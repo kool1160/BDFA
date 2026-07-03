@@ -572,6 +572,12 @@
   background: rgba(76, 217, 100, 0.055);
 }
 
+.monthly-flow-timeline-row-lowest {
+  border-color: rgba(255, 214, 10, 0.34);
+  background: linear-gradient(135deg, rgba(255, 214, 10, 0.14), rgba(255, 255, 255, 0.055));
+  box-shadow: 0 12px 28px rgba(255, 214, 10, 0.08);
+}
+
 .monthly-flow-timeline-details,
 .monthly-flow-timeline-starting-row span,
 .monthly-flow-timeline-empty {
@@ -581,7 +587,21 @@
 }
 
 .monthly-flow-timeline-details {
+  display: grid;
+  gap: 5px;
   min-width: 0;
+}
+
+.monthly-flow-timeline-lowest-label {
+  justify-self: start;
+  width: fit-content;
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: rgba(255, 214, 10, 0.16);
+  color: rgba(255, 238, 153, 0.96);
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.01em;
 }
 
 .monthly-flow-timeline-details.money-positive {
