@@ -14,6 +14,7 @@
 
   const sourceCollections = Object.keys(storageKeys);
   let currentSourceData = null;
+  let cloudSavePromise = Promise.resolve();
 
   function clone(value) {
     if (typeof structuredClone === 'function') {
@@ -64,6 +65,30 @@
     return currentSourceData ? clone(currentSourceData) : readStoredSourceData();
   }
 
+  function dispatchSourceDataUpdated(sourceData) {
+    window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
+      detail: clone(sourceData)
+    }));
+  }
+
+  function getSupabaseClient() {
+    return window.BDFA.supabaseClient || null;
+  }
+
+  function saveCloudSnapshot(sourceData) {
+    const supabaseClient = getSupabaseClient();
+
+    if (!supabaseClient || !supabaseClient.isConfigured()) {
+      return Promise.resolve({ status: 'local' });
+    }
+
+    cloudSavePromise = cloudSavePromise
+      .catch(() => undefined)
+      .then(() => supabaseClient.saveSnapshot(clone(sourceData)));
+
+    return cloudSavePromise;
+  }
+
   function loadSourceData(defaultSourceData) {
     const sourceData = clone(defaultSourceData);
     const storedSourceData = readStoredSourceData();
@@ -87,6 +112,8 @@
         saveRows(collection, sourceData[collection]);
       }
     });
+
+    saveCloudSnapshot(currentSourceData);
 
     return getSourceData();
   }
@@ -117,8 +144,31 @@
     });
 
     currentSourceData = clone(demoData);
+    saveCloudSnapshot(currentSourceData);
 
     return getSourceData();
+  }
+
+  async function loadCloudSnapshot() {
+    const supabaseClient = getSupabaseClient();
+
+    if (!supabaseClient || !supabaseClient.isConfigured()) {
+      return { status: 'local', data: getSourceData() };
+    }
+
+    const result = await supabaseClient.loadSnapshot();
+
+    if (result.data) {
+      saveSourceData(result.data);
+      dispatchSourceDataUpdated(currentSourceData);
+      return { status: result.status, data: getSourceData() };
+    }
+
+    if (result.status === 'missing') {
+      await saveCloudSnapshot(getSourceData());
+    }
+
+    return { status: result.status, data: getSourceData(), error: result.error };
   }
 
   window.BDFA.dataAdapter = window.BDFA.dataAdapter || {
@@ -127,6 +177,7 @@
     saveSourceData,
     importData,
     exportData,
-    resetToDemoData
+    resetToDemoData,
+    loadCloudSnapshot
   };
 }());

@@ -184,6 +184,7 @@ function applySourceDataSnapshot(sourceData) {
 
 function saveAllRows() {
   window.BDFA.dataAdapter.saveSourceData(getExportData());
+  dispatchSourceDataUpdated();
 }
 
 function getDashboardTotals() {
@@ -1151,6 +1152,97 @@ function dispatchSourceDataUpdated() {
   }));
 }
 
+async function getAuthUser() {
+  const supabaseClient = window.BDFA.supabaseClient;
+
+  if (!supabaseClient || !supabaseClient.isConfigured()) {
+    return null;
+  }
+
+  return supabaseClient.getUser();
+}
+
+async function renderAuthStatus(message, tone = 'neutral') {
+  const status = document.getElementById('authStatus');
+  const signOutButton = document.getElementById('authSignOut');
+  const authInputs = document.querySelectorAll('[data-auth-input]');
+  const supabaseClient = window.BDFA.supabaseClient;
+
+  if (!status) {
+    return;
+  }
+
+  if (!supabaseClient || !supabaseClient.isConfigured()) {
+    status.textContent = supabaseClient ? supabaseClient.getConfigurationLabel() : 'Local mode';
+    status.dataset.tone = 'neutral';
+    authInputs.forEach(input => {
+      input.disabled = true;
+    });
+    if (signOutButton) {
+      signOutButton.hidden = true;
+    }
+    return;
+  }
+
+  const user = await getAuthUser();
+  const fallbackMessage = user ? `Signed in as ${user.email || 'Supabase user'} · Cloud save ready` : 'Signed out · Local mode';
+
+  status.textContent = message || fallbackMessage;
+  status.dataset.tone = tone;
+  authInputs.forEach(input => {
+    input.disabled = false;
+  });
+
+  if (signOutButton) {
+    signOutButton.hidden = !user;
+  }
+}
+
+async function handleAuthAction(action) {
+  const supabaseClient = window.BDFA.supabaseClient;
+  const emailField = document.getElementById('authEmail');
+  const passwordField = document.getElementById('authPassword');
+  const email = emailField ? emailField.value.trim() : '';
+  const password = passwordField ? passwordField.value : '';
+
+  if (!supabaseClient || !supabaseClient.isConfigured()) {
+    await renderAuthStatus('Supabase not configured');
+    return;
+  }
+
+  if (!email || !password) {
+    await renderAuthStatus('Enter an email and password to continue.', 'error');
+    return;
+  }
+
+  const result = action === 'signup' ? await supabaseClient.signUp(email, password) : await supabaseClient.signIn(email, password);
+
+  if (result.error) {
+    await renderAuthStatus(result.error.message || 'Auth failed.', 'error');
+    return;
+  }
+
+  await window.BDFA.dataAdapter.loadCloudSnapshot();
+  await renderAuthStatus();
+}
+
+async function handleSignOut() {
+  const supabaseClient = window.BDFA.supabaseClient;
+
+  if (!supabaseClient) {
+    return;
+  }
+
+  const result = await supabaseClient.signOut();
+
+  if (result.error) {
+    await renderAuthStatus(result.error.message || 'Sign out failed.', 'error');
+    return;
+  }
+
+  await renderAuthStatus('Signed out · Local mode');
+}
+
 function exportDemoData() {
   const exportedJson = JSON.stringify(window.BDFA.dataAdapter.exportData(getExportData()), null, 2);
   const exportField = document.getElementById('exportData');
@@ -1195,9 +1287,14 @@ function resetDemoData() {
   showStatus('Demo data reset to the original mock dataset.');
 }
 
-applySourceDataSnapshot(window.BDFA.dataAdapter.loadSourceData(demoData));
-renderAllSections();
-applySavedPanelState();
+function handleSourceDataUpdated(event) {
+  if (!event.detail) {
+    return;
+  }
+
+  applySourceDataSnapshot(event.detail);
+  renderAllSections();
+}
 
 function addOptionalEventListener(id, eventName, handler, options) {
   const element = document.getElementById(id);
@@ -1244,7 +1341,33 @@ addOptionalEventListener('recurringIncomeList', 'click', handleRecurringIncomeAc
 addOptionalEventListener('importButton', 'click', importDemoData);
 addOptionalEventListener('exportButton', 'click', exportDemoData);
 addOptionalEventListener('resetButton', 'click', resetDemoData);
+addOptionalEventListener('authForm', 'submit', event => {
+  event.preventDefault();
+  handleAuthAction('signin');
+});
+addOptionalEventListener('authSignUp', 'click', () => handleAuthAction('signup'));
+addOptionalEventListener('authSignIn', 'click', () => handleAuthAction('signin'));
+addOptionalEventListener('authSignOut', 'click', handleSignOut);
+
+window.addEventListener('bdfa:source-data-updated', handleSourceDataUpdated);
+window.addEventListener('bdfa:supabase-status-changed', event => {
+  const status = event.detail || {};
+  renderAuthStatus(status.message, status.tone);
+});
+
+if (window.BDFA.supabaseClient) {
+  window.BDFA.supabaseClient.onAuthStateChange(() => {
+    window.BDFA.dataAdapter.loadCloudSnapshot();
+    renderAuthStatus();
+  });
+}
 
 document.querySelectorAll('[data-toggle]').forEach(button => {
   button.addEventListener('click', () => togglePanel(button));
 });
+
+applySourceDataSnapshot(window.BDFA.dataAdapter.loadSourceData(demoData));
+renderAllSections();
+applySavedPanelState();
+renderAuthStatus();
+window.BDFA.dataAdapter.loadCloudSnapshot();
