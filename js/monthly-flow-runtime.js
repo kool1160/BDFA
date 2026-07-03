@@ -22,6 +22,15 @@ const monthlyFlowBillFrequencyLabels = {
   yearly: 'Yearly'
 };
 
+const monthlyFlowIncomeFrequencyLabels = {
+  weekly: 'Weekly',
+  biweekly: 'Biweekly',
+  semimonthly: 'Semimonthly',
+  monthly: 'Monthly',
+  quarterly: 'Quarterly',
+  yearly: 'Yearly'
+};
+
 function cloneMonthlyFlowSourceData(sourceData) {
   if (!sourceData) {
     return null;
@@ -403,10 +412,130 @@ function renderMonthlyFlowBills(target, billRows) {
   target.replaceChildren(fragment);
 }
 
+function getMonthlyFlowIncomeName(income) {
+  return income && typeof income.name === 'string' && income.name.trim() ? income.name.trim() : 'Income source';
+}
+
+function getMonthlyFlowIncomeRawAmount(income) {
+  const amount = Number(income && income.amount);
+
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function getMonthlyFlowIncomeAmount(income) {
+  return monthlyFlowMoney.format(getMonthlyFlowIncomeRawAmount(income));
+}
+
+function getMonthlyFlowIncomeFrequencyLabel(income) {
+  const frequency = income && typeof income.frequency === 'string' ? income.frequency.trim().toLowerCase() : '';
+
+  return monthlyFlowIncomeFrequencyLabels[frequency] || 'Monthly';
+}
+
+function getMonthlyFlowIncomePayDay(income) {
+  const nextPayDay = income && income.nextPayDay;
+
+  if (typeof nextPayDay === 'number' || typeof nextPayDay === 'string') {
+    const dayText = String(nextPayDay).trim();
+    const numericDay = Number(dayText);
+
+    if (/^\d{1,2}$/.test(dayText) && Number.isInteger(numericDay) && numericDay >= 1 && numericDay <= 31) {
+      return numericDay;
+    }
+
+    const dateMatch = dayText.match(/^\d{4}-\d{2}-(\d{2})(?:$|T)/);
+
+    if (dateMatch) {
+      const dateDay = Number(dateMatch[1]);
+
+      if (Number.isInteger(dateDay) && dateDay >= 1 && dateDay <= 31) {
+        return dateDay;
+      }
+    }
+  }
+
+  return null;
+}
+
+function getMonthlyFlowSortedIncome(recurringIncome) {
+  return recurringIncome.slice().sort((firstIncome, secondIncome) => {
+    const firstPayDay = getMonthlyFlowIncomePayDay(firstIncome);
+    const secondPayDay = getMonthlyFlowIncomePayDay(secondIncome);
+
+    if (firstPayDay === null && secondPayDay === null) {
+      return 0;
+    }
+
+    if (firstPayDay === null) {
+      return 1;
+    }
+
+    if (secondPayDay === null) {
+      return -1;
+    }
+
+    return firstPayDay - secondPayDay;
+  });
+}
+
+function getMonthlyFlowIncomeMeta(income) {
+  const frequency = getMonthlyFlowIncomeFrequencyLabel(income);
+  const payDay = getMonthlyFlowIncomePayDay(income);
+
+  return `${frequency} · ${payDay === null ? 'Pay day not set' : `Due ${payDay}`}`;
+}
+
+function renderMonthlyFlowIncomeEmptyState(target) {
+  const emptyState = document.createElement('p');
+
+  emptyState.className = 'monthly-flow-income-empty';
+  emptyState.textContent = 'No recurring income added yet.';
+  target.replaceChildren(emptyState);
+}
+
+function renderMonthlyFlowIncome(recurringIncome) {
+  const target = document.getElementById('monthlyFlowIncomeList');
+  const incomeEntries = Array.isArray(recurringIncome) ? recurringIncome : [];
+
+  if (!target) {
+    return;
+  }
+
+  if (!incomeEntries.length) {
+    renderMonthlyFlowIncomeEmptyState(target);
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+
+  getMonthlyFlowSortedIncome(incomeEntries).forEach(income => {
+    const incomeRow = document.createElement('div');
+    const incomeCopy = document.createElement('div');
+    const incomeName = document.createElement('strong');
+    const incomeMeta = document.createElement('span');
+    const incomeAmount = document.createElement('span');
+
+    incomeRow.className = 'monthly-flow-income-row';
+    incomeCopy.className = 'monthly-flow-income-copy';
+    incomeAmount.className = 'monthly-flow-income-amount';
+
+    incomeName.textContent = getMonthlyFlowIncomeName(income);
+    incomeMeta.textContent = getMonthlyFlowIncomeMeta(income);
+    incomeAmount.textContent = getMonthlyFlowIncomeAmount(income);
+
+    incomeCopy.append(incomeName, incomeMeta);
+    incomeRow.append(incomeCopy, incomeAmount);
+    fragment.append(incomeRow);
+  });
+
+  target.replaceChildren(fragment);
+}
+
 function renderMonthlyFlow(sourceData) {
   const target = document.getElementById('monthlyFlowBillsList');
   const bills = sourceData && Array.isArray(sourceData.bills) ? sourceData.bills : [];
   const accounts = sourceData && Array.isArray(sourceData.accounts) ? sourceData.accounts : [];
+  const recurringIncome = sourceData && Array.isArray(sourceData.recurringIncome) ? sourceData.recurringIncome : [];
   const sortedBills = getMonthlyFlowSortedBills(bills);
   const estimatedMonthlyBills = renderMonthlyFlowBillSummary(bills);
   const remainingBillsSummary = renderMonthlyFlowRemainingBillsSummary(bills);
@@ -416,6 +545,7 @@ function renderMonthlyFlow(sourceData) {
 
   renderMonthlyFlowNextBillDue(bills);
   renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsSummary.total, lowestProjectedCash);
+  renderMonthlyFlowIncome(recurringIncome);
 
   if (!target) {
     return;
@@ -430,7 +560,7 @@ function renderMonthlyFlow(sourceData) {
 }
 
 function refreshMonthlyFlow(event) {
-  const sourceData = getMonthlyFlowSourceData(event) || { accounts: [], bills: [] };
+  const sourceData = getMonthlyFlowSourceData(event) || { accounts: [], bills: [], recurringIncome: [] };
 
   monthlyFlowSourceData = sourceData;
   renderMonthlyFlow(monthlyFlowSourceData);
