@@ -4,12 +4,6 @@ const money = new Intl.NumberFormat('en-US', {
   maximumFractionDigits: 0
 });
 
-const accountStorageKey = 'bdfa.mockAccounts';
-const billStorageKey = 'bdfa.mockBills';
-const allocationStorageKey = 'bdfa.mockAllocations';
-const investmentStorageKey = 'bdfa.mockInvestments';
-const assetStorageKey = 'bdfa.mockAssets';
-const recurringIncomeStorageKey = 'bdfa.mockRecurringIncome';
 const panelStateStorageKey = 'bdfa.panelState';
 let statusTimer;
 
@@ -172,35 +166,24 @@ function getAllocationProgress(allocation) {
   `;
 }
 
-function loadStoredRows(storageKey, targetKey) {
-  const savedRows = localStorage.getItem(storageKey);
-
-  if (!savedRows) {
-    return;
+function cloneSourceData(sourceData) {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(sourceData);
   }
 
-  try {
-    const parsedRows = JSON.parse(savedRows);
-
-    if (Array.isArray(parsedRows)) {
-      data[targetKey] = parsedRows;
-    }
-  } catch {
-    localStorage.removeItem(storageKey);
-  }
+  return JSON.parse(JSON.stringify(sourceData));
 }
 
-function saveRows(storageKey, rows) {
-  localStorage.setItem(storageKey, JSON.stringify(rows));
+function applySourceDataSnapshot(sourceData) {
+  ['accounts', 'bills', 'allocations', 'investments', 'assets', 'recurringIncome'].forEach(collection => {
+    if (Array.isArray(sourceData[collection])) {
+      data[collection] = cloneSourceData(sourceData[collection]);
+    }
+  });
 }
 
 function saveAllRows() {
-  saveRows(accountStorageKey, data.accounts);
-  saveRows(billStorageKey, data.bills);
-  saveRows(allocationStorageKey, data.allocations);
-  saveRows(investmentStorageKey, data.investments);
-  saveRows(assetStorageKey, data.assets);
-  saveRows(recurringIncomeStorageKey, data.recurringIncome);
+  window.BDFA.dataAdapter.saveSourceData(getExportData());
 }
 
 function getDashboardTotals() {
@@ -316,7 +299,7 @@ function handleAccountSubmit(event) {
     });
   }
 
-  saveRows(accountStorageKey, data.accounts);
+  saveAllRows();
   resetAccountForm();
   renderAccountsDashboard();
   dispatchSourceDataUpdated();
@@ -343,7 +326,7 @@ function handleAccountActions(event) {
 
   if (deleteId) {
     data.accounts = data.accounts.filter(account => account.id !== deleteId);
-    saveRows(accountStorageKey, data.accounts);
+    saveAllRows();
     resetAccountForm();
     renderAccountsDashboard();
     dispatchSourceDataUpdated();
@@ -428,7 +411,7 @@ function handleBillSubmit(event) {
     });
   }
 
-  saveRows(billStorageKey, data.bills);
+  saveAllRows();
   resetBillForm();
   renderBillsDashboard();
   dispatchSourceDataUpdated();
@@ -456,7 +439,7 @@ function handleBillActions(event) {
 
   if (deleteId) {
     data.bills = data.bills.filter(bill => bill.id !== deleteId);
-    saveRows(billStorageKey, data.bills);
+    saveAllRows();
     resetBillForm();
     renderBillsDashboard();
     dispatchSourceDataUpdated();
@@ -552,7 +535,7 @@ function handleAllocationSubmit(event) {
     });
   }
 
-  saveRows(allocationStorageKey, data.allocations);
+  saveAllRows();
   resetAllocationForm();
   renderAllocationsDashboard();
   dispatchSourceDataUpdated();
@@ -580,7 +563,7 @@ function handleAllocationActions(event) {
 
   if (deleteId) {
     data.allocations = data.allocations.filter(allocation => allocation.id !== deleteId);
-    saveRows(allocationStorageKey, data.allocations);
+    saveAllRows();
     resetAllocationForm();
     renderAllocationsDashboard();
     dispatchSourceDataUpdated();
@@ -674,7 +657,7 @@ function handleAssetSubmit(event) {
     });
   }
 
-  saveRows(assetStorageKey, data.assets);
+  saveAllRows();
   resetAssetForm();
   renderAssetsDashboard();
   dispatchSourceDataUpdated();
@@ -702,7 +685,7 @@ function handleAssetActions(event) {
 
   if (deleteId) {
     data.assets = data.assets.filter(asset => asset.id !== deleteId);
-    saveRows(assetStorageKey, data.assets);
+    saveAllRows();
     resetAssetForm();
     renderAssetsDashboard();
     dispatchSourceDataUpdated();
@@ -781,7 +764,7 @@ function handleInvestmentSubmit(event) {
     });
   }
 
-  saveRows(investmentStorageKey, data.investments);
+  saveAllRows();
   resetInvestmentForm();
   renderInvestmentsDashboard();
   dispatchSourceDataUpdated();
@@ -808,7 +791,7 @@ function handleInvestmentActions(event) {
 
   if (deleteId) {
     data.investments = data.investments.filter(investment => investment.id !== deleteId);
-    saveRows(investmentStorageKey, data.investments);
+    saveAllRows();
     resetInvestmentForm();
     renderInvestmentsDashboard();
     dispatchSourceDataUpdated();
@@ -947,7 +930,7 @@ function handleRecurringIncomeSubmit(event) {
     });
   }
 
-  saveRows(recurringIncomeStorageKey, data.recurringIncome);
+  saveAllRows();
   resetRecurringIncomeForm();
   renderRecurringIncomeDashboard();
   dispatchSourceDataUpdated();
@@ -975,7 +958,7 @@ function handleRecurringIncomeActions(event) {
 
   if (deleteId) {
     data.recurringIncome = data.recurringIncome.filter(income => income.id !== deleteId);
-    saveRows(recurringIncomeStorageKey, data.recurringIncome);
+    saveAllRows();
     resetRecurringIncomeForm();
     renderRecurringIncomeDashboard();
     dispatchSourceDataUpdated();
@@ -1104,13 +1087,8 @@ function isValidImport(importedData) {
 
 
 function applyImportedData(importedData) {
-  data.accounts = importedData.accounts;
-  data.bills = importedData.bills;
-  data.allocations = importedData.allocations;
-  data.investments = importedData.investments;
-  data.assets = Array.isArray(importedData.assets) ? importedData.assets : [];
-  data.recurringIncome = Array.isArray(importedData.recurringIncome) ? importedData.recurringIncome : [];
-  saveAllRows();
+  const persistedData = window.BDFA.dataAdapter.importData(importedData);
+  applySourceDataSnapshot(persistedData);
   resetAccountForm();
   resetBillForm();
   resetAllocationForm();
@@ -1162,7 +1140,7 @@ function getExportData() {
 }
 
 function getRuntimeSourceData() {
-  return structuredClone(getExportData());
+  return cloneSourceData(getExportData());
 }
 
 window.BDFA.getSourceData = getRuntimeSourceData;
@@ -1174,7 +1152,7 @@ function dispatchSourceDataUpdated() {
 }
 
 function exportDemoData() {
-  const exportedJson = JSON.stringify(getExportData(), null, 2);
+  const exportedJson = JSON.stringify(window.BDFA.dataAdapter.exportData(getExportData()), null, 2);
   const exportField = document.getElementById('exportData');
 
   if (exportField) {
@@ -1194,28 +1172,18 @@ function exportDemoData() {
   showStatus('Demo data exported as JSON.');
 }
 
-function clearDemoStorage() {
-  localStorage.removeItem(accountStorageKey);
-  localStorage.removeItem(billStorageKey);
-  localStorage.removeItem(allocationStorageKey);
-  localStorage.removeItem(investmentStorageKey);
-  localStorage.removeItem(assetStorageKey);
-  localStorage.removeItem(recurringIncomeStorageKey);
-}
-
 function resetDemoData() {
   if (!confirm('Reset BDFA demo data back to the original mock dataset?')) {
     return;
   }
 
-  const freshData = structuredClone(demoData);
+  const freshData = window.BDFA.dataAdapter.resetToDemoData(demoData);
   data.accounts = freshData.accounts;
   data.bills = freshData.bills;
   data.allocations = freshData.allocations;
   data.investments = freshData.investments;
   data.assets = freshData.assets;
   data.recurringIncome = freshData.recurringIncome;
-  clearDemoStorage();
   resetAccountForm();
   resetBillForm();
   resetAllocationForm();
@@ -1227,12 +1195,7 @@ function resetDemoData() {
   showStatus('Demo data reset to the original mock dataset.');
 }
 
-loadStoredRows(accountStorageKey, 'accounts');
-loadStoredRows(billStorageKey, 'bills');
-loadStoredRows(allocationStorageKey, 'allocations');
-loadStoredRows(investmentStorageKey, 'investments');
-loadStoredRows(assetStorageKey, 'assets');
-loadStoredRows(recurringIncomeStorageKey, 'recurringIncome');
+applySourceDataSnapshot(window.BDFA.dataAdapter.loadSourceData(demoData));
 renderAllSections();
 applySavedPanelState();
 
