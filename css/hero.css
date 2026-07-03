@@ -137,25 +137,19 @@
 }
 
 @media (max-width: 759px) {
-  .app-shell {
-    padding-top: 0;
-  }
-
   .brand-hero {
-    margin-top: 0;
-    padding-top: calc(48px + env(safe-area-inset-top));
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
+    margin-top: 4px;
+    padding-top: 48px;
+    border-top-left-radius: 34px;
+    border-top-right-radius: 34px;
   }
 }
 
 @media (max-width: 374px) {
   .brand-hero {
     gap: 15px;
-    padding: calc(38px + env(safe-area-inset-top)) 14px 36px;
+    padding: 38px 14px 36px;
     border-radius: 30px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
   }
 
   .brand-mark {
@@ -179,7 +173,7 @@
 @media (min-width: 430px) and (max-width: 759px) {
   .brand-hero {
     gap: 20px;
-    padding-top: calc(56px + env(safe-area-inset-top));
+    padding-top: 56px;
     padding-bottom: 50px;
   }
 
