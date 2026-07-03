@@ -3,58 +3,130 @@
 
   window.BDFA = window.BDFA || {};
 
-  const notWiredMessage = 'BDFA data adapter is not wired yet.';
-
-  function notWired() {
-    throw new Error(notWiredMessage);
-  }
-
-  /*
-   * BDFA source-data adapter scaffold.
-   *
-   * This file defines the future persistence seam only. It is intentionally
-   * not loaded by the app yet and must not change current runtime behavior.
-   * Future wiring should move persistence behind this adapter without placing
-   * localStorage, backend, auth, or API details directly in UI handlers.
-   *
-   * getSourceData should eventually return the complete source-data snapshot:
-   *
-   * - accounts
-   * - bills
-   * - allocations
-   * - investments
-   * - recurringIncome
-   * - assets
-   *
-   * Consumers should receive a complete source-data snapshot, not partial
-   * records or one collection at a time.
-   *
-   * Future adapter wiring must preserve the current public runtime contracts:
-   *
-   * - window.BDFA.getSourceData()
-   * - bdfa:source-data-updated
-   * - event.detail is the direct source snapshot
-   *
-   * The update event detail must remain event.detail, not
-   * event.detail.sourceData.
-   */
-  const dataAdapter = {
-    getSourceData: notWired,
-    saveAccount: notWired,
-    deleteAccount: notWired,
-    saveBill: notWired,
-    deleteBill: notWired,
-    saveRecurringIncome: notWired,
-    deleteRecurringIncome: notWired,
-    saveInvestment: notWired,
-    deleteInvestment: notWired,
-    saveAsset: notWired,
-    deleteAsset: notWired,
-    saveAllocation: notWired,
-    deleteAllocation: notWired,
-    importData: notWired,
-    exportData: notWired
+  const storageKeys = {
+    accounts: 'bdfa.mockAccounts',
+    bills: 'bdfa.mockBills',
+    allocations: 'bdfa.mockAllocations',
+    investments: 'bdfa.mockInvestments',
+    assets: 'bdfa.mockAssets',
+    recurringIncome: 'bdfa.mockRecurringIncome'
   };
 
-  window.BDFA.dataAdapter = window.BDFA.dataAdapter || dataAdapter;
+  const sourceCollections = Object.keys(storageKeys);
+  let currentSourceData = null;
+
+  function clone(value) {
+    if (typeof structuredClone === 'function') {
+      return structuredClone(value);
+    }
+
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function getStoredRows(collection) {
+    const storageKey = storageKeys[collection];
+    const savedRows = localStorage.getItem(storageKey);
+
+    if (!savedRows) {
+      return null;
+    }
+
+    try {
+      const parsedRows = JSON.parse(savedRows);
+
+      if (Array.isArray(parsedRows)) {
+        return parsedRows;
+      }
+    } catch {
+      localStorage.removeItem(storageKey);
+    }
+
+    return null;
+  }
+
+  function saveRows(collection, rows) {
+    localStorage.setItem(storageKeys[collection], JSON.stringify(clone(rows)));
+  }
+
+  function readStoredSourceData() {
+    return sourceCollections.reduce((sourceData, collection) => {
+      const storedRows = getStoredRows(collection);
+
+      if (storedRows) {
+        sourceData[collection] = clone(storedRows);
+      }
+
+      return sourceData;
+    }, {});
+  }
+
+  function getSourceData() {
+    return currentSourceData ? clone(currentSourceData) : readStoredSourceData();
+  }
+
+  function loadSourceData(defaultSourceData) {
+    const sourceData = clone(defaultSourceData);
+    const storedSourceData = readStoredSourceData();
+
+    sourceCollections.forEach(collection => {
+      if (Array.isArray(storedSourceData[collection])) {
+        sourceData[collection] = storedSourceData[collection];
+      }
+    });
+
+    currentSourceData = clone(sourceData);
+
+    return getSourceData();
+  }
+
+  function saveSourceData(sourceData) {
+    currentSourceData = clone(sourceData);
+
+    sourceCollections.forEach(collection => {
+      if (Array.isArray(sourceData[collection])) {
+        saveRows(collection, sourceData[collection]);
+      }
+    });
+
+    return getSourceData();
+  }
+
+  function importData(sourceData) {
+    const importSnapshot = clone(sourceData);
+
+    sourceCollections.forEach(collection => {
+      if (!Array.isArray(importSnapshot[collection])) {
+        importSnapshot[collection] = [];
+      }
+    });
+
+    return saveSourceData(importSnapshot);
+  }
+
+  function exportData(sourceData) {
+    if (sourceData) {
+      return clone(sourceData);
+    }
+
+    return getSourceData();
+  }
+
+  function resetToDemoData(demoData) {
+    sourceCollections.forEach(collection => {
+      localStorage.removeItem(storageKeys[collection]);
+    });
+
+    currentSourceData = clone(demoData);
+
+    return getSourceData();
+  }
+
+  window.BDFA.dataAdapter = window.BDFA.dataAdapter || {
+    getSourceData,
+    loadSourceData,
+    saveSourceData,
+    importData,
+    exportData,
+    resetToDemoData
+  };
 }());

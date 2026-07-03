@@ -537,7 +537,8 @@
     <button type="button" class="mobile-bottom-nav-item" data-mobile-view-target="analytics">Analytics</button>
   </nav>
 
-  <!-- Dashboard enhancement scripts depend on globals from app.js and must stay in this order. -->
+  <!-- Dashboard scripts depend on data-adapter.js before app.js; enhancements then depend on app.js globals. -->
+  <script src="js/data-adapter.js"></script>
   <script src="js/app.js"></script>
   <script src="js/accountGroups.js"></script>
   <script src="js/billDueDays.js"></script>
