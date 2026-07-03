@@ -149,6 +149,41 @@
       </section>
 
       <section class="panel">
+        <button class="panel-title" data-toggle="recurringIncome"><span class="panel-label"><span class="section-heading"><span class="section-icon positive-icon" aria-hidden="true">+</span><span>Recurring Income</span></span></span><span class="panel-summary money-positive" id="recurringIncomeSummary">$0</span><span>⌄</span></button>
+        <div class="panel-body" id="recurringIncome">
+          <form class="edit-form" id="recurringIncomeForm">
+            <input type="hidden" id="recurringIncomeId" />
+            <label>
+              <span>Income name</span>
+              <input id="recurringIncomeName" type="text" placeholder="Paycheck" required />
+            </label>
+            <label>
+              <span>Amount</span>
+              <input id="recurringIncomeAmount" type="number" inputmode="decimal" step="0.01" placeholder="2100" required />
+            </label>
+            <label>
+              <span>Frequency</span>
+              <select id="recurringIncomeFrequency" required>
+                <option value="weekly">Weekly</option>
+                <option value="biweekly" selected>Biweekly</option>
+                <option value="semimonthly">Semimonthly</option>
+                <option value="monthly">Monthly</option>
+              </select>
+            </label>
+            <label>
+              <span>Next pay day or day of month</span>
+              <input id="recurringIncomeNextPayDay" type="text" placeholder="2026-07-08 or 15" />
+            </label>
+            <div class="form-actions">
+              <button type="submit" id="recurringIncomeSubmit">Add Income</button>
+              <button type="button" id="recurringIncomeCancel" class="ghost-button" hidden>Cancel</button>
+            </div>
+          </form>
+          <div id="recurringIncomeList"></div>
+        </div>
+      </section>
+
+      <section class="panel">
         <button class="panel-title" data-toggle="investments"><span class="panel-label"><span class="section-heading"><span class="section-icon growth-icon" aria-hidden="true">↗</span><span>Investments</span></span><span class="panel-helper" id="investmentsMix" hidden></span></span><span class="panel-summary money-growth" id="investmentsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="investments">
           <form class="edit-form" id="investmentForm">
