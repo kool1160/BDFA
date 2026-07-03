@@ -230,38 +230,42 @@
             <span class="bill-date-chip"><strong>24</strong><span>Phone</span></span>
           </div>
         </div>
-        <div class="monthly-flow-bills-summary" aria-label="Monthly Flow bill summary">
-          <strong id="monthlyFlowBillsCount">0 bills</strong>
-          <span id="monthlyFlowBillsEstimate">Estimated monthly bills: $0.00</span>
-        </div>
-        <div class="monthly-flow-bills-summary monthly-flow-remaining-summary" aria-label="Monthly Flow remaining bills this month summary">
-          <strong id="monthlyFlowRemainingBillsCount">Remaining this month: 0 bills</strong>
-          <span id="monthlyFlowRemainingBillsTotal">Remaining bill total: $0.00</span>
-        </div>
-        <div class="monthly-flow-next-bill" aria-label="Monthly Flow next bill due">
-          <span id="monthlyFlowNextBillLabel">Next bill due: None this month</span>
-          <strong id="monthlyFlowNextBillDetails">No remaining dated bills</strong>
-        </div>
-        <div class="monthly-flow-cash-snapshot" aria-label="Monthly Flow cash after bills snapshot">
-          <div>
-            <span>Cash available</span>
-            <strong id="monthlyFlowCashAvailable">$0.00</strong>
-          </div>
-          <div>
-            <span>After estimated monthly bills</span>
-            <strong id="monthlyFlowCashAfterBills">$0.00</strong>
-          </div>
-          <div>
-            <span>Projected after remaining bills</span>
-            <strong id="monthlyFlowProjectedAfterRemainingBills">$0.00</strong>
-          </div>
-          <div>
-            <span>Lowest projected cash this month</span>
-            <strong id="monthlyFlowLowestProjectedCash">$0.00</strong>
-          </div>
-          <div class="monthly-flow-cash-status-row">
+        <div class="monthly-flow-summary-panel" aria-label="Monthly Flow live planning summary">
+          <div class="monthly-flow-cash-status-card">
             <span>Cash status</span>
             <strong id="monthlyFlowCashStatus" class="monthly-flow-cash-status monthly-flow-cash-status-safe">Looks safe</strong>
+          </div>
+          <div class="monthly-flow-cash-snapshot" aria-label="Monthly Flow cash after bills snapshot">
+            <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
+              <span>Lowest projected cash this month</span>
+              <strong id="monthlyFlowLowestProjectedCash">$0.00</strong>
+            </div>
+            <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
+              <span>Projected after remaining bills</span>
+              <strong id="monthlyFlowProjectedAfterRemainingBills">$0.00</strong>
+            </div>
+            <div class="monthly-flow-summary-card">
+              <span>Cash available</span>
+              <strong id="monthlyFlowCashAvailable">$0.00</strong>
+            </div>
+            <div class="monthly-flow-summary-card">
+              <span>After estimated monthly bills</span>
+              <strong id="monthlyFlowCashAfterBills">$0.00</strong>
+            </div>
+          </div>
+          <div class="monthly-flow-secondary-summary" aria-label="Monthly Flow bill timing summary">
+            <div class="monthly-flow-bills-summary monthly-flow-remaining-summary" aria-label="Monthly Flow remaining bills this month summary">
+              <strong id="monthlyFlowRemainingBillsCount">Remaining this month: 0 bills</strong>
+              <span id="monthlyFlowRemainingBillsTotal">Remaining bill total: $0.00</span>
+            </div>
+            <div class="monthly-flow-next-bill" aria-label="Monthly Flow next bill due">
+              <span id="monthlyFlowNextBillLabel">Next bill due: None this month</span>
+              <strong id="monthlyFlowNextBillDetails">No remaining dated bills</strong>
+            </div>
+            <div class="monthly-flow-bills-summary" aria-label="Monthly Flow bill summary">
+              <strong id="monthlyFlowBillsCount">0 bills</strong>
+              <span id="monthlyFlowBillsEstimate">Estimated monthly bills: $0.00</span>
+            </div>
           </div>
         </div>
         <div id="monthlyFlowBillsList" class="monthly-flow-bills-list" aria-live="polite"></div>
