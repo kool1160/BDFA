@@ -141,6 +141,13 @@ function getMonthlyFlowCurrentDay() {
   return today.getDate();
 }
 
+function getMonthlyFlowCurrentMonthKey() {
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, '0');
+
+  return `${today.getFullYear()}-${month}`;
+}
+
 function isMonthlyFlowBillRemainingThisMonth(bill, currentDay) {
   const dueDay = getMonthlyFlowBillDueDay(bill);
 
@@ -279,7 +286,7 @@ function applyMonthlyFlowMoneyTone(target, amount) {
   target.classList.toggle('money-positive', amount >= 0);
 }
 
-function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsTotal, lowestProjectedCash) {
+function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, projectedAfterRemainingBills, lowestProjectedCash) {
   const cashAvailableTarget = document.getElementById('monthlyFlowCashAvailable');
   const cashAfterBillsTarget = document.getElementById('monthlyFlowCashAfterBills');
   const projectedAfterRemainingBillsTarget = document.getElementById('monthlyFlowProjectedAfterRemainingBills');
@@ -287,7 +294,6 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainin
   const cashStatusTarget = document.getElementById('monthlyFlowCashStatus');
   const cashAvailable = getMonthlyFlowCashAvailable(accounts);
   const cashAfterBills = cashAvailable - estimatedMonthlyBills;
-  const projectedAfterRemainingBills = cashAvailable - remainingBillsTotal;
 
   if (cashAvailableTarget) {
     cashAvailableTarget.textContent = monthlyFlowMoney.format(cashAvailable);
@@ -317,30 +323,6 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainin
   }
 }
 
-function getMonthlyFlowBillRunningBalances(bills, cashAvailable) {
-  const currentDay = getMonthlyFlowCurrentDay();
-  let runningBalance = cashAvailable;
-
-  return bills.map(bill => {
-    if (!isMonthlyFlowBillRemainingThisMonth(bill, currentDay)) {
-      return { bill, projectedAfterBill: null };
-    }
-
-    runningBalance -= getMonthlyFlowBillRawAmount(bill);
-
-    return { bill, projectedAfterBill: runningBalance };
-  });
-}
-
-function getMonthlyFlowLowestProjectedCash(billRows, cashAvailable) {
-  return billRows.reduce((lowestProjectedCash, billRowData) => {
-    if (billRowData.projectedAfterBill === null) {
-      return lowestProjectedCash;
-    }
-
-    return Math.min(lowestProjectedCash, billRowData.projectedAfterBill);
-  }, cashAvailable);
-}
 
 function renderMonthlyFlowBillSummary(bills) {
   const countTarget = document.getElementById('monthlyFlowBillsCount');
@@ -457,6 +439,21 @@ function getMonthlyFlowIncomePayDay(income) {
   return null;
 }
 
+function getMonthlyFlowIncomePayDayThisMonth(income) {
+  const nextPayDay = income && income.nextPayDay;
+
+  if (typeof nextPayDay === 'string') {
+    const dayText = nextPayDay.trim();
+    const dateMatch = dayText.match(/^(\d{4}-\d{2})-(\d{2})(?:$|T)/);
+
+    if (dateMatch && dateMatch[1] !== getMonthlyFlowCurrentMonthKey()) {
+      return null;
+    }
+  }
+
+  return getMonthlyFlowIncomePayDay(income);
+}
+
 function getMonthlyFlowSortedIncome(recurringIncome) {
   return recurringIncome.slice().sort((firstIncome, secondIncome) => {
     const firstPayDay = getMonthlyFlowIncomePayDay(firstIncome);
@@ -485,6 +482,77 @@ function getMonthlyFlowIncomeMeta(income) {
   return `${frequency} · ${payDay === null ? 'Pay day not set' : `Due ${payDay}`}`;
 }
 
+function createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable) {
+  const currentDay = getMonthlyFlowCurrentDay();
+  const sortedBills = getMonthlyFlowSortedBills(Array.isArray(bills) ? bills : []);
+  const sortedIncome = getMonthlyFlowSortedIncome(Array.isArray(recurringIncome) ? recurringIncome : []);
+  const billRows = sortedBills.map(bill => ({ bill, projectedAfterBill: null }));
+  const incomeRows = sortedIncome.map(income => ({ income, projectedAfterIncome: null }));
+  const timelineEvents = [];
+
+  billRows.forEach((billRowData, index) => {
+    const dueDay = getMonthlyFlowBillDueDay(billRowData.bill);
+
+    if (dueDay !== null && dueDay >= currentDay) {
+      timelineEvents.push({
+        day: dueDay,
+        type: 'bill',
+        sortOrder: 1,
+        index,
+        amount: getMonthlyFlowBillRawAmount(billRowData.bill)
+      });
+    }
+  });
+
+  incomeRows.forEach((incomeRowData, index) => {
+    const payDay = getMonthlyFlowIncomePayDayThisMonth(incomeRowData.income);
+
+    if (payDay !== null && payDay >= currentDay) {
+      timelineEvents.push({
+        day: payDay,
+        type: 'income',
+        sortOrder: 0,
+        index,
+        amount: getMonthlyFlowIncomeRawAmount(incomeRowData.income)
+      });
+    }
+  });
+
+  timelineEvents.sort((firstEvent, secondEvent) => {
+    if (firstEvent.day !== secondEvent.day) {
+      return firstEvent.day - secondEvent.day;
+    }
+
+    if (firstEvent.sortOrder !== secondEvent.sortOrder) {
+      return firstEvent.sortOrder - secondEvent.sortOrder;
+    }
+
+    return firstEvent.index - secondEvent.index;
+  });
+
+  let runningBalance = cashAvailable;
+  let lowestProjectedCash = cashAvailable;
+
+  timelineEvents.forEach(timelineEvent => {
+    if (timelineEvent.type === 'income') {
+      runningBalance += timelineEvent.amount;
+      incomeRows[timelineEvent.index].projectedAfterIncome = runningBalance;
+    } else {
+      runningBalance -= timelineEvent.amount;
+      billRows[timelineEvent.index].projectedAfterBill = runningBalance;
+    }
+
+    lowestProjectedCash = Math.min(lowestProjectedCash, runningBalance);
+  });
+
+  return {
+    billRows,
+    incomeRows,
+    projectedAfterRemainingBills: runningBalance,
+    lowestProjectedCash
+  };
+}
+
 function renderMonthlyFlowIncomeEmptyState(target) {
   const emptyState = document.createElement('p');
 
@@ -493,9 +561,9 @@ function renderMonthlyFlowIncomeEmptyState(target) {
   target.replaceChildren(emptyState);
 }
 
-function renderMonthlyFlowIncome(recurringIncome) {
+function renderMonthlyFlowIncome(incomeRows) {
   const target = document.getElementById('monthlyFlowIncomeList');
-  const incomeEntries = Array.isArray(recurringIncome) ? recurringIncome : [];
+  const incomeEntries = Array.isArray(incomeRows) ? incomeRows : [];
 
   if (!target) {
     return;
@@ -508,12 +576,15 @@ function renderMonthlyFlowIncome(recurringIncome) {
 
   const fragment = document.createDocumentFragment();
 
-  getMonthlyFlowSortedIncome(incomeEntries).forEach(income => {
+  incomeEntries.forEach(incomeRowData => {
+    const income = incomeRowData.income;
+    const projectedAfterIncome = incomeRowData.projectedAfterIncome;
     const incomeRow = document.createElement('div');
     const incomeCopy = document.createElement('div');
     const incomeName = document.createElement('strong');
     const incomeMeta = document.createElement('span');
     const incomeAmount = document.createElement('span');
+    const projectedBalance = document.createElement('span');
 
     incomeRow.className = 'monthly-flow-income-row';
     incomeCopy.className = 'monthly-flow-income-copy';
@@ -524,6 +595,13 @@ function renderMonthlyFlowIncome(recurringIncome) {
     incomeAmount.textContent = getMonthlyFlowIncomeAmount(income);
 
     incomeCopy.append(incomeName, incomeMeta);
+
+    if (projectedAfterIncome !== null) {
+      projectedBalance.className = 'monthly-flow-income-projected';
+      projectedBalance.textContent = `Projected after income: ${monthlyFlowMoney.format(projectedAfterIncome)}`;
+      applyMonthlyFlowMoneyTone(projectedBalance, projectedAfterIncome);
+      incomeCopy.append(projectedBalance);
+    }
     incomeRow.append(incomeCopy, incomeAmount);
     fragment.append(incomeRow);
   });
@@ -536,16 +614,19 @@ function renderMonthlyFlow(sourceData) {
   const bills = sourceData && Array.isArray(sourceData.bills) ? sourceData.bills : [];
   const accounts = sourceData && Array.isArray(sourceData.accounts) ? sourceData.accounts : [];
   const recurringIncome = sourceData && Array.isArray(sourceData.recurringIncome) ? sourceData.recurringIncome : [];
-  const sortedBills = getMonthlyFlowSortedBills(bills);
   const estimatedMonthlyBills = renderMonthlyFlowBillSummary(bills);
-  const remainingBillsSummary = renderMonthlyFlowRemainingBillsSummary(bills);
+  renderMonthlyFlowRemainingBillsSummary(bills);
   const cashAvailable = getMonthlyFlowCashAvailable(accounts);
-  const billRows = getMonthlyFlowBillRunningBalances(sortedBills, cashAvailable);
-  const lowestProjectedCash = getMonthlyFlowLowestProjectedCash(billRows, cashAvailable);
+  const timeline = createMonthlyFlowTimeline(bills, recurringIncome, cashAvailable);
 
   renderMonthlyFlowNextBillDue(bills);
-  renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsSummary.total, lowestProjectedCash);
-  renderMonthlyFlowIncome(recurringIncome);
+  renderMonthlyFlowCashSnapshot(
+    accounts,
+    estimatedMonthlyBills,
+    timeline.projectedAfterRemainingBills,
+    timeline.lowestProjectedCash
+  );
+  renderMonthlyFlowIncome(timeline.incomeRows);
 
   if (!target) {
     return;
@@ -556,7 +637,7 @@ function renderMonthlyFlow(sourceData) {
     return;
   }
 
-  renderMonthlyFlowBills(target, billRows);
+  renderMonthlyFlowBills(target, timeline.billRows);
 }
 
 function refreshMonthlyFlow(event) {

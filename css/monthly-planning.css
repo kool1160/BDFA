@@ -630,6 +630,16 @@
   line-height: 1.34;
 }
 
+.monthly-flow-income-copy .monthly-flow-income-projected {
+  color: var(--money-positive);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.monthly-flow-income-copy .monthly-flow-income-projected.monthly-flow-cash-negative {
+  color: var(--money-debt);
+}
+
 .monthly-flow-income-amount {
   flex: 0 0 auto;
   color: var(--money-positive);
