@@ -575,6 +575,10 @@ h1 {
 }
 
 @media (max-width: 759px) {
+  .app-shell {
+    padding-top: calc(16px + env(safe-area-inset-top));
+  }
+
   body.has-mobile-views {
     padding-bottom: calc(108px + env(safe-area-inset-bottom));
   }
