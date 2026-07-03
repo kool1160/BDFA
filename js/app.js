@@ -8,6 +8,7 @@ const accountStorageKey = 'bdfa.mockAccounts';
 const billStorageKey = 'bdfa.mockBills';
 const allocationStorageKey = 'bdfa.mockAllocations';
 const investmentStorageKey = 'bdfa.mockInvestments';
+const assetStorageKey = 'bdfa.mockAssets';
 const recurringIncomeStorageKey = 'bdfa.mockRecurringIncome';
 const panelStateStorageKey = 'bdfa.panelState';
 let statusTimer;
@@ -20,6 +21,7 @@ const billFrequencies = {
 };
 
 const accountTypes = ['Cash', 'Credit Card', 'Debt'];
+const assetTypes = ['Home', 'Vehicle', 'Equipment', 'Personal Property', 'Other'];
 const recurringIncomeFrequencies = {
   weekly: 'Weekly',
   biweekly: 'Biweekly',
@@ -53,6 +55,7 @@ const demoData = {
     { id: 'roth-ira', name: 'Roth IRA', detail: 'Tax-free retirement', amount: 116000 },
     { id: 'brokerage', name: 'Brokerage', detail: 'Taxable investing', amount: 105102 }
   ],
+  assets: [],
   recurringIncome: [
     { id: 'primary-paycheck', name: 'Primary Paycheck', amount: 2100, frequency: 'biweekly', nextPayDay: '2026-07-08' },
     { id: 'side-income', name: 'Side Income', amount: 375, frequency: 'monthly', nextPayDay: '10' }
@@ -196,12 +199,14 @@ function saveAllRows() {
   saveRows(billStorageKey, data.bills);
   saveRows(allocationStorageKey, data.allocations);
   saveRows(investmentStorageKey, data.investments);
+  saveRows(assetStorageKey, data.assets);
   saveRows(recurringIncomeStorageKey, data.recurringIncome);
 }
 
 function getDashboardTotals() {
   const cash = total(data.accounts.filter(account => account.type === 'Cash'));
   const investments = total(data.investments);
+  const assets = getAssetsTotal();
   const debt = Math.abs(total(data.accounts.filter(account => account.amount < 0)));
   const bills = getMonthlyBillsTotal();
   const allocations = total(data.allocations);
@@ -209,8 +214,9 @@ function getDashboardTotals() {
   return {
     cash,
     investments,
+    assets,
     debt,
-    netWorth: cash + investments - debt,
+    netWorth: cash + investments + assets - debt,
     availableToAllocate: cash - bills - allocations
   };
 }
@@ -220,6 +226,7 @@ function renderSectionSummaries() {
   setText('billsSummary', `${money.format(getMonthlyBillsTotal())}/mo`);
   setMoneyText('allocationsSummary', total(data.allocations));
   setMoneyText('investmentsSummary', total(data.investments));
+  setMoneyText('assetsSummary', getAssetsTotal());
   setMoneyText('recurringIncomeSummary', getRecurringIncomeTotal());
 }
 
@@ -580,6 +587,128 @@ function handleAllocationActions(event) {
   }
 }
 
+function getAssetsTotal() {
+  return data.assets.reduce((sum, asset) => (
+    Number.isFinite(asset.value) ? sum + asset.value : sum
+  ), 0);
+}
+
+function resetAssetForm() {
+  document.getElementById('assetForm').reset();
+  document.getElementById('assetId').value = '';
+  document.getElementById('assetType').value = 'Home';
+  document.getElementById('assetSubmit').textContent = 'Add Asset';
+  document.getElementById('assetCancel').hidden = true;
+}
+
+function renderAssets() {
+  const target = document.getElementById('assetsList');
+
+  if (!target) {
+    return;
+  }
+
+  setMoneyText('assetsTotal', getAssetsTotal());
+
+  if (!data.assets.length) {
+    target.innerHTML = getEmptyState('No assets yet', 'Add a home, vehicle, equipment, or other manual asset to make net worth equity-aware.');
+    return;
+  }
+
+  target.innerHTML = data.assets.map(asset => `
+    <div class="row editable-row">
+      <div>
+        <strong>${asset.name}</strong>
+        <small>${asset.type}${asset.notes ? ` · ${asset.notes}` : ''}</small>
+      </div>
+      <strong>${money.format(asset.value)}</strong>
+      <div class="row-actions" aria-label="Asset actions">
+        <button type="button" data-edit-asset="${asset.id}">Edit</button>
+        <button type="button" data-delete-asset="${asset.id}">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderAssetsDashboard() {
+  renderAssets();
+  renderDashboardTotals();
+}
+
+function getAssetFormData() {
+  const id = document.getElementById('assetId').value;
+  const name = document.getElementById('assetName').value.trim();
+  const type = document.getElementById('assetType').value;
+  const value = Number(document.getElementById('assetValue').value);
+  const notes = document.getElementById('assetNotes').value.trim();
+
+  if (!name || !assetTypes.includes(type) || !Number.isFinite(value)) {
+    return null;
+  }
+
+  return { id, name, type, value, notes };
+}
+
+function handleAssetSubmit(event) {
+  event.preventDefault();
+
+  const formData = getAssetFormData();
+
+  if (!formData) {
+    return;
+  }
+
+  if (formData.id) {
+    data.assets = data.assets.map(asset => (
+      asset.id === formData.id
+        ? { ...asset, name: formData.name, type: formData.type, value: formData.value, notes: formData.notes }
+        : asset
+    ));
+  } else {
+    data.assets.push({
+      id: crypto.randomUUID(),
+      name: formData.name,
+      type: formData.type,
+      value: formData.value,
+      notes: formData.notes
+    });
+  }
+
+  saveRows(assetStorageKey, data.assets);
+  resetAssetForm();
+  renderAssetsDashboard();
+  dispatchSourceDataUpdated();
+}
+
+function handleAssetActions(event) {
+  const editId = event.target.dataset.editAsset;
+  const deleteId = event.target.dataset.deleteAsset;
+
+  if (editId) {
+    const asset = data.assets.find(item => item.id === editId);
+
+    if (!asset) {
+      return;
+    }
+
+    document.getElementById('assetId').value = asset.id;
+    document.getElementById('assetName').value = asset.name;
+    document.getElementById('assetType').value = assetTypes.includes(asset.type) ? asset.type : 'Other';
+    document.getElementById('assetValue').value = asset.value;
+    document.getElementById('assetNotes').value = asset.notes || '';
+    document.getElementById('assetSubmit').textContent = 'Save Asset';
+    document.getElementById('assetCancel').hidden = false;
+  }
+
+  if (deleteId) {
+    data.assets = data.assets.filter(asset => asset.id !== deleteId);
+    saveRows(assetStorageKey, data.assets);
+    resetAssetForm();
+    renderAssetsDashboard();
+    dispatchSourceDataUpdated();
+  }
+}
+
 function resetInvestmentForm() {
   document.getElementById('investmentForm').reset();
   document.getElementById('investmentId').value = '';
@@ -858,6 +987,7 @@ function renderAllSections() {
   renderBills();
   renderAllocations();
   renderInvestments();
+  renderAssets();
   renderRecurringIncome();
   renderDashboardTotals();
 }
@@ -924,6 +1054,15 @@ function isBasicMoneyRow(row) {
   return row && isText(row.id) && isText(row.name) && isText(row.detail) && isAmount(row.amount);
 }
 
+function isValidAssetRow(row) {
+  return Boolean(row) &&
+    isText(row.id) &&
+    isText(row.name) &&
+    assetTypes.includes(row.type) &&
+    isAmount(row.value) &&
+    (row.notes === undefined || typeof row.notes === 'string');
+}
+
 function isValidAllocationRow(row) {
   return isBasicMoneyRow(row) && (
     row.targetAmount === undefined ||
@@ -938,6 +1077,7 @@ function isValidImport(importedData) {
   }
 
   const { accounts, bills, allocations, investments } = importedData;
+  const assets = Array.isArray(importedData.assets) ? importedData.assets : [];
   const recurringIncome = Array.isArray(importedData.recurringIncome) ? importedData.recurringIncome : [];
 
   if (![accounts, bills, allocations, investments].every(Array.isArray)) {
@@ -959,7 +1099,7 @@ function isValidImport(importedData) {
 
   const recurringIncomeValid = recurringIncome.every(isValidRecurringIncomeRow);
 
-  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && recurringIncomeValid;
+  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && assets.every(isValidAssetRow) && recurringIncomeValid;
 }
 
 
@@ -968,12 +1108,14 @@ function applyImportedData(importedData) {
   data.bills = importedData.bills;
   data.allocations = importedData.allocations;
   data.investments = importedData.investments;
+  data.assets = Array.isArray(importedData.assets) ? importedData.assets : [];
   data.recurringIncome = Array.isArray(importedData.recurringIncome) ? importedData.recurringIncome : [];
   saveAllRows();
   resetAccountForm();
   resetBillForm();
   resetAllocationForm();
   resetInvestmentForm();
+  resetAssetForm();
   resetRecurringIncomeForm();
   renderAllSections();
   dispatchSourceDataUpdated();
@@ -1014,7 +1156,8 @@ function getExportData() {
     bills: data.bills,
     allocations: data.allocations,
     investments: data.investments,
-    recurringIncome: data.recurringIncome
+    recurringIncome: data.recurringIncome,
+    assets: data.assets
   };
 }
 
@@ -1056,6 +1199,7 @@ function clearDemoStorage() {
   localStorage.removeItem(billStorageKey);
   localStorage.removeItem(allocationStorageKey);
   localStorage.removeItem(investmentStorageKey);
+  localStorage.removeItem(assetStorageKey);
   localStorage.removeItem(recurringIncomeStorageKey);
 }
 
@@ -1069,12 +1213,14 @@ function resetDemoData() {
   data.bills = freshData.bills;
   data.allocations = freshData.allocations;
   data.investments = freshData.investments;
+  data.assets = freshData.assets;
   data.recurringIncome = freshData.recurringIncome;
   clearDemoStorage();
   resetAccountForm();
   resetBillForm();
   resetAllocationForm();
   resetInvestmentForm();
+  resetAssetForm();
   resetRecurringIncomeForm();
   renderAllSections();
   dispatchSourceDataUpdated();
@@ -1085,6 +1231,7 @@ loadStoredRows(accountStorageKey, 'accounts');
 loadStoredRows(billStorageKey, 'bills');
 loadStoredRows(allocationStorageKey, 'allocations');
 loadStoredRows(investmentStorageKey, 'investments');
+loadStoredRows(assetStorageKey, 'assets');
 loadStoredRows(recurringIncomeStorageKey, 'recurringIncome');
 renderAllSections();
 applySavedPanelState();
@@ -1123,6 +1270,9 @@ addOptionalEventListener('allocationForm', 'submit', handleAllocationSubmit);
 addOptionalEventListener('allocationCancel', 'click', resetAllocationForm);
 addOptionalEventListener('allocationsList', 'click', handleAllocationActions);
 addOptionalEventListener('investmentForm', 'submit', handleInvestmentSubmit);
+addOptionalEventListener('assetForm', 'submit', handleAssetSubmit);
+addOptionalEventListener('assetCancel', 'click', resetAssetForm);
+addOptionalEventListener('assetsList', 'click', handleAssetActions);
 addOptionalEventListener('investmentCancel', 'click', resetInvestmentForm);
 addOptionalEventListener('investmentsList', 'click', handleInvestmentActions);
 addOptionalEventListener('recurringIncomeForm', 'submit', handleRecurringIncomeSubmit);
