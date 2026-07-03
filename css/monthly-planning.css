@@ -42,6 +42,7 @@
 }
 
 .monthly-planning-card {
+  --monthly-flow-day-width: clamp(74px, 22vw, 88px);
   min-height: 96px;
   border: 1px dashed rgba(255, 255, 255, 0.13);
   border-radius: 20px;
@@ -182,26 +183,30 @@
 
 .daily-date-strip {
   display: grid;
-  grid-auto-columns: minmax(64px, 1fr);
+  grid-auto-columns: var(--monthly-flow-day-width);
   grid-auto-flow: column;
   gap: 8px;
   overflow-x: auto;
-  margin: -4px -2px 16px;
-  padding: 4px 2px 10px;
+  margin: -2px -10px 14px;
+  padding: 4px 10px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
 }
 
 .daily-date-strip span {
   display: grid;
   place-items: center;
+  align-content: start;
   gap: 5px;
   box-sizing: border-box;
-  min-width: 64px;
+  min-width: var(--monthly-flow-day-width);
   overflow: hidden;
   scroll-snap-align: start;
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  padding: 9px 8px;
+  min-height: 84px;
+  padding: 9px 7px;
   background: rgba(255, 255, 255, 0.04);
 }
 
@@ -232,6 +237,7 @@
 
 .daily-date-strip .day-events {
   display: grid;
+  place-items: center;
   gap: 4px;
   box-sizing: border-box;
   min-width: 0;
@@ -254,13 +260,14 @@
   max-width: 100%;
   overflow: hidden;
   border-radius: 999px;
-  padding: 3px 5px;
+  padding: 3px 6px;
   color: rgba(247, 247, 251, 0.88);
   font-size: 0.56rem;
   font-weight: 850;
   line-height: 1;
   text-overflow: ellipsis;
   white-space: nowrap;
+  width: 100%;
 }
 
 .bill-event-marker::before {
@@ -299,18 +306,20 @@
 
 .running-balance-row {
   display: grid;
-  grid-auto-columns: minmax(64px, 1fr);
+  grid-auto-columns: var(--monthly-flow-day-width);
   grid-auto-flow: column;
   gap: 8px;
   overflow-x: auto;
-  margin: -8px -2px 16px;
-  padding: 0 2px 10px;
+  margin: -6px -10px 16px;
+  padding: 0 10px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
 }
 
 .running-balance-row span {
   box-sizing: border-box;
-  min-width: 64px;
+  min-width: var(--monthly-flow-day-width);
   overflow: hidden;
   scroll-snap-align: start;
   border: 1px solid rgba(76, 217, 100, 0.16);
@@ -356,9 +365,15 @@
   align-items: stretch;
   gap: 10px;
   overflow-x: auto;
-  margin: 0 -4px;
-  padding: 8px 4px 10px;
+  margin: 0 -10px;
+  padding: 8px 10px 10px;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
   scroll-snap-type: x proximity;
+}
+
+.bill-date-chip-list::-webkit-scrollbar {
+  display: none;
 }
 
 .bill-date-chip-list::before {
@@ -375,13 +390,15 @@
 .bill-date-chip {
   position: relative;
   z-index: 1;
-  flex: 0 0 84px;
+  flex: 0 0 clamp(88px, 27vw, 104px);
   display: grid;
   place-items: center;
   gap: 6px;
   scroll-snap-align: start;
   border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 18px;
+  box-sizing: border-box;
+  min-width: 0;
   padding: 12px 10px;
   background: rgba(14, 14, 18, 0.9);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
@@ -401,6 +418,10 @@
 }
 
 .bill-date-chip span {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: rgba(169, 169, 181, 0.82);
   font-size: 0.72rem;
   font-weight: 750;
@@ -415,7 +436,7 @@
 .monthly-flow-summary-panel {
   display: grid;
   gap: 10px;
-  margin: 14px 0 0;
+  margin: 16px 0 0;
   border-top: 1px solid rgba(255, 255, 255, 0.075);
   padding-top: 12px;
 }
@@ -488,6 +509,7 @@
 }
 
 .monthly-flow-summary-card strong {
+  min-width: 0;
   overflow-wrap: anywhere;
   color: var(--money-positive);
   font-size: 1rem;
@@ -616,6 +638,9 @@
   display: grid;
   gap: 5px;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .monthly-flow-timeline-lowest-label {
@@ -641,6 +666,8 @@
 .monthly-flow-timeline-starting-row strong,
 .monthly-flow-timeline-amount {
   flex: 0 0 auto;
+  max-width: 42%;
+  overflow: hidden;
   font-size: 0.82rem;
   font-weight: 850;
 }
@@ -703,6 +730,9 @@
 
 .monthly-flow-bill-amount {
   flex: 0 0 auto;
+  max-width: 38%;
+  overflow-wrap: anywhere;
+  text-align: right;
   color: var(--money-caution);
   font-size: 0.82rem;
   font-weight: 850;
@@ -776,6 +806,9 @@
 
 .monthly-flow-income-amount {
   flex: 0 0 auto;
+  max-width: 38%;
+  overflow-wrap: anywhere;
+  text-align: right;
   color: var(--money-positive);
   font-size: 0.82rem;
   font-weight: 850;
@@ -928,6 +961,78 @@
 
 .legend-remaining i {
   background: rgba(100, 210, 255, 0.95);
+}
+
+.daily-date-strip::-webkit-scrollbar,
+.running-balance-row::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 520px) {
+  .monthly-planning-section {
+    padding: 16px;
+  }
+
+  .monthly-planning-card {
+    padding: 12px;
+  }
+
+  .month-selector-row,
+  .planning-horizon-selector,
+  .weekly-timeline,
+  .daily-date-strip,
+  .running-balance-row {
+    margin-bottom: 14px;
+  }
+
+  .weekly-timeline {
+    margin-right: -10px;
+    margin-left: -10px;
+    padding-right: 10px;
+    padding-left: 10px;
+    scroll-snap-type: x proximity;
+  }
+
+  .weekly-timeline span {
+    scroll-snap-align: start;
+  }
+
+  .monthly-flow-timeline-starting-row,
+  .monthly-flow-timeline-row,
+  .monthly-flow-bill-row,
+  .monthly-flow-income-row {
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .monthly-flow-timeline-details,
+  .monthly-flow-bill-copy,
+  .monthly-flow-income-copy {
+    flex: 1 1 auto;
+  }
+
+  .monthly-flow-timeline-details {
+    line-height: 1.38;
+  }
+
+  .monthly-flow-timeline-lowest-label {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .monthly-flow-bill-copy span,
+  .monthly-flow-income-copy span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .monthly-flow-timeline-amount,
+  .monthly-flow-bill-amount,
+  .monthly-flow-income-amount {
+    font-size: 0.78rem;
+    line-height: 1.18;
+  }
 }
 
 @media (min-width: 760px) {
