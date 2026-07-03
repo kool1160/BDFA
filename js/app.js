@@ -8,6 +8,7 @@ const accountStorageKey = 'bdfa.mockAccounts';
 const billStorageKey = 'bdfa.mockBills';
 const allocationStorageKey = 'bdfa.mockAllocations';
 const investmentStorageKey = 'bdfa.mockInvestments';
+const recurringIncomeStorageKey = 'bdfa.mockRecurringIncome';
 const panelStateStorageKey = 'bdfa.panelState';
 let statusTimer;
 
@@ -19,6 +20,12 @@ const billFrequencies = {
 };
 
 const accountTypes = ['Cash', 'Credit Card', 'Debt'];
+const recurringIncomeFrequencies = {
+  weekly: 'Weekly',
+  biweekly: 'Biweekly',
+  semimonthly: 'Semimonthly',
+  monthly: 'Monthly'
+};
 
 const demoData = {
   accounts: [
@@ -45,6 +52,10 @@ const demoData = {
     { id: 'hsa', name: 'HSA', detail: 'Invested medical savings', amount: 18540 },
     { id: 'roth-ira', name: 'Roth IRA', detail: 'Tax-free retirement', amount: 116000 },
     { id: 'brokerage', name: 'Brokerage', detail: 'Taxable investing', amount: 105102 }
+  ],
+  recurringIncome: [
+    { id: 'primary-paycheck', name: 'Primary Paycheck', amount: 2100, frequency: 'biweekly', nextPayDay: '2026-07-08' },
+    { id: 'side-income', name: 'Side Income', amount: 375, frequency: 'monthly', nextPayDay: '10' }
   ]
 };
 
@@ -185,6 +196,7 @@ function saveAllRows() {
   saveRows(billStorageKey, data.bills);
   saveRows(allocationStorageKey, data.allocations);
   saveRows(investmentStorageKey, data.investments);
+  saveRows(recurringIncomeStorageKey, data.recurringIncome);
 }
 
 function getDashboardTotals() {
@@ -208,6 +220,7 @@ function renderSectionSummaries() {
   setText('billsSummary', `${money.format(getMonthlyBillsTotal())}/mo`);
   setMoneyText('allocationsSummary', total(data.allocations));
   setMoneyText('investmentsSummary', total(data.investments));
+  setMoneyText('recurringIncomeSummary', getRecurringIncomeTotal());
 }
 
 function renderDashboardTotals() {
@@ -673,11 +686,179 @@ function handleInvestmentActions(event) {
   }
 }
 
+
+function getRecurringIncomeTotal() {
+  return data.recurringIncome.reduce((sum, income) => (
+    Number.isFinite(income.amount) ? sum + income.amount : sum
+  ), 0);
+}
+
+function getRecurringIncomeFrequencyLabel(frequency) {
+  return recurringIncomeFrequencies[frequency] || recurringIncomeFrequencies.monthly;
+}
+
+function resetRecurringIncomeForm() {
+  const form = document.getElementById('recurringIncomeForm');
+
+  if (form) {
+    form.reset();
+  }
+
+  const id = document.getElementById('recurringIncomeId');
+  const frequency = document.getElementById('recurringIncomeFrequency');
+  const submit = document.getElementById('recurringIncomeSubmit');
+  const cancel = document.getElementById('recurringIncomeCancel');
+
+  if (id) {
+    id.value = '';
+  }
+
+  if (frequency) {
+    frequency.value = 'biweekly';
+  }
+
+  if (submit) {
+    submit.textContent = 'Add Income';
+  }
+
+  if (cancel) {
+    cancel.hidden = true;
+  }
+}
+
+function renderRecurringIncome() {
+  const target = document.getElementById('recurringIncomeList');
+
+  if (!target) {
+    return;
+  }
+
+  if (!data.recurringIncome.length) {
+    target.innerHTML = getEmptyState('No recurring income yet', 'Add a source to keep income timing ready for future Monthly Flow planning.');
+    return;
+  }
+
+  target.innerHTML = data.recurringIncome.map(income => `
+    <div class="row editable-row">
+      <div>
+        <strong>${income.name || 'Income source'}</strong>
+        <small>${getRecurringIncomeFrequencyLabel(income.frequency)} · Next pay day ${income.nextPayDay || 'Not set'}</small>
+      </div>
+      <strong>${money.format(Number.isFinite(income.amount) ? income.amount : 0)}</strong>
+      <div class="row-actions" aria-label="Recurring income actions">
+        <button type="button" data-edit-recurring-income="${income.id}">Edit</button>
+        <button type="button" data-delete-recurring-income="${income.id}">Delete</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderRecurringIncomeDashboard() {
+  renderRecurringIncome();
+  renderSectionSummaries();
+}
+
+function getRecurringIncomeFormData() {
+  const id = document.getElementById('recurringIncomeId');
+  const name = document.getElementById('recurringIncomeName');
+  const amount = document.getElementById('recurringIncomeAmount');
+  const frequency = document.getElementById('recurringIncomeFrequency');
+  const nextPayDay = document.getElementById('recurringIncomeNextPayDay');
+
+  if (!id || !name || !amount || !frequency || !nextPayDay) {
+    return null;
+  }
+
+  const parsedAmount = Number(amount.value);
+
+  if (!name.value.trim() || !Number.isFinite(parsedAmount)) {
+    return null;
+  }
+
+  return {
+    id: id.value,
+    name: name.value.trim(),
+    amount: parsedAmount,
+    frequency: recurringIncomeFrequencies[frequency.value] ? frequency.value : 'monthly',
+    nextPayDay: nextPayDay.value.trim()
+  };
+}
+
+function isValidRecurringIncomeRow(row) {
+  return Boolean(row) &&
+    isText(row.id) &&
+    isText(row.name) &&
+    isAmount(row.amount) &&
+    (!row.frequency || Boolean(recurringIncomeFrequencies[row.frequency])) &&
+    (row.nextPayDay === undefined || typeof row.nextPayDay === 'string');
+}
+
+function handleRecurringIncomeSubmit(event) {
+  event.preventDefault();
+
+  const formData = getRecurringIncomeFormData();
+
+  if (!formData) {
+    return;
+  }
+
+  if (formData.id) {
+    data.recurringIncome = data.recurringIncome.map(income => (
+      income.id === formData.id
+        ? { ...income, name: formData.name, amount: formData.amount, frequency: formData.frequency, nextPayDay: formData.nextPayDay }
+        : income
+    ));
+  } else {
+    data.recurringIncome.push({
+      id: crypto.randomUUID(),
+      name: formData.name,
+      amount: formData.amount,
+      frequency: formData.frequency,
+      nextPayDay: formData.nextPayDay
+    });
+  }
+
+  saveRows(recurringIncomeStorageKey, data.recurringIncome);
+  resetRecurringIncomeForm();
+  renderRecurringIncomeDashboard();
+  dispatchSourceDataUpdated();
+}
+
+function handleRecurringIncomeActions(event) {
+  const editId = event.target.dataset.editRecurringIncome;
+  const deleteId = event.target.dataset.deleteRecurringIncome;
+
+  if (editId) {
+    const income = data.recurringIncome.find(item => item.id === editId);
+
+    if (!income) {
+      return;
+    }
+
+    document.getElementById('recurringIncomeId').value = income.id;
+    document.getElementById('recurringIncomeName').value = income.name || '';
+    document.getElementById('recurringIncomeAmount').value = Number.isFinite(income.amount) ? income.amount : '';
+    document.getElementById('recurringIncomeFrequency').value = recurringIncomeFrequencies[income.frequency] ? income.frequency : 'monthly';
+    document.getElementById('recurringIncomeNextPayDay').value = income.nextPayDay || '';
+    document.getElementById('recurringIncomeSubmit').textContent = 'Save Income';
+    document.getElementById('recurringIncomeCancel').hidden = false;
+  }
+
+  if (deleteId) {
+    data.recurringIncome = data.recurringIncome.filter(income => income.id !== deleteId);
+    saveRows(recurringIncomeStorageKey, data.recurringIncome);
+    resetRecurringIncomeForm();
+    renderRecurringIncomeDashboard();
+    dispatchSourceDataUpdated();
+  }
+}
+
 function renderAllSections() {
   renderAccounts();
   renderBills();
   renderAllocations();
   renderInvestments();
+  renderRecurringIncome();
   renderDashboardTotals();
 }
 
@@ -757,6 +938,7 @@ function isValidImport(importedData) {
   }
 
   const { accounts, bills, allocations, investments } = importedData;
+  const recurringIncome = Array.isArray(importedData.recurringIncome) ? importedData.recurringIncome : [];
 
   if (![accounts, bills, allocations, investments].every(Array.isArray)) {
     return false;
@@ -775,19 +957,24 @@ function isValidImport(importedData) {
     Boolean(billFrequencies[bill.frequency])
   ));
 
-  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow);
+  const recurringIncomeValid = recurringIncome.every(isValidRecurringIncomeRow);
+
+  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && recurringIncomeValid;
 }
+
 
 function applyImportedData(importedData) {
   data.accounts = importedData.accounts;
   data.bills = importedData.bills;
   data.allocations = importedData.allocations;
   data.investments = importedData.investments;
+  data.recurringIncome = Array.isArray(importedData.recurringIncome) ? importedData.recurringIncome : [];
   saveAllRows();
   resetAccountForm();
   resetBillForm();
   resetAllocationForm();
   resetInvestmentForm();
+  resetRecurringIncomeForm();
   renderAllSections();
   dispatchSourceDataUpdated();
 }
@@ -826,7 +1013,8 @@ function getExportData() {
     accounts: data.accounts,
     bills: data.bills,
     allocations: data.allocations,
-    investments: data.investments
+    investments: data.investments,
+    recurringIncome: data.recurringIncome
   };
 }
 
@@ -868,6 +1056,7 @@ function clearDemoStorage() {
   localStorage.removeItem(billStorageKey);
   localStorage.removeItem(allocationStorageKey);
   localStorage.removeItem(investmentStorageKey);
+  localStorage.removeItem(recurringIncomeStorageKey);
 }
 
 function resetDemoData() {
@@ -880,11 +1069,13 @@ function resetDemoData() {
   data.bills = freshData.bills;
   data.allocations = freshData.allocations;
   data.investments = freshData.investments;
+  data.recurringIncome = freshData.recurringIncome;
   clearDemoStorage();
   resetAccountForm();
   resetBillForm();
   resetAllocationForm();
   resetInvestmentForm();
+  resetRecurringIncomeForm();
   renderAllSections();
   dispatchSourceDataUpdated();
   showStatus('Demo data reset to the original mock dataset.');
@@ -894,6 +1085,7 @@ loadStoredRows(accountStorageKey, 'accounts');
 loadStoredRows(billStorageKey, 'bills');
 loadStoredRows(allocationStorageKey, 'allocations');
 loadStoredRows(investmentStorageKey, 'investments');
+loadStoredRows(recurringIncomeStorageKey, 'recurringIncome');
 renderAllSections();
 applySavedPanelState();
 
@@ -933,6 +1125,9 @@ addOptionalEventListener('allocationsList', 'click', handleAllocationActions);
 addOptionalEventListener('investmentForm', 'submit', handleInvestmentSubmit);
 addOptionalEventListener('investmentCancel', 'click', resetInvestmentForm);
 addOptionalEventListener('investmentsList', 'click', handleInvestmentActions);
+addOptionalEventListener('recurringIncomeForm', 'submit', handleRecurringIncomeSubmit);
+addOptionalEventListener('recurringIncomeCancel', 'click', resetRecurringIncomeForm);
+addOptionalEventListener('recurringIncomeList', 'click', handleRecurringIncomeActions);
 addOptionalEventListener('importButton', 'click', importDemoData);
 addOptionalEventListener('exportButton', 'click', exportDemoData);
 addOptionalEventListener('resetButton', 'click', resetDemoData);
