@@ -132,13 +132,17 @@ function getMonthlyFlowCurrentDay() {
   return today.getDate();
 }
 
+function isMonthlyFlowBillRemainingThisMonth(bill, currentDay) {
+  const dueDay = getMonthlyFlowBillDueDay(bill);
+
+  return dueDay !== null && dueDay >= currentDay;
+}
+
 function getMonthlyFlowRemainingBillsThisMonth(bills) {
   const currentDay = getMonthlyFlowCurrentDay();
 
   return bills.reduce((summary, bill) => {
-    const dueDay = getMonthlyFlowBillDueDay(bill);
-
-    if (dueDay !== null && dueDay >= currentDay) {
+    if (isMonthlyFlowBillRemainingThisMonth(bill, currentDay)) {
       summary.count += 1;
       summary.total += getMonthlyFlowBillRawAmount(bill);
     }
@@ -289,6 +293,21 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainin
   }
 }
 
+function getMonthlyFlowBillRunningBalances(bills, cashAvailable) {
+  const currentDay = getMonthlyFlowCurrentDay();
+  let runningBalance = cashAvailable;
+
+  return bills.map(bill => {
+    if (!isMonthlyFlowBillRemainingThisMonth(bill, currentDay)) {
+      return { bill, projectedAfterBill: null };
+    }
+
+    runningBalance -= getMonthlyFlowBillRawAmount(bill);
+
+    return { bill, projectedAfterBill: runningBalance };
+  });
+}
+
 function renderMonthlyFlowBillSummary(bills) {
   const countTarget = document.getElementById('monthlyFlowBillsCount');
   const estimateTarget = document.getElementById('monthlyFlowBillsEstimate');
@@ -323,15 +342,18 @@ function renderMonthlyFlowEmptyState(target) {
   target.replaceChildren(emptyState);
 }
 
-function renderMonthlyFlowBills(target, bills) {
+function renderMonthlyFlowBills(target, billRows) {
   const fragment = document.createDocumentFragment();
 
-  bills.forEach(bill => {
+  billRows.forEach(billRowData => {
+    const bill = billRowData.bill;
+    const projectedAfterBill = billRowData.projectedAfterBill;
     const billRow = document.createElement('div');
     const billCopy = document.createElement('div');
     const billName = document.createElement('strong');
     const billMeta = document.createElement('span');
     const billAmount = document.createElement('span');
+    const projectedBalance = document.createElement('span');
 
     billRow.className = 'monthly-flow-bill-row';
     billCopy.className = 'monthly-flow-bill-copy';
@@ -342,6 +364,13 @@ function renderMonthlyFlowBills(target, bills) {
     billAmount.textContent = getMonthlyFlowBillAmount(bill);
 
     billCopy.append(billName, billMeta);
+
+    if (projectedAfterBill !== null) {
+      projectedBalance.className = 'monthly-flow-bill-projected';
+      projectedBalance.textContent = `Projected after bill: ${monthlyFlowMoney.format(projectedAfterBill)}`;
+      applyMonthlyFlowMoneyTone(projectedBalance, projectedAfterBill);
+      billCopy.append(projectedBalance);
+    }
     billRow.append(billCopy, billAmount);
     fragment.append(billRow);
   });
@@ -353,8 +382,10 @@ function renderMonthlyFlow(sourceData) {
   const target = document.getElementById('monthlyFlowBillsList');
   const bills = sourceData && Array.isArray(sourceData.bills) ? sourceData.bills : [];
   const accounts = sourceData && Array.isArray(sourceData.accounts) ? sourceData.accounts : [];
+  const sortedBills = getMonthlyFlowSortedBills(bills);
   const estimatedMonthlyBills = renderMonthlyFlowBillSummary(bills);
   const remainingBillsSummary = renderMonthlyFlowRemainingBillsSummary(bills);
+  const cashAvailable = getMonthlyFlowCashAvailable(accounts);
 
   renderMonthlyFlowNextBillDue(bills);
   renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, remainingBillsSummary.total);
@@ -368,7 +399,7 @@ function renderMonthlyFlow(sourceData) {
     return;
   }
 
-  renderMonthlyFlowBills(target, getMonthlyFlowSortedBills(bills));
+  renderMonthlyFlowBills(target, getMonthlyFlowBillRunningBalances(sortedBills, cashAvailable));
 }
 
 function refreshMonthlyFlow(event) {

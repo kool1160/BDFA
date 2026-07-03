@@ -501,6 +501,16 @@
   line-height: 1.34;
 }
 
+.monthly-flow-bill-copy .monthly-flow-bill-projected {
+  color: var(--money-positive);
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.monthly-flow-bill-copy .monthly-flow-bill-projected.monthly-flow-cash-negative {
+  color: var(--money-debt);
+}
+
 .monthly-flow-bill-amount {
   flex: 0 0 auto;
   color: var(--money-caution);
