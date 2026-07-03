@@ -41,3 +41,35 @@
   letter-spacing: -0.01em;
   line-height: 1.25;
 }
+
+.panel-copy {
+  margin: 0 0 16px;
+  color: rgba(247, 247, 251, 0.72);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.panel-total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 12px 0 14px;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.panel-total span {
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.panel-total strong {
+  color: #70f0b8;
+  font-size: 1.1rem;
+}

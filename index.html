@@ -214,6 +214,45 @@
         </div>
       </section>
 
+
+      <section class="panel" data-mobile-view="overview">
+        <button class="panel-title" data-toggle="assets"><span class="panel-label"><span class="section-heading"><span class="section-icon growth-icon" aria-hidden="true">◆</span><span>Assets</span></span><span class="panel-helper">Have a mortgage or car loan? Add the home or vehicle value here.</span></span><span class="panel-summary money-growth" id="assetsSummary">$0</span><span>⌄</span></button>
+        <div class="panel-body" id="assets">
+          <p class="panel-copy">Loans reduce net worth. Add the asset value here to show the value behind the debt.</p>
+          <form class="edit-form" id="assetForm">
+            <input type="hidden" id="assetId" />
+            <label>
+              <span>Asset name</span>
+              <input id="assetName" type="text" placeholder="Primary Home" required />
+            </label>
+            <label>
+              <span>Type</span>
+              <select id="assetType" required>
+                <option value="Home">Home</option>
+                <option value="Vehicle">Vehicle</option>
+                <option value="Equipment">Equipment</option>
+                <option value="Personal Property">Personal Property</option>
+                <option value="Other">Other</option>
+              </select>
+            </label>
+            <label>
+              <span>Value</span>
+              <input id="assetValue" type="number" inputmode="decimal" step="0.01" placeholder="550000" required />
+            </label>
+            <label>
+              <span>Notes</span>
+              <input id="assetNotes" type="text" placeholder="Manual estimate" />
+            </label>
+            <div class="form-actions">
+              <button type="submit" id="assetSubmit">Add Asset</button>
+              <button type="button" id="assetCancel" class="ghost-button" hidden>Cancel</button>
+            </div>
+          </form>
+          <div class="panel-total"><span>Assets total</span><strong id="assetsTotal">$0</strong></div>
+          <div id="assetsList"></div>
+        </div>
+      </section>
+
       <section class="panel" data-mobile-view="overview">
         <button class="panel-title" data-toggle="investments"><span class="panel-label"><span class="section-heading"><span class="section-icon growth-icon" aria-hidden="true">↗</span><span>Investments</span></span><span class="panel-helper" id="investmentsMix" hidden></span></span><span class="panel-summary money-growth" id="investmentsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="investments">
