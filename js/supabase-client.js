@@ -38,6 +38,11 @@
     return hasConfig() && hasLibrary() && Boolean(getClient());
   }
 
+  function getEmailRedirectUrl() {
+    // Supabase Authentication URL Configuration must allow this deployed app URL for email confirmation redirects to work.
+    return `${window.location.origin}${window.location.pathname}`;
+  }
+
   function getConfigurationLabel() {
     if (!hasConfig()) {
       return 'Supabase not configured';
@@ -84,12 +89,18 @@
       return { data: null, error: new Error(getConfigurationLabel()) };
     }
 
-    const result = await supabase.auth.signUp({ email, password });
+    const result = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: getEmailRedirectUrl()
+      }
+    });
 
     if (result.error) {
       setStatus(result.error.message || 'Sign up failed.', 'error');
     } else {
-      setStatus('Sign up complete. Check your email if confirmation is required.', 'success');
+      setStatus('Sign up complete. Check your email to confirm, then return here and sign in.', 'success');
     }
 
     return result;
