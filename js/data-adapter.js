@@ -11,6 +11,7 @@
     assets: 'bdfa.mockAssets',
     recurringIncome: 'bdfa.mockRecurringIncome'
   };
+  const preCloudRestoreBackupKey = 'bdfa.preCloudRestoreBackup';
 
   const sourceCollections = Object.keys(storageKeys);
   let currentSourceData = null;
@@ -65,6 +66,26 @@
     return currentSourceData ? clone(currentSourceData) : readStoredSourceData();
   }
 
+  function validateSourceSnapshot(snapshot) {
+    if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+      return { valid: false, data: null };
+    }
+
+    const sourceData = {};
+
+    for (const collection of sourceCollections) {
+      if (snapshot[collection] === undefined) {
+        sourceData[collection] = [];
+      } else if (Array.isArray(snapshot[collection])) {
+        sourceData[collection] = clone(snapshot[collection]);
+      } else {
+        return { valid: false, data: null };
+      }
+    }
+
+    return { valid: true, data: sourceData };
+  }
+
   function dispatchSourceDataUpdated(sourceData) {
     window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
       detail: clone(sourceData)
@@ -86,8 +107,55 @@
     return snapshot;
   }
 
+  function hasPreCloudRestoreBackup() {
+    return Boolean(localStorage.getItem(preCloudRestoreBackupKey));
+  }
+
+  function createPreCloudRestoreBackup() {
+    const validation = validateSourceSnapshot(getPublicSourceData());
+
+    if (!validation.valid) {
+      return false;
+    }
+
+    try {
+      localStorage.setItem(preCloudRestoreBackupKey, JSON.stringify({
+        createdAt: new Date().toISOString(),
+        sourceData: validation.data
+      }));
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function readPreCloudRestoreBackup() {
+    const savedBackup = localStorage.getItem(preCloudRestoreBackupKey);
+
+    if (!savedBackup) {
+      return { valid: false, data: null };
+    }
+
+    try {
+      const backup = JSON.parse(savedBackup);
+
+      if (!backup || typeof backup !== 'object' || Array.isArray(backup)) {
+        return { valid: false, data: null };
+      }
+
+      return validateSourceSnapshot(backup.sourceData);
+    } catch {
+      return { valid: false, data: null };
+    }
+  }
+
   function saveCloudSnapshot(sourceData) {
     const supabaseClient = getSupabaseClient();
+    const validation = validateSourceSnapshot(sourceData);
+
+    if (!validation.valid) {
+      return Promise.resolve({ status: 'invalid' });
+    }
 
     if (!supabaseClient || !supabaseClient.isConfigured()) {
       return Promise.resolve({ status: 'local' });
@@ -95,7 +163,7 @@
 
     cloudSavePromise = cloudSavePromise
       .catch(() => undefined)
-      .then(() => supabaseClient.saveSnapshot(clone(sourceData)))
+      .then(() => supabaseClient.saveSnapshot(validation.data))
       .catch(error => ({ status: 'failed', error }));
 
     return cloudSavePromise;
@@ -116,30 +184,43 @@
     return getSourceData();
   }
 
-  function saveSourceData(sourceData) {
-    currentSourceData = clone(sourceData);
+  function persistSourceData(sourceData, options = {}) {
+    const { syncCloud = true } = options;
+    const validation = validateSourceSnapshot(sourceData);
+
+    if (!validation.valid) {
+      return getSourceData();
+    }
+
+    currentSourceData = clone(validation.data);
 
     sourceCollections.forEach(collection => {
-      if (Array.isArray(sourceData[collection])) {
-        saveRows(collection, sourceData[collection]);
-      }
+      saveRows(collection, currentSourceData[collection]);
     });
 
-    saveCloudSnapshot(currentSourceData);
+    if (syncCloud) {
+      saveCloudSnapshot(currentSourceData);
+    }
 
     return getSourceData();
   }
 
+  function saveSourceData(sourceData) {
+    return persistSourceData(sourceData);
+  }
+
+  function saveLocalSourceData(sourceData) {
+    return persistSourceData(sourceData, { syncCloud: false });
+  }
+
   function importData(sourceData) {
-    const importSnapshot = clone(sourceData);
+    const validation = validateSourceSnapshot(sourceData);
 
-    sourceCollections.forEach(collection => {
-      if (!Array.isArray(importSnapshot[collection])) {
-        importSnapshot[collection] = [];
-      }
-    });
+    if (!validation.valid) {
+      return getSourceData();
+    }
 
-    return saveSourceData(importSnapshot);
+    return saveSourceData(validation.data);
   }
 
   function exportData(sourceData) {
@@ -172,13 +253,23 @@
     const result = await supabaseClient.loadSnapshot();
 
     if (result.data) {
-      const cloudSourceData = clone(result.data);
+      const validation = validateSourceSnapshot(result.data);
+
+      if (!validation.valid) {
+        return { status: 'invalid', data: getSourceData(), error: null };
+      }
+
+      const cloudSourceData = validation.data;
 
       if (!applySnapshot) {
         return { status: result.status, data: cloudSourceData, error: null };
       }
 
-      saveSourceData(cloudSourceData);
+      if (!createPreCloudRestoreBackup()) {
+        return { status: 'backup-failed', data: getSourceData(), error: null };
+      }
+
+      saveLocalSourceData(cloudSourceData);
       dispatchSourceDataUpdated(currentSourceData);
       return { status: result.status, data: getSourceData(), error: null };
     }
@@ -206,6 +297,11 @@
     exportData,
     resetToDemoData,
     getPublicSourceData,
+    validateSourceSnapshot,
+    hasPreCloudRestoreBackup,
+    createPreCloudRestoreBackup,
+    readPreCloudRestoreBackup,
+    saveLocalSourceData,
     saveCloudSnapshot,
     loadCloudSnapshot
   };
