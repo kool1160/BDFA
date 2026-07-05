@@ -1105,11 +1105,11 @@ function isValidAllocationRow(row) {
   );
 }
 
-function isValidImport(importedData) {
+function getValidImportSnapshot(importedData) {
   const validation = validateSourceSnapshot(importedData);
 
   if (!validation.valid) {
-    return false;
+    return null;
   }
 
   const { accounts, bills, allocations, investments, assets, recurringIncome } = validation.data;
@@ -1129,7 +1129,13 @@ function isValidImport(importedData) {
 
   const recurringIncomeValid = recurringIncome.every(isValidRecurringIncomeRow);
 
-  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && assets.every(isValidAssetRow) && recurringIncomeValid;
+  const rowsValid = accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && assets.every(isValidAssetRow) && recurringIncomeValid;
+
+  return rowsValid ? validation.data : null;
+}
+
+function isValidImport(importedData) {
+  return Boolean(getValidImportSnapshot(importedData));
 }
 
 
@@ -1158,12 +1164,14 @@ function importDemoData() {
   try {
     const importedData = JSON.parse(rawImport);
 
-    if (!isValidImport(importedData)) {
+    const importSnapshot = getValidImportSnapshot(importedData);
+
+    if (!importSnapshot) {
       showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
       return;
     }
 
-    applyImportedData(importedData);
+    applyImportedData(importSnapshot);
 
     if (importField) {
       importField.value = '';
