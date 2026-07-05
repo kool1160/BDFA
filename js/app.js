@@ -1138,9 +1138,30 @@ function isValidImport(importedData) {
   return Boolean(getValidImportSnapshot(importedData));
 }
 
+function sourceSnapshotsMatch(firstSnapshot, secondSnapshot) {
+  const firstValidation = validateSourceSnapshot(firstSnapshot);
+  const secondValidation = validateSourceSnapshot(secondSnapshot);
+
+  if (!firstValidation.valid || !secondValidation.valid) {
+    return false;
+  }
+
+  return JSON.stringify(firstValidation.data) === JSON.stringify(secondValidation.data);
+}
 
 function applyImportedData(importedData) {
-  const persistedData = window.BDFA.dataAdapter.importData(importedData);
+  const importSnapshot = getValidImportSnapshot(importedData);
+
+  if (!importSnapshot) {
+    return false;
+  }
+
+  const persistedData = window.BDFA.dataAdapter.importData(importSnapshot);
+
+  if (!sourceSnapshotsMatch(importSnapshot, persistedData)) {
+    return false;
+  }
+
   applySourceDataSnapshot(persistedData);
   resetAccountForm();
   resetBillForm();
@@ -1150,6 +1171,8 @@ function applyImportedData(importedData) {
   resetRecurringIncomeForm();
   renderAllSections();
   dispatchSourceDataUpdated();
+
+  return true;
 }
 
 function importDemoData() {
@@ -1171,7 +1194,10 @@ function importDemoData() {
       return;
     }
 
-    applyImportedData(importSnapshot);
+    if (!applyImportedData(importSnapshot)) {
+      showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
+      return;
+    }
 
     if (importField) {
       importField.value = '';
