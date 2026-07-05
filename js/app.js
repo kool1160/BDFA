@@ -182,6 +182,56 @@ function applySourceDataSnapshot(sourceData) {
   });
 }
 
+function validateSourceSnapshot(sourceData) {
+  if (window.BDFA.dataAdapter && typeof window.BDFA.dataAdapter.validateSourceSnapshot === 'function') {
+    return window.BDFA.dataAdapter.validateSourceSnapshot(sourceData);
+  }
+
+  if (!sourceData || typeof sourceData !== 'object' || Array.isArray(sourceData)) {
+    return { valid: false, data: null };
+  }
+
+  const snapshot = {};
+
+  for (const collection of ['accounts', 'bills', 'allocations', 'investments', 'assets', 'recurringIncome']) {
+    if (sourceData[collection] === undefined) {
+      snapshot[collection] = [];
+    } else if (Array.isArray(sourceData[collection])) {
+      snapshot[collection] = cloneSourceData(sourceData[collection]);
+    } else {
+      return { valid: false, data: null };
+    }
+  }
+
+  return { valid: true, data: snapshot };
+}
+
+function resetFormsAfterSourceDataChange() {
+  resetAccountForm();
+  resetBillForm();
+  resetAllocationForm();
+  resetInvestmentForm();
+  resetAssetForm();
+  resetRecurringIncomeForm();
+}
+
+function applyPersistedSourceData(sourceData) {
+  applySourceDataSnapshot(sourceData);
+  resetFormsAfterSourceDataChange();
+  renderAllSections();
+  window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
+    detail: cloneSourceData(sourceData)
+  }));
+}
+
+function saveSourceDataLocally(sourceData) {
+  if (window.BDFA.dataAdapter && typeof window.BDFA.dataAdapter.saveLocalSourceData === 'function') {
+    return window.BDFA.dataAdapter.saveLocalSourceData(sourceData);
+  }
+
+  return window.BDFA.dataAdapter.importData(sourceData);
+}
+
 function saveAllRows() {
   window.BDFA.dataAdapter.saveSourceData(getExportData());
   dispatchSourceDataUpdated();
@@ -1146,6 +1196,8 @@ function getRuntimeSourceData() {
 
 window.BDFA.getSourceData = getRuntimeSourceData;
 
+let cloudOperationInProgress = false;
+
 function dispatchSourceDataUpdated() {
   window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
     detail: window.BDFA.getSourceData()
@@ -1169,6 +1221,7 @@ async function renderAuthStatus(message, tone = 'neutral') {
   const signInButton = document.getElementById('authSignIn');
   const cloudSaveButton = document.getElementById('cloudSaveButton');
   const cloudLoadButton = document.getElementById('cloudLoadButton');
+  const restoreLocalBackupButton = document.getElementById('restoreLocalBackupButton');
   const authInputs = document.querySelectorAll('[data-auth-input]');
   const supabaseClient = window.BDFA.supabaseClient;
 
@@ -1185,7 +1238,7 @@ async function renderAuthStatus(message, tone = 'neutral') {
     if (signOutButton) {
       signOutButton.hidden = true;
     }
-    [cloudSaveButton, cloudLoadButton].forEach(button => {
+    [cloudSaveButton, cloudLoadButton, restoreLocalBackupButton].forEach(button => {
       if (button) {
         button.disabled = true;
       }
@@ -1216,9 +1269,32 @@ async function renderAuthStatus(message, tone = 'neutral') {
 
   [cloudSaveButton, cloudLoadButton].forEach(button => {
     if (button) {
-      button.disabled = !user;
+      button.disabled = !user || cloudOperationInProgress;
     }
   });
+
+  if (restoreLocalBackupButton) {
+    const hasBackup = window.BDFA.dataAdapter
+      && typeof window.BDFA.dataAdapter.hasPreCloudRestoreBackup === 'function'
+      && window.BDFA.dataAdapter.hasPreCloudRestoreBackup();
+    restoreLocalBackupButton.disabled = cloudOperationInProgress || !hasBackup;
+    restoreLocalBackupButton.hidden = !hasBackup;
+  }
+}
+
+async function runCloudOperation(statusMessage, operation) {
+  if (cloudOperationInProgress) {
+    return null;
+  }
+
+  cloudOperationInProgress = true;
+  await renderAuthStatus(statusMessage, 'neutral');
+
+  try {
+    return await operation();
+  } finally {
+    cloudOperationInProgress = false;
+  }
 }
 
 async function handleAuthAction(action) {
@@ -1261,6 +1337,16 @@ async function syncCloudSnapshotAfterAuth() {
     return;
   }
 
+  if (result.status === 'invalid') {
+    await renderAuthStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
+    return;
+  }
+
+  if (result.status === 'backup-failed') {
+    await renderAuthStatus('Could not create local backup. Cloud load was canceled.', 'error');
+    return;
+  }
+
   if (result.status === 'loaded') {
     await renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
     return;
@@ -1270,6 +1356,10 @@ async function syncCloudSnapshotAfterAuth() {
 }
 
 async function handleManualCloudSave() {
+  if (cloudOperationInProgress) {
+    return;
+  }
+
   if (!window.BDFA.dataAdapter || typeof window.BDFA.dataAdapter.saveCloudSnapshot !== 'function') {
     await renderAuthStatus('Cloud save failed, using local fallback.', 'error');
     return;
@@ -1279,11 +1369,21 @@ async function handleManualCloudSave() {
     return;
   }
 
-  await renderAuthStatus('Saving to cloud...', 'neutral');
   const sourceData = typeof window.BDFA.getSourceData === 'function'
     ? window.BDFA.getSourceData()
     : window.BDFA.dataAdapter.exportData();
-  const result = await window.BDFA.dataAdapter.saveCloudSnapshot(sourceData);
+  const validation = validateSourceSnapshot(sourceData);
+
+  if (!validation.valid) {
+    await renderAuthStatus('Local snapshot is invalid. Cloud save was canceled.', 'error');
+    return;
+  }
+
+  const result = await runCloudOperation('Saving to cloud...', () => window.BDFA.dataAdapter.saveCloudSnapshot(validation.data));
+
+  if (!result) {
+    return;
+  }
 
   if (result.status === 'saved') {
     await renderAuthStatus('Saved to cloud.', 'success');
@@ -1295,20 +1395,32 @@ async function handleManualCloudSave() {
     return;
   }
 
+  if (result.status === 'invalid') {
+    await renderAuthStatus('Local snapshot is invalid. Cloud save was canceled.', 'error');
+    return;
+  }
+
   await renderAuthStatus('Cloud save failed, using local fallback.', 'error');
 }
 
 async function handleManualCloudLoad() {
+  if (cloudOperationInProgress) {
+    return;
+  }
+
   if (!window.BDFA.dataAdapter || typeof window.BDFA.dataAdapter.loadCloudSnapshot !== 'function') {
     await renderAuthStatus('Cloud load failed, using local fallback.', 'error');
     return;
   }
 
-  await renderAuthStatus('Loading cloud snapshot...', 'neutral');
-  const result = await window.BDFA.dataAdapter.loadCloudSnapshot({
+  const result = await runCloudOperation('Loading cloud snapshot...', () => window.BDFA.dataAdapter.loadCloudSnapshot({
     applySnapshot: false,
     saveMissingSnapshot: false
-  });
+  }));
+
+  if (!result) {
+    return;
+  }
 
   if (result.status === 'missing') {
     await renderAuthStatus('No cloud snapshot found.', 'neutral');
@@ -1325,24 +1437,76 @@ async function handleManualCloudLoad() {
     return;
   }
 
+  const validation = validateSourceSnapshot(result.data);
+
+  if (result.status === 'invalid' || !validation.valid) {
+    await renderAuthStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
+    return;
+  }
+
   if (!confirm('Load cloud snapshot? This will replace the current local BDFA data on this device.')) {
     await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
     return;
   }
 
-  const persistedData = window.BDFA.dataAdapter.importData(result.data);
-  applySourceDataSnapshot(persistedData);
-  resetAccountForm();
-  resetBillForm();
-  resetAllocationForm();
-  resetInvestmentForm();
-  resetAssetForm();
-  resetRecurringIncomeForm();
-  renderAllSections();
-  window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
-    detail: cloneSourceData(persistedData)
-  }));
-  await renderAuthStatus('Cloud snapshot loaded.', 'success');
+  const applyResult = await runCloudOperation('Loading cloud snapshot...', async () => {
+    if (!window.BDFA.dataAdapter.createPreCloudRestoreBackup()) {
+      return { status: 'backup-failed' };
+    }
+
+    const persistedData = saveSourceDataLocally(validation.data);
+    applyPersistedSourceData(persistedData);
+    return { status: 'loaded' };
+  });
+
+  if (!applyResult) {
+    return;
+  }
+
+  if (applyResult.status === 'backup-failed') {
+    await renderAuthStatus('Could not create local backup. Cloud load was canceled.', 'error');
+    return;
+  }
+
+  await renderAuthStatus('Cloud snapshot loaded. Previous local data was backed up.', 'success');
+}
+
+async function handleRestoreLocalBackup() {
+  if (cloudOperationInProgress) {
+    return;
+  }
+
+  if (!window.BDFA.dataAdapter || typeof window.BDFA.dataAdapter.readPreCloudRestoreBackup !== 'function') {
+    await renderAuthStatus('Local backup could not be restored.', 'error');
+    return;
+  }
+
+  if (!confirm('Restore the local backup from before the last cloud load? This will replace the current local BDFA data on this device.')) {
+    return;
+  }
+
+  const result = await runCloudOperation('Restoring local backup...', async () => {
+    const backup = window.BDFA.dataAdapter.readPreCloudRestoreBackup();
+
+    if (!backup.valid) {
+      return { status: 'invalid' };
+    }
+
+    const persistedData = saveSourceDataLocally(backup.data);
+    applyPersistedSourceData(persistedData);
+    return { status: 'restored' };
+  });
+
+  if (!result) {
+    return;
+  }
+
+  if (result.status !== 'restored') {
+    await renderAuthStatus('Local backup could not be restored.', 'error');
+    return;
+  }
+
+  await renderAuthStatus('Local backup restored.', 'success');
 }
 
 async function handleSignOut() {
@@ -1469,6 +1633,7 @@ addOptionalEventListener('authSignIn', 'click', () => handleAuthAction('signin')
 addOptionalEventListener('authSignOut', 'click', handleSignOut);
 addOptionalEventListener('cloudSaveButton', 'click', handleManualCloudSave);
 addOptionalEventListener('cloudLoadButton', 'click', handleManualCloudLoad);
+addOptionalEventListener('restoreLocalBackupButton', 'click', handleRestoreLocalBackup);
 
 window.addEventListener('bdfa:source-data-updated', handleSourceDataUpdated);
 window.addEventListener('bdfa:supabase-status-changed', event => {
