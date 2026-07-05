@@ -1105,15 +1105,8 @@ function isValidAllocationRow(row) {
   );
 }
 
-function getValidImportSnapshot(importedData) {
-  const validation = validateSourceSnapshot(importedData);
-
-  if (!validation.valid) {
-    return null;
-  }
-
-  const { accounts, bills, allocations, investments, assets, recurringIncome } = validation.data;
-
+function areImportRowsValid(sourceData) {
+  const { accounts, bills, allocations, investments, assets, recurringIncome } = sourceData;
   const accountsValid = accounts.every(account => (
     account &&
     isText(account.id) &&
@@ -1129,13 +1122,23 @@ function getValidImportSnapshot(importedData) {
 
   const recurringIncomeValid = recurringIncome.every(isValidRecurringIncomeRow);
 
-  const rowsValid = accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && assets.every(isValidAssetRow) && recurringIncomeValid;
+  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && assets.every(isValidAssetRow) && recurringIncomeValid;
+}
 
-  return rowsValid ? validation.data : null;
+function getValidImportSnapshot(importedData) {
+  const validation = validateSourceSnapshot(importedData);
+
+  if (!validation.valid || !areImportRowsValid(validation.data)) {
+    return null;
+  }
+
+  return validation.data;
 }
 
 function isValidImport(importedData) {
-  return Boolean(getValidImportSnapshot(importedData));
+  const validation = validateSourceSnapshot(importedData);
+
+  return validation.valid && areImportRowsValid(validation.data);
 }
 
 function sourceSnapshotsMatch(firstSnapshot, secondSnapshot) {
