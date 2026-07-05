@@ -1222,7 +1222,22 @@ async function handleAuthAction(action) {
     return;
   }
 
-  await window.BDFA.dataAdapter.loadCloudSnapshot();
+  await syncCloudSnapshotAfterAuth();
+}
+
+async function syncCloudSnapshotAfterAuth() {
+  const result = await window.BDFA.dataAdapter.loadCloudSnapshot();
+
+  if (result.status === 'saved-initial') {
+    await renderAuthStatus('Signed in. Local snapshot saved to cloud.', 'success');
+    return;
+  }
+
+  if (result.status === 'initial-save-failed') {
+    await renderAuthStatus('Cloud save failed, using local fallback.', 'error');
+    return;
+  }
+
   await renderAuthStatus();
 }
 
@@ -1357,8 +1372,7 @@ window.addEventListener('bdfa:supabase-status-changed', event => {
 
 if (window.BDFA.supabaseClient) {
   window.BDFA.supabaseClient.onAuthStateChange(() => {
-    window.BDFA.dataAdapter.loadCloudSnapshot();
-    renderAuthStatus();
+    syncCloudSnapshotAfterAuth();
   });
 }
 
