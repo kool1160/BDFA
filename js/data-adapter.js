@@ -161,7 +161,8 @@
     return getSourceData();
   }
 
-  async function loadCloudSnapshot() {
+  async function loadCloudSnapshot(options = {}) {
+    const { applySnapshot = true, saveMissingSnapshot = true } = options;
     const supabaseClient = getSupabaseClient();
 
     if (!supabaseClient || !supabaseClient.isConfigured()) {
@@ -171,12 +172,18 @@
     const result = await supabaseClient.loadSnapshot();
 
     if (result.data) {
-      saveSourceData(result.data);
+      const cloudSourceData = clone(result.data);
+
+      if (!applySnapshot) {
+        return { status: result.status, data: cloudSourceData, error: null };
+      }
+
+      saveSourceData(cloudSourceData);
       dispatchSourceDataUpdated(currentSourceData);
-      return { status: result.status, data: getSourceData() };
+      return { status: result.status, data: getSourceData(), error: null };
     }
 
-    if (result.status === 'missing') {
+    if (result.status === 'missing' && saveMissingSnapshot) {
       const saveResult = await saveCloudSnapshot(getPublicSourceData());
 
       if (saveResult.status === 'saved') {
@@ -198,6 +205,8 @@
     importData,
     exportData,
     resetToDemoData,
+    getPublicSourceData,
+    saveCloudSnapshot,
     loadCloudSnapshot
   };
 }());

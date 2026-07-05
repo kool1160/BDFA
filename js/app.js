@@ -1165,6 +1165,10 @@ async function getAuthUser() {
 async function renderAuthStatus(message, tone = 'neutral') {
   const status = document.getElementById('authStatus');
   const signOutButton = document.getElementById('authSignOut');
+  const signUpButton = document.getElementById('authSignUp');
+  const signInButton = document.getElementById('authSignIn');
+  const cloudSaveButton = document.getElementById('cloudSaveButton');
+  const cloudLoadButton = document.getElementById('cloudLoadButton');
   const authInputs = document.querySelectorAll('[data-auth-input]');
   const supabaseClient = window.BDFA.supabaseClient;
 
@@ -1181,6 +1185,11 @@ async function renderAuthStatus(message, tone = 'neutral') {
     if (signOutButton) {
       signOutButton.hidden = true;
     }
+    [cloudSaveButton, cloudLoadButton].forEach(button => {
+      if (button) {
+        button.disabled = true;
+      }
+    });
     return;
   }
 
@@ -1190,12 +1199,26 @@ async function renderAuthStatus(message, tone = 'neutral') {
   status.textContent = message || fallbackMessage;
   status.dataset.tone = tone;
   authInputs.forEach(input => {
-    input.disabled = false;
+    input.disabled = Boolean(user);
   });
+
+  if (signUpButton) {
+    signUpButton.hidden = Boolean(user);
+  }
+
+  if (signInButton) {
+    signInButton.hidden = Boolean(user);
+  }
 
   if (signOutButton) {
     signOutButton.hidden = !user;
   }
+
+  [cloudSaveButton, cloudLoadButton].forEach(button => {
+    if (button) {
+      button.disabled = !user;
+    }
+  });
 }
 
 async function handleAuthAction(action) {
@@ -1238,7 +1261,88 @@ async function syncCloudSnapshotAfterAuth() {
     return;
   }
 
+  if (result.status === 'loaded') {
+    await renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
+    return;
+  }
+
   await renderAuthStatus();
+}
+
+async function handleManualCloudSave() {
+  if (!window.BDFA.dataAdapter || typeof window.BDFA.dataAdapter.saveCloudSnapshot !== 'function') {
+    await renderAuthStatus('Cloud save failed, using local fallback.', 'error');
+    return;
+  }
+
+  if (!confirm('Save current local BDFA data to cloud? This will replace the cloud snapshot.')) {
+    return;
+  }
+
+  await renderAuthStatus('Saving to cloud...', 'neutral');
+  const sourceData = typeof window.BDFA.getSourceData === 'function'
+    ? window.BDFA.getSourceData()
+    : window.BDFA.dataAdapter.exportData();
+  const result = await window.BDFA.dataAdapter.saveCloudSnapshot(sourceData);
+
+  if (result.status === 'saved') {
+    await renderAuthStatus('Saved to cloud.', 'success');
+    return;
+  }
+
+  if (result.status === 'local') {
+    await renderAuthStatus('Signed out · Local mode', 'neutral');
+    return;
+  }
+
+  await renderAuthStatus('Cloud save failed, using local fallback.', 'error');
+}
+
+async function handleManualCloudLoad() {
+  if (!window.BDFA.dataAdapter || typeof window.BDFA.dataAdapter.loadCloudSnapshot !== 'function') {
+    await renderAuthStatus('Cloud load failed, using local fallback.', 'error');
+    return;
+  }
+
+  await renderAuthStatus('Loading cloud snapshot...', 'neutral');
+  const result = await window.BDFA.dataAdapter.loadCloudSnapshot({
+    applySnapshot: false,
+    saveMissingSnapshot: false
+  });
+
+  if (result.status === 'missing') {
+    await renderAuthStatus('No cloud snapshot found.', 'neutral');
+    return;
+  }
+
+  if (result.status === 'local') {
+    await renderAuthStatus('Signed out · Local mode', 'neutral');
+    return;
+  }
+
+  if (result.status === 'failed' || !result.data) {
+    await renderAuthStatus('Cloud load failed, using local fallback.', 'error');
+    return;
+  }
+
+  if (!confirm('Load cloud snapshot? This will replace the current local BDFA data on this device.')) {
+    await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
+    return;
+  }
+
+  const persistedData = window.BDFA.dataAdapter.importData(result.data);
+  applySourceDataSnapshot(persistedData);
+  resetAccountForm();
+  resetBillForm();
+  resetAllocationForm();
+  resetInvestmentForm();
+  resetAssetForm();
+  resetRecurringIncomeForm();
+  renderAllSections();
+  window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
+    detail: cloneSourceData(persistedData)
+  }));
+  await renderAuthStatus('Cloud snapshot loaded.', 'success');
 }
 
 async function handleSignOut() {
@@ -1363,6 +1467,8 @@ addOptionalEventListener('authForm', 'submit', event => {
 addOptionalEventListener('authSignUp', 'click', () => handleAuthAction('signup'));
 addOptionalEventListener('authSignIn', 'click', () => handleAuthAction('signin'));
 addOptionalEventListener('authSignOut', 'click', handleSignOut);
+addOptionalEventListener('cloudSaveButton', 'click', handleManualCloudSave);
+addOptionalEventListener('cloudLoadButton', 'click', handleManualCloudLoad);
 
 window.addEventListener('bdfa:source-data-updated', handleSourceDataUpdated);
 window.addEventListener('bdfa:supabase-status-changed', event => {
