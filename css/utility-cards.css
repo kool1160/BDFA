@@ -167,6 +167,22 @@
   outline: 0;
 }
 
+.cloud-actions {
+  display: flex;
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cloud-actions button {
+  flex: 1 1 10rem;
+}
+
+.auth-card button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
 .auth-status {
   width: fit-content;
   max-width: 100%;
@@ -204,7 +220,7 @@
     align-items: center;
   }
 
-  .auth-card button,
+  .auth-card button:not(:disabled),
   .assistant-card button,
   .import-card .file-button,
   .export-card button,
