@@ -229,7 +229,13 @@ function saveSourceDataLocally(sourceData) {
     return window.BDFA.dataAdapter.saveLocalSourceData(sourceData);
   }
 
-  return window.BDFA.dataAdapter.importData(sourceData);
+  const validation = validateSourceSnapshot(sourceData);
+
+  if (!validation.valid) {
+    return null;
+  }
+
+  return window.BDFA.dataAdapter.importData(validation.data);
 }
 
 function saveAllRows() {
@@ -1455,6 +1461,11 @@ async function handleManualCloudLoad() {
     }
 
     const persistedData = saveSourceDataLocally(validation.data);
+
+    if (!persistedData) {
+      return { status: 'invalid' };
+    }
+
     applyPersistedSourceData(persistedData);
     return { status: 'loaded' };
   });
@@ -1465,6 +1476,11 @@ async function handleManualCloudLoad() {
 
   if (applyResult.status === 'backup-failed') {
     await renderAuthStatus('Could not create local backup. Cloud load was canceled.', 'error');
+    return;
+  }
+
+  if (applyResult.status === 'invalid') {
+    await renderAuthStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
     return;
   }
 
@@ -1493,6 +1509,11 @@ async function handleRestoreLocalBackup() {
     }
 
     const persistedData = saveSourceDataLocally(backup.data);
+
+    if (!persistedData) {
+      return { status: 'invalid' };
+    }
+
     applyPersistedSourceData(persistedData);
     return { status: 'restored' };
   });

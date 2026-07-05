@@ -111,7 +111,13 @@
     return Boolean(localStorage.getItem(preCloudRestoreBackupKey));
   }
 
-  function createPreCloudRestoreBackup() {
+  function createPreCloudRestoreBackup(options = {}) {
+    const { preserveExistingValidBackup = false } = options;
+
+    if (preserveExistingValidBackup && readPreCloudRestoreBackup().valid) {
+      return true;
+    }
+
     const validation = validateSourceSnapshot(getPublicSourceData());
 
     if (!validation.valid) {
@@ -185,10 +191,14 @@
   }
 
   function persistSourceData(sourceData, options = {}) {
-    const { syncCloud = true } = options;
+    const { rejectInvalid = false, syncCloud = true } = options;
     const validation = validateSourceSnapshot(sourceData);
 
     if (!validation.valid) {
+      if (rejectInvalid) {
+        return null;
+      }
+
       return getSourceData();
     }
 
@@ -210,7 +220,7 @@
   }
 
   function saveLocalSourceData(sourceData) {
-    return persistSourceData(sourceData, { syncCloud: false });
+    return persistSourceData(sourceData, { rejectInvalid: true, syncCloud: false });
   }
 
   function importData(sourceData) {
@@ -265,11 +275,14 @@
         return { status: result.status, data: cloudSourceData, error: null };
       }
 
-      if (!createPreCloudRestoreBackup()) {
+      if (!createPreCloudRestoreBackup({ preserveExistingValidBackup: true })) {
         return { status: 'backup-failed', data: getSourceData(), error: null };
       }
 
-      saveLocalSourceData(cloudSourceData);
+      if (!saveLocalSourceData(cloudSourceData)) {
+        return { status: 'invalid', data: getSourceData(), error: null };
+      }
+
       dispatchSourceDataUpdated(currentSourceData);
       return { status: result.status, data: getSourceData(), error: null };
     }
