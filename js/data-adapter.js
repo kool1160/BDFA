@@ -75,6 +75,17 @@
     return window.BDFA.supabaseClient || null;
   }
 
+  function getPublicSourceData() {
+    const sourceData = typeof window.BDFA.getSourceData === 'function' ? window.BDFA.getSourceData() : getSourceData();
+    const snapshot = {};
+
+    sourceCollections.forEach(collection => {
+      snapshot[collection] = Array.isArray(sourceData[collection]) ? clone(sourceData[collection]) : [];
+    });
+
+    return snapshot;
+  }
+
   function saveCloudSnapshot(sourceData) {
     const supabaseClient = getSupabaseClient();
 
@@ -84,7 +95,8 @@
 
     cloudSavePromise = cloudSavePromise
       .catch(() => undefined)
-      .then(() => supabaseClient.saveSnapshot(clone(sourceData)));
+      .then(() => supabaseClient.saveSnapshot(clone(sourceData)))
+      .catch(error => ({ status: 'failed', error }));
 
     return cloudSavePromise;
   }
@@ -165,7 +177,15 @@
     }
 
     if (result.status === 'missing') {
-      await saveCloudSnapshot(getSourceData());
+      const saveResult = await saveCloudSnapshot(getPublicSourceData());
+
+      if (saveResult.status === 'saved') {
+        return { status: 'saved-initial', data: getSourceData(), error: null };
+      }
+
+      if (saveResult.status === 'failed') {
+        return { status: 'initial-save-failed', data: getSourceData(), error: saveResult.error };
+      }
     }
 
     return { status: result.status, data: getSourceData(), error: result.error };
