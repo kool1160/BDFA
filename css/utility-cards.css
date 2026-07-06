@@ -176,6 +176,7 @@
 
 .cloud-actions button {
   flex: 1 1 10rem;
+  min-width: 0;
 }
 
 .auth-card button:disabled {
@@ -186,6 +187,7 @@
 .auth-status {
   width: fit-content;
   max-width: 100%;
+  overflow-wrap: anywhere;
   padding: 9px 12px;
   border: 1px solid rgba(255, 255, 255, 0.11);
   border-radius: 999px;
