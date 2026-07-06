@@ -184,6 +184,15 @@
   opacity: 0.45;
 }
 
+.cloud-last-sync {
+  margin: -8px 0 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: rgba(245, 247, 251, 0.62);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 .auth-status {
   width: fit-content;
   max-width: 100%;

@@ -1230,6 +1230,45 @@ function getRuntimeSourceData() {
 window.BDFA.getSourceData = getRuntimeSourceData;
 
 let cloudOperationInProgress = false;
+let cloudLastSyncMessage = 'Using local save only';
+
+function formatCloudSyncTime(updatedAt) {
+  if (!updatedAt) {
+    return '';
+  }
+
+  const syncDate = new Date(updatedAt);
+
+  if (Number.isNaN(syncDate.getTime())) {
+    return '';
+  }
+
+  return syncDate.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+}
+
+function getCloudSavedMessage(updatedAt) {
+  const syncTime = formatCloudSyncTime(updatedAt);
+  return syncTime ? `Cloud last saved: ${syncTime}` : 'Cloud last saved: just now';
+}
+
+function getCloudLoadedMessage(updatedAt) {
+  const syncTime = formatCloudSyncTime(updatedAt);
+  return syncTime ? `Cloud snapshot loaded: ${syncTime}` : 'Cloud snapshot loaded: just now';
+}
+
+function setCloudLastSyncMessage(message) {
+  cloudLastSyncMessage = message || 'Using local save only';
+  const lastSync = document.getElementById('cloudLastSync');
+
+  if (lastSync) {
+    lastSync.textContent = cloudLastSyncMessage;
+  }
+}
 
 function dispatchSourceDataUpdated() {
   window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
@@ -1265,6 +1304,7 @@ async function renderAuthStatus(message, tone = 'neutral') {
   if (!supabaseClient || !supabaseClient.isConfigured()) {
     status.textContent = supabaseClient ? supabaseClient.getConfigurationLabel() : 'Local mode';
     status.dataset.tone = 'neutral';
+    setCloudLastSyncMessage('Using local save only');
     authInputs.forEach(input => {
       input.disabled = true;
     });
@@ -1283,6 +1323,11 @@ async function renderAuthStatus(message, tone = 'neutral') {
   const fallbackMessage = user ? `Signed in as ${user.email || 'Supabase user'} · Cloud save ready` : 'Signed out · Local mode';
 
   status.textContent = message || fallbackMessage;
+  if (!user) {
+    setCloudLastSyncMessage('Using local save only');
+  } else {
+    setCloudLastSyncMessage(cloudLastSyncMessage);
+  }
   status.dataset.tone = tone;
   authInputs.forEach(input => {
     input.disabled = Boolean(user);
@@ -1361,6 +1406,7 @@ async function syncCloudSnapshotAfterAuth() {
   const result = await window.BDFA.dataAdapter.loadCloudSnapshot();
 
   if (result.status === 'saved-initial') {
+    setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     await renderAuthStatus('Signed in. Local snapshot saved to cloud.', 'success');
     return;
   }
@@ -1381,6 +1427,7 @@ async function syncCloudSnapshotAfterAuth() {
   }
 
   if (result.status === 'loaded') {
+    setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
     await renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
     return;
   }
@@ -1419,11 +1466,13 @@ async function handleManualCloudSave() {
   }
 
   if (result.status === 'saved') {
+    setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     await renderAuthStatus('Saved to cloud.', 'success');
     return;
   }
 
   if (result.status === 'local') {
+    setCloudLastSyncMessage('Using local save only');
     await renderAuthStatus('Signed out · Local mode', 'neutral');
     return;
   }
@@ -1456,11 +1505,13 @@ async function handleManualCloudLoad() {
   }
 
   if (result.status === 'missing') {
+    setCloudLastSyncMessage('Cloud last saved: never');
     await renderAuthStatus('No cloud snapshot found.', 'neutral');
     return;
   }
 
   if (result.status === 'local') {
+    setCloudLastSyncMessage('Using local save only');
     await renderAuthStatus('Signed out · Local mode', 'neutral');
     return;
   }
@@ -1501,6 +1552,7 @@ async function handleManualCloudLoad() {
     return;
   }
 
+  setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
   await renderAuthStatus('Cloud snapshot loaded. Previous local data was backed up.', 'success');
 }
 
@@ -1556,6 +1608,7 @@ async function handleSignOut() {
     return;
   }
 
+  setCloudLastSyncMessage('Using local save only');
   await renderAuthStatus('Signed out · Local mode');
 }
 
@@ -1688,4 +1741,20 @@ applySourceDataSnapshot(window.BDFA.dataAdapter.loadSourceData(demoData));
 renderAllSections();
 applySavedPanelState();
 renderAuthStatus();
-window.BDFA.dataAdapter.loadCloudSnapshot();
+window.BDFA.dataAdapter.loadCloudSnapshot().then(result => {
+  if (!result) {
+    return;
+  }
+
+  if (result.status === 'saved-initial') {
+    setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
+    renderAuthStatus('Signed in. Local snapshot saved to cloud.', 'success');
+  }
+
+  if (result.status === 'loaded') {
+    setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
+    renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
+  }
+}).catch(() => {
+  renderAuthStatus('Cloud load failed, using local fallback.', 'error');
+});
