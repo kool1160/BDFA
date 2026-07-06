@@ -1190,14 +1190,14 @@ function importDemoData() {
   try {
     const importedData = JSON.parse(rawImport);
 
-    const importSnapshot = getValidImportSnapshot(importedData);
-
-    if (!importSnapshot) {
+    if (!isValidImport(importedData)) {
       showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
       return;
     }
 
-    if (!applyImportedData(importSnapshot)) {
+    const normalizedImportSnapshot = getValidImportSnapshot(importedData);
+
+    if (!normalizedImportSnapshot || !applyImportedData(normalizedImportSnapshot)) {
       showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
       return;
     }
