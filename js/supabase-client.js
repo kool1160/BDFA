@@ -153,7 +153,7 @@
     try {
       const { data, error } = await supabase
         .from(snapshotsTable)
-        .select('source_data')
+        .select('source_data, updated_at')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -168,7 +168,7 @@
       }
 
       setStatus('Cloud snapshot loaded.', 'success');
-      return { data: data.source_data, error: null, status: 'loaded' };
+      return { data: data.source_data, updatedAt: data.updated_at || null, error: null, status: 'loaded' };
     } catch (error) {
       setStatus('Cloud load failed, using local fallback.', 'error');
       return { data: null, error, status: 'failed' };
@@ -191,7 +191,7 @@
           source_data: sourceData,
           updated_at: new Date().toISOString()
         }, { onConflict: 'user_id' })
-        .select('source_data')
+        .select('source_data, updated_at')
         .single();
 
       if (error) {
@@ -200,7 +200,7 @@
       }
 
       setStatus('Cloud save ready.', 'success');
-      return { data, error: null, status: 'saved' };
+      return { data, updatedAt: data && data.updated_at ? data.updated_at : null, error: null, status: 'saved' };
     } catch (error) {
       setStatus('Cloud save failed, using local fallback.', 'error');
       return { data: null, error, status: 'failed' };

@@ -289,7 +289,7 @@
       const cloudSourceData = validation.data;
 
       if (!applySnapshot) {
-        return { status: result.status, data: cloudSourceData, error: null };
+        return { status: result.status, data: cloudSourceData, updatedAt: result.updatedAt || null, error: null };
       }
 
       if (!createPreCloudRestoreBackup({ preserveExistingValidBackup: true })) {
@@ -302,22 +302,22 @@
       }
 
       dispatchSourceDataUpdated(currentSourceData);
-      return { status: result.status, data: getSourceData(), error: null };
+      return { status: result.status, data: getSourceData(), updatedAt: result.updatedAt || null, error: null };
     }
 
     if (result.status === 'missing' && saveMissingSnapshot) {
       const saveResult = await saveCloudSnapshot(getPublicSourceData());
 
       if (saveResult.status === 'saved') {
-        return { status: 'saved-initial', data: getSourceData(), error: null };
+        return { status: 'saved-initial', data: getSourceData(), updatedAt: saveResult.updatedAt || null, error: null };
       }
 
       if (saveResult.status === 'failed') {
-        return { status: 'initial-save-failed', data: getSourceData(), error: saveResult.error };
+        return { status: 'initial-save-failed', data: getSourceData(), updatedAt: saveResult.updatedAt || null, error: saveResult.error };
       }
     }
 
-    return { status: result.status, data: getSourceData(), error: result.error };
+    return { status: result.status, data: getSourceData(), updatedAt: result.updatedAt || null, error: result.error };
   }
 
   window.BDFA.dataAdapter = window.BDFA.dataAdapter || {
