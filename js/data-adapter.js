@@ -13,7 +13,9 @@
   };
   const preCloudRestoreBackupKey = 'bdfa.preCloudRestoreBackup';
 
-  const sourceCollections = Object.keys(storageKeys);
+  const requiredSourceCollections = ['accounts', 'bills', 'allocations', 'investments'];
+  const optionalSourceCollections = ['assets', 'recurringIncome'];
+  const sourceCollections = [...requiredSourceCollections, ...optionalSourceCollections];
   let currentSourceData = null;
   let cloudSavePromise = Promise.resolve();
 
@@ -73,7 +75,15 @@
 
     const sourceData = {};
 
-    for (const collection of sourceCollections) {
+    for (const collection of requiredSourceCollections) {
+      if (!Array.isArray(snapshot[collection])) {
+        return { valid: false, data: null };
+      }
+
+      sourceData[collection] = clone(snapshot[collection]);
+    }
+
+    for (const collection of optionalSourceCollections) {
       if (snapshot[collection] === undefined) {
         sourceData[collection] = [];
       } else if (Array.isArray(snapshot[collection])) {
@@ -89,6 +99,12 @@
   function dispatchSourceDataUpdated(sourceData) {
     window.dispatchEvent(new CustomEvent('bdfa:source-data-updated', {
       detail: clone(sourceData)
+    }));
+  }
+
+  function dispatchCloudStatus(message, tone = 'neutral') {
+    window.dispatchEvent(new CustomEvent('bdfa:supabase-status-changed', {
+      detail: { message, tone }
     }));
   }
 
@@ -111,7 +127,13 @@
     return Boolean(localStorage.getItem(preCloudRestoreBackupKey));
   }
 
-  function createPreCloudRestoreBackup() {
+  function createPreCloudRestoreBackup(options = {}) {
+    const { preserveExistingValidBackup = false } = options;
+
+    if (preserveExistingValidBackup && readPreCloudRestoreBackup().valid) {
+      return true;
+    }
+
     const validation = validateSourceSnapshot(getPublicSourceData());
 
     if (!validation.valid) {
@@ -185,10 +207,14 @@
   }
 
   function persistSourceData(sourceData, options = {}) {
-    const { syncCloud = true } = options;
+    const { rejectInvalid = false, syncCloud = true } = options;
     const validation = validateSourceSnapshot(sourceData);
 
     if (!validation.valid) {
+      if (rejectInvalid) {
+        return null;
+      }
+
       return getSourceData();
     }
 
@@ -210,7 +236,7 @@
   }
 
   function saveLocalSourceData(sourceData) {
-    return persistSourceData(sourceData, { syncCloud: false });
+    return persistSourceData(sourceData, { rejectInvalid: true, syncCloud: false });
   }
 
   function importData(sourceData) {
@@ -256,6 +282,7 @@
       const validation = validateSourceSnapshot(result.data);
 
       if (!validation.valid) {
+        dispatchCloudStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
         return { status: 'invalid', data: getSourceData(), error: null };
       }
 
@@ -265,11 +292,15 @@
         return { status: result.status, data: cloudSourceData, error: null };
       }
 
-      if (!createPreCloudRestoreBackup()) {
+      if (!createPreCloudRestoreBackup({ preserveExistingValidBackup: true })) {
         return { status: 'backup-failed', data: getSourceData(), error: null };
       }
 
-      saveLocalSourceData(cloudSourceData);
+      if (!saveLocalSourceData(cloudSourceData)) {
+        dispatchCloudStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
+        return { status: 'invalid', data: getSourceData(), error: null };
+      }
+
       dispatchSourceDataUpdated(currentSourceData);
       return { status: result.status, data: getSourceData(), error: null };
     }
