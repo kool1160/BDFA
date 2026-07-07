@@ -1234,6 +1234,7 @@ window.BDFA.getSourceData = getRuntimeSourceData;
 let cloudOperationInProgress = false;
 let cloudLastSyncMessage = 'Using local save only';
 let localChangesPendingCloudSave = false;
+let cloudDirtyIndicatorEligible = false;
 
 function renderCloudDirtyIndicator() {
   const indicator = document.getElementById('cloudDirtyIndicator');
@@ -1242,8 +1243,10 @@ function renderCloudDirtyIndicator() {
     return;
   }
 
-  indicator.hidden = !localChangesPendingCloudSave;
-  indicator.textContent = localChangesPendingCloudSave ? 'Local changes not saved to cloud.' : '';
+  const shouldShowIndicator = localChangesPendingCloudSave && cloudDirtyIndicatorEligible;
+
+  indicator.hidden = !shouldShowIndicator;
+  indicator.textContent = shouldShowIndicator ? 'Local changes not saved to cloud.' : '';
 }
 
 function setLocalChangesPendingCloudSave(isPending) {
@@ -1533,7 +1536,6 @@ async function getAuthUser() {
 
 async function renderAuthStatus(message, tone = 'neutral') {
   updateLocalBackupTimestamp();
-  renderCloudDirtyIndicator();
 
   const status = document.getElementById('authStatus');
   const signOutButton = document.getElementById('authSignOut');
@@ -1551,6 +1553,8 @@ async function renderAuthStatus(message, tone = 'neutral') {
   }
 
   if (!supabaseClient || !supabaseClient.isConfigured()) {
+    cloudDirtyIndicatorEligible = false;
+    renderCloudDirtyIndicator();
     status.textContent = supabaseClient ? supabaseClient.getConfigurationLabel() : 'Local mode';
     status.dataset.tone = 'neutral';
     setCloudLastSyncMessage('Using local save only');
@@ -1575,6 +1579,8 @@ async function renderAuthStatus(message, tone = 'neutral') {
 
   const user = await getAuthUser();
   const fallbackMessage = user ? `Signed in as ${user.email || 'Supabase user'} · Cloud save ready` : 'Signed out · Local mode';
+  cloudDirtyIndicatorEligible = Boolean(user);
+  renderCloudDirtyIndicator();
 
   status.textContent = message || fallbackMessage;
   if (!user) {
