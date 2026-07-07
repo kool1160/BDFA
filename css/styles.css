@@ -1191,8 +1191,131 @@ h1 {
     background: rgba(255, 255, 255, 0.058);
   }
 
+  body.has-mobile-views .panel-title[data-toggle="assets"],
+  body.has-mobile-views .panel-title[data-toggle="investments"] {
+    padding-bottom: 13px;
+  }
+
+  body.has-mobile-views #assets,
+  body.has-mobile-views #investments {
+    padding-bottom: 8px;
+  }
+
+  body.has-mobile-views #assets .panel-copy {
+    margin-bottom: 10px;
+    color: rgba(247, 247, 251, 0.62);
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+
+  body.has-mobile-views #assets .panel-total {
+    margin: 8px 0 10px;
+    padding: 10px 12px;
+    border-color: rgba(255, 255, 255, 0.068);
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.026));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.036);
+  }
+
+  body.has-mobile-views #assets .panel-total span {
+    color: rgba(169, 169, 181, 0.72);
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+  }
+
+  body.has-mobile-views #assets .panel-total strong {
+    font-size: 1.04rem;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+
+  body.has-mobile-views #assetsList,
+  body.has-mobile-views #investmentsList {
+    display: grid;
+    gap: 8px;
+  }
+
+  body.has-mobile-views #assetsList .row,
+  body.has-mobile-views #investmentsList .row {
+    gap: 10px 12px;
+    min-height: 0;
+    padding: 10px 11px;
+    border: 1px solid rgba(255, 255, 255, 0.064);
+    border-radius: 16px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.024));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.032);
+  }
+
+  body.has-mobile-views #assetsList .row > div strong,
+  body.has-mobile-views #investmentsList .row > div strong {
+    font-size: 0.93rem;
+    line-height: 1.12;
+  }
+
+  body.has-mobile-views #assetsList .row small,
+  body.has-mobile-views #investmentsList .row small {
+    margin-top: 3px;
+    color: rgba(169, 169, 181, 0.72);
+    font-size: 0.76rem;
+    line-height: 1.18;
+  }
+
+  body.has-mobile-views #assetsList .row > strong:last-child,
+  body.has-mobile-views #investmentsList .row > strong:last-child {
+    color: rgba(247, 247, 251, 0.94);
+    font-size: 0.98rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  body.has-mobile-views #assetsList .row-actions,
+  body.has-mobile-views #investmentsList .row-actions {
+    gap: 6px;
+    padding-top: 0;
+  }
+
+  body.has-mobile-views #assetsList .row-actions button,
+  body.has-mobile-views #investmentsList .row-actions button {
+    min-height: 36px;
+    padding: 7px 10px;
+    border-color: rgba(255, 255, 255, 0.078);
+    background: rgba(255, 255, 255, 0.052);
+    color: rgba(247, 247, 251, 0.8);
+    font-size: 0.78rem;
+  }
+
+  body.has-mobile-views #assetsList .row-actions button:last-child,
+  body.has-mobile-views #investmentsList .row-actions button:last-child {
+    background: transparent;
+    color: rgba(169, 169, 181, 0.74);
+  }
+
   body.has-mobile-views .allocation-progress {
-    margin-top: 9px;
+    margin-top: 8px;
+  }
+
+  body.has-mobile-views .allocation-progress-label {
+    gap: 10px;
+    color: rgba(169, 169, 181, 0.78);
+    font-size: 0.72rem;
+    line-height: 1.16;
+  }
+
+  body.has-mobile-views .allocation-progress-track {
+    height: 6px;
+    margin-top: 6px;
+    background: rgba(255, 255, 255, 0.065);
+  }
+
+  body.has-mobile-views .allocation-progress-track span {
+    background: rgba(247, 247, 251, 0.68);
+  }
+
+  body.has-mobile-views .allocation-progress-status {
+    margin-top: 5px;
+    color: rgba(169, 169, 181, 0.82);
+    font-size: 0.72rem;
+    line-height: 1.16;
   }
 
   body.has-mobile-views .row-actions {
