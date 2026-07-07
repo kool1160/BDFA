@@ -706,6 +706,117 @@ h1 {
     margin-top: 0;
   }
 
+  body.has-mobile-views .panel {
+    border-color: rgba(255, 255, 255, 0.075);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.034));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 14px 38px rgba(0, 0, 0, 0.22);
+  }
+
+  body.has-mobile-views .panel-title {
+    padding: 16px 16px 14px;
+    gap: 8px;
+    font-size: 0.98rem;
+  }
+
+  body.has-mobile-views .panel-title > span:last-child {
+    width: 26px;
+    height: 26px;
+    background: rgba(255, 255, 255, 0.06);
+  }
+
+  body.has-mobile-views .panel-summary {
+    max-width: 7.8rem;
+    padding: 6px 9px;
+    background: rgba(255, 255, 255, 0.05);
+    font-size: 0.74rem;
+  }
+
+  body.has-mobile-views .panel-body {
+    padding: 0 16px 6px;
+  }
+
+  body.has-mobile-views .row {
+    gap: 12px;
+    min-height: 54px;
+    padding: 11px 0;
+    border-top-color: rgba(255, 255, 255, 0.062);
+  }
+
+  body.has-mobile-views .row > div strong {
+    font-size: 0.96rem;
+    line-height: 1.16;
+  }
+
+  body.has-mobile-views .row small {
+    margin-top: 4px;
+    font-size: 0.79rem;
+    line-height: 1.2;
+  }
+
+  body.has-mobile-views .row > strong:last-child,
+  body.has-mobile-views .bill-amount strong {
+    font-size: 1rem;
+  }
+
+  body.has-mobile-views .bill-amount small {
+    margin-top: 4px;
+    font-size: 0.74rem;
+  }
+
+  body.has-mobile-views .account-group-label,
+  body.has-mobile-views .bill-group-label {
+    margin: 14px 0 2px;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+  }
+
+  body.has-mobile-views .bill-status-badge {
+    margin-top: 5px;
+    padding: 4px 7px;
+    border-color: rgba(255, 255, 255, 0.09);
+    background: rgba(255, 255, 255, 0.025);
+    font-size: 0.66rem;
+  }
+
+  body.has-mobile-views .bill-row.due-soon,
+  body.has-mobile-views .bill-row.past-due {
+    margin-inline: -8px;
+    padding-inline: 8px;
+    border-radius: 14px;
+  }
+
+  body.has-mobile-views .bill-row.due-soon {
+    background: rgba(255, 255, 255, 0.026);
+  }
+
+  body.has-mobile-views .bill-row.past-due {
+    background: rgba(255, 255, 255, 0.04);
+  }
+
+  body.has-mobile-views .bill-row.past-due .bill-status-badge {
+    background: rgba(255, 255, 255, 0.058);
+  }
+
+  body.has-mobile-views .allocation-progress {
+    margin-top: 9px;
+  }
+
+  body.has-mobile-views .row-actions {
+    gap: 7px;
+  }
+
+  body.has-mobile-views .row-actions button {
+    min-height: 40px;
+    padding: 8px 11px;
+    background: rgba(255, 255, 255, 0.068);
+  }
+
+  body.has-mobile-views .editable-row .row-actions {
+    padding-top: 1px;
+  }
+
   body.has-mobile-views .panel[data-mobile-view]:not([hidden]),
   body.has-mobile-views .monthly-planning-section[data-mobile-view]:not([hidden]),
   body.has-mobile-views .analytics-section[data-mobile-view]:not([hidden]),
