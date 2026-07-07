@@ -12,6 +12,7 @@
     recurringIncome: 'bdfa.mockRecurringIncome'
   };
   const preCloudRestoreBackupKey = 'bdfa.preCloudRestoreBackup';
+  const localChangesPendingCloudSaveKey = 'bdfa.localChangesPendingCloudSave';
 
   const requiredSourceCollections = ['accounts', 'bills', 'allocations', 'investments'];
   const optionalSourceCollections = ['assets', 'recurringIncome'];
@@ -94,6 +95,34 @@
     }
 
     return { valid: true, data: sourceData };
+  }
+
+  function sourceSnapshotsMatch(firstSnapshot, secondSnapshot) {
+    const firstValidation = validateSourceSnapshot(firstSnapshot);
+    const secondValidation = validateSourceSnapshot(secondSnapshot);
+
+    if (!firstValidation.valid || !secondValidation.valid) {
+      return false;
+    }
+
+    return JSON.stringify(firstValidation.data) === JSON.stringify(secondValidation.data);
+  }
+
+  function hasLocalChangesPendingCloudSave() {
+    return localStorage.getItem(localChangesPendingCloudSaveKey) === 'true';
+  }
+
+  function setLocalChangesPendingCloudSave(isPending) {
+    try {
+      if (isPending) {
+        localStorage.setItem(localChangesPendingCloudSaveKey, 'true');
+      } else {
+        localStorage.removeItem(localChangesPendingCloudSaveKey);
+      }
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   function dispatchSourceDataUpdated(sourceData) {
@@ -268,6 +297,13 @@
     cloudSavePromise = cloudSavePromise
       .catch(() => undefined)
       .then(() => supabaseClient.saveSnapshot(validation.data))
+      .then(result => {
+        if (result.status === 'saved') {
+          setLocalChangesPendingCloudSave(false);
+        }
+
+        return result;
+      })
       .catch(error => ({ status: 'failed', error }));
 
     return cloudSavePromise;
@@ -289,7 +325,7 @@
   }
 
   function persistSourceData(sourceData, options = {}) {
-    const { rejectInvalid = false, syncCloud = true } = options;
+    const { rejectInvalid = false, syncCloud = true, markCloudDirty = false } = options;
     const validation = validateSourceSnapshot(sourceData);
 
     if (!validation.valid) {
@@ -306,6 +342,10 @@
       saveRows(collection, currentSourceData[collection]);
     });
 
+    if (markCloudDirty) {
+      setLocalChangesPendingCloudSave(true);
+    }
+
     if (syncCloud) {
       saveCloudSnapshot(currentSourceData);
     }
@@ -318,7 +358,7 @@
   }
 
   function saveLocalSourceData(sourceData) {
-    return persistSourceData(sourceData, { rejectInvalid: true, syncCloud: false });
+    return persistSourceData(sourceData, { rejectInvalid: true, syncCloud: false, markCloudDirty: true });
   }
 
   function importData(sourceData) {
@@ -374,15 +414,27 @@
         return { status: result.status, data: cloudSourceData, updatedAt: result.updatedAt || null, error: null };
       }
 
+      if (hasLocalChangesPendingCloudSave()) {
+        const localSourceData = getPublicSourceData();
+
+        if (!sourceSnapshotsMatch(localSourceData, cloudSourceData)) {
+          dispatchCloudStatus('Local changes not saved to cloud. Startup cloud load was skipped.', 'neutral');
+          return { status: 'local-dirty', data: getSourceData(), updatedAt: result.updatedAt || null, error: null };
+        }
+
+        setLocalChangesPendingCloudSave(false);
+      }
+
       if (!createPreCloudRestoreBackup({ preserveExistingValidBackup: true })) {
         return { status: 'backup-failed', data: getSourceData(), error: null };
       }
 
-      if (!saveLocalSourceData(cloudSourceData)) {
+      if (!persistSourceData(cloudSourceData, { rejectInvalid: true, syncCloud: false, markCloudDirty: false })) {
         dispatchCloudStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
         return { status: 'invalid', data: getSourceData(), error: null };
       }
 
+      setLocalChangesPendingCloudSave(false);
       dispatchSourceDataUpdated(currentSourceData);
       return { status: result.status, data: getSourceData(), updatedAt: result.updatedAt || null, error: null };
     }
@@ -411,6 +463,8 @@
     resetToDemoData,
     getPublicSourceData,
     validateSourceSnapshot,
+    hasLocalChangesPendingCloudSave,
+    setLocalChangesPendingCloudSave,
     hasPreCloudRestoreBackup,
     createPreCloudRestoreBackup,
     readPreCloudRestoreBackup,

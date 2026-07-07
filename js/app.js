@@ -233,7 +233,8 @@ function saveSourceDataLocally(sourceData) {
 }
 
 function saveAllRows() {
-  window.BDFA.dataAdapter.saveSourceData(getExportData());
+  saveSourceDataLocally(getExportData());
+  setLocalChangesPendingCloudSave(true);
   dispatchSourceDataUpdated();
 }
 
@@ -1159,7 +1160,7 @@ function applyImportedData(importedData) {
     return false;
   }
 
-  const persistedData = window.BDFA.dataAdapter.importData(importSnapshot);
+  const persistedData = saveSourceDataLocally(importSnapshot);
 
   if (!sourceSnapshotsMatch(importSnapshot, persistedData)) {
     return false;
@@ -1173,6 +1174,7 @@ function applyImportedData(importedData) {
   resetAssetForm();
   resetRecurringIncomeForm();
   renderAllSections();
+  setLocalChangesPendingCloudSave(true);
   dispatchSourceDataUpdated();
 
   return true;
@@ -1231,6 +1233,26 @@ window.BDFA.getSourceData = getRuntimeSourceData;
 
 let cloudOperationInProgress = false;
 let cloudLastSyncMessage = 'Using local save only';
+let localChangesPendingCloudSave = false;
+let cloudDirtyIndicatorEligible = false;
+
+function renderCloudDirtyIndicator() {
+  const indicator = document.getElementById('cloudDirtyIndicator');
+
+  if (!indicator) {
+    return;
+  }
+
+  const shouldShowIndicator = localChangesPendingCloudSave && cloudDirtyIndicatorEligible;
+
+  indicator.hidden = !shouldShowIndicator;
+  indicator.textContent = shouldShowIndicator ? 'Local changes not saved to cloud.' : '';
+}
+
+function setLocalChangesPendingCloudSave(isPending) {
+  localChangesPendingCloudSave = Boolean(isPending);
+  renderCloudDirtyIndicator();
+}
 
 function formatCloudSyncTime(updatedAt) {
   if (!updatedAt) {
@@ -1531,6 +1553,8 @@ async function renderAuthStatus(message, tone = 'neutral') {
   }
 
   if (!supabaseClient || !supabaseClient.isConfigured()) {
+    cloudDirtyIndicatorEligible = false;
+    renderCloudDirtyIndicator();
     status.textContent = supabaseClient ? supabaseClient.getConfigurationLabel() : 'Local mode';
     status.dataset.tone = 'neutral';
     setCloudLastSyncMessage('Using local save only');
@@ -1555,6 +1579,8 @@ async function renderAuthStatus(message, tone = 'neutral') {
 
   const user = await getAuthUser();
   const fallbackMessage = user ? `Signed in as ${user.email || 'Supabase user'} · Cloud save ready` : 'Signed out · Local mode';
+  cloudDirtyIndicatorEligible = Boolean(user);
+  renderCloudDirtyIndicator();
 
   status.textContent = message || fallbackMessage;
   if (!user) {
@@ -1646,6 +1672,7 @@ async function syncCloudSnapshotAfterAuth() {
   const result = await window.BDFA.dataAdapter.loadCloudSnapshot();
 
   if (result.status === 'saved-initial') {
+    setLocalChangesPendingCloudSave(false);
     setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     await renderAuthStatus('Signed in. Local snapshot saved to cloud.', 'success');
     return;
@@ -1667,6 +1694,7 @@ async function syncCloudSnapshotAfterAuth() {
   }
 
   if (result.status === 'loaded') {
+    setLocalChangesPendingCloudSave(false);
     setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
     await renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
     return;
@@ -1706,6 +1734,7 @@ async function handleManualCloudSave() {
   }
 
   if (result.status === 'saved') {
+    setLocalChangesPendingCloudSave(false);
     setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     await renderAuthStatus('Saved to cloud.', 'success');
     return;
@@ -1821,6 +1850,7 @@ async function handleManualCloudLoad() {
   }
 
   setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
+  setLocalChangesPendingCloudSave(false);
   updateLocalBackupTimestamp();
   await renderAuthStatus('Cloud snapshot loaded. Previous local data was backed up.', 'success');
 }
@@ -1861,6 +1891,7 @@ async function handleRestoreLocalBackup() {
     }
 
     applyPersistedSourceData(persistedData);
+    setLocalChangesPendingCloudSave(true);
     return { status: 'restored' };
   });
 
@@ -1952,7 +1983,7 @@ function resetDemoData() {
     return;
   }
 
-  const freshData = window.BDFA.dataAdapter.resetToDemoData(demoData);
+  const freshData = saveSourceDataLocally(demoData);
   data.accounts = freshData.accounts;
   data.bills = freshData.bills;
   data.allocations = freshData.allocations;
@@ -1966,6 +1997,7 @@ function resetDemoData() {
   resetAssetForm();
   resetRecurringIncomeForm();
   renderAllSections();
+  setLocalChangesPendingCloudSave(true);
   dispatchSourceDataUpdated();
   showStatus('Demo data reset to the original mock dataset.');
 }
@@ -2062,11 +2094,13 @@ window.BDFA.dataAdapter.loadCloudSnapshot().then(result => {
   }
 
   if (result.status === 'saved-initial') {
+    setLocalChangesPendingCloudSave(false);
     setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     renderAuthStatus('Signed in. Local snapshot saved to cloud.', 'success');
   }
 
   if (result.status === 'loaded') {
+    setLocalChangesPendingCloudSave(false);
     setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
     renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
   }
