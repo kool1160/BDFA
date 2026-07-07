@@ -1254,6 +1254,16 @@ function setLocalChangesPendingCloudSave(isPending) {
   renderCloudDirtyIndicator();
 }
 
+function hydrateLocalChangesPendingCloudSave() {
+  const dataAdapter = window.BDFA.dataAdapter;
+
+  if (!dataAdapter || typeof dataAdapter.hasLocalChangesPendingCloudSave !== 'function') {
+    return;
+  }
+
+  setLocalChangesPendingCloudSave(dataAdapter.hasLocalChangesPendingCloudSave());
+}
+
 function formatCloudSyncTime(updatedAt) {
   if (!updatedAt) {
     return '';
@@ -2203,6 +2213,7 @@ document.querySelectorAll('[data-toggle]').forEach(button => {
 });
 
 applySourceDataSnapshot(window.BDFA.dataAdapter.loadSourceData(demoData));
+hydrateLocalChangesPendingCloudSave();
 renderAllSections();
 applySavedPanelState();
 renderAuthStatus();
