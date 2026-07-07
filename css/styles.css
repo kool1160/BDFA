@@ -675,8 +675,8 @@ h1 {
 
   .mobile-view-header {
     display: block;
-    margin: 0 0 16px;
-    padding: 18px 20px;
+    margin: 0 0 14px;
+    padding: 16px 18px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-lg);
     background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.045));
@@ -685,17 +685,17 @@ h1 {
   }
 
   .mobile-view-header h2 {
-    margin: 7px 0 0;
-    font-size: clamp(1.75rem, 11vw, 2.45rem);
-    line-height: 0.95;
-    letter-spacing: -0.06em;
+    margin: 6px 0 0;
+    font-size: clamp(1.68rem, 10.2vw, 2.34rem);
+    line-height: 0.98;
+    letter-spacing: -0.055em;
   }
 
   .mobile-view-header p {
-    margin: 8px 0 0;
-    color: var(--muted);
-    font-size: 0.98rem;
-    line-height: 1.35;
+    margin: 7px 0 0;
+    color: rgba(169, 169, 181, 0.82);
+    font-size: 0.92rem;
+    line-height: 1.3;
   }
 
   body.has-mobile-views [data-mobile-view]:not([hidden]) {
@@ -718,6 +718,31 @@ h1 {
     padding: 16px 16px 14px;
     gap: 8px;
     font-size: 0.98rem;
+    line-height: 1.08;
+  }
+
+  body.has-mobile-views .panel-label {
+    display: grid;
+    gap: 3px;
+  }
+
+  body.has-mobile-views .section-heading {
+    gap: 7px;
+    line-height: 1.05;
+  }
+
+  body.has-mobile-views .section-icon {
+    width: 24px;
+    height: 24px;
+    font-size: 0.68rem;
+  }
+
+  body.has-mobile-views .panel-helper {
+    margin-top: 0;
+    color: rgba(169, 169, 181, 0.66);
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.18;
   }
 
   body.has-mobile-views .panel-title > span:last-child {
@@ -731,10 +756,73 @@ h1 {
     padding: 6px 9px;
     background: rgba(255, 255, 255, 0.05);
     font-size: 0.74rem;
+    line-height: 0.98;
   }
 
   body.has-mobile-views .panel-body {
     padding: 0 16px 6px;
+  }
+
+  body.has-mobile-views .panel-copy {
+    margin-bottom: 12px;
+    color: rgba(247, 247, 251, 0.66);
+    font-size: 0.82rem;
+    line-height: 1.34;
+  }
+
+  body.has-mobile-views .empty-state {
+    margin: 0 0 12px;
+    padding: 14px;
+    border-color: rgba(255, 255, 255, 0.105);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.03);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+
+  body.has-mobile-views .empty-state strong {
+    color: rgba(247, 247, 251, 0.92);
+    font-size: 0.94rem;
+    line-height: 1.16;
+  }
+
+  body.has-mobile-views .empty-state p {
+    margin-top: 5px;
+    color: rgba(169, 169, 181, 0.76);
+    font-size: 0.84rem;
+    line-height: 1.32;
+  }
+
+  body.has-mobile-views .analytics-header,
+  body.has-mobile-views .monthly-planning-header {
+    gap: 7px;
+  }
+
+  body.has-mobile-views .analytics-header h2,
+  body.has-mobile-views .monthly-planning-header h2,
+  body.has-mobile-views .monthly-flow-timeline-section h3,
+  body.has-mobile-views .monthly-flow-income-section h3 {
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+  }
+
+  body.has-mobile-views .analytics-header p,
+  body.has-mobile-views .monthly-planning-header p,
+  body.has-mobile-views .cash-timing-copy p,
+  body.has-mobile-views .bill-calendar-strip-copy p,
+  body.has-mobile-views .monthly-next-step p {
+    color: rgba(169, 169, 181, 0.76);
+    font-size: 0.84rem;
+    line-height: 1.3;
+  }
+
+  body.has-mobile-views .analytics-card small,
+  body.has-mobile-views .monthly-flow-timeline-empty,
+  body.has-mobile-views .monthly-flow-bills-empty,
+  body.has-mobile-views .monthly-flow-income-empty,
+  body.has-mobile-views .analytics-empty {
+    color: rgba(169, 169, 181, 0.74);
+    font-size: 0.8rem;
+    line-height: 1.3;
   }
 
   body.has-mobile-views .row {
