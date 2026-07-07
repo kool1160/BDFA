@@ -1442,6 +1442,18 @@ function formatRestoreLocalBackupConfirmation(backupCreatedAt, summary) {
   return lines.join('\n');
 }
 
+function formatClearLocalBackupConfirmation(backupCreatedAt) {
+  const backupTime = formatLocalBackupTime(backupCreatedAt) || 'the saved backup';
+  const lines = [
+    `Clear local restore backup from ${backupTime}?`,
+    '',
+    'This only removes the stored restore backup on this device.',
+    'Current local BDFA data and cloud data will not be changed.'
+  ];
+
+  return lines.join('\n');
+}
+
 function waitForStatusPaint() {
   return new Promise(resolve => {
     window.setTimeout(resolve, 0);
@@ -1510,6 +1522,7 @@ async function renderAuthStatus(message, tone = 'neutral') {
   const cloudSaveButton = document.getElementById('cloudSaveButton');
   const cloudLoadButton = document.getElementById('cloudLoadButton');
   const restoreLocalBackupButton = document.getElementById('restoreLocalBackupButton');
+  const clearLocalBackupButton = document.getElementById('clearLocalBackupButton');
   const authInputs = document.querySelectorAll('[data-auth-input]');
   const supabaseClient = window.BDFA.supabaseClient;
 
@@ -1527,9 +1540,14 @@ async function renderAuthStatus(message, tone = 'neutral') {
     if (signOutButton) {
       signOutButton.hidden = true;
     }
-    [cloudSaveButton, cloudLoadButton, restoreLocalBackupButton].forEach(button => {
+    [cloudSaveButton, cloudLoadButton, restoreLocalBackupButton, clearLocalBackupButton].forEach(button => {
       if (button) {
         button.disabled = true;
+      }
+    });
+    [restoreLocalBackupButton, clearLocalBackupButton].forEach(button => {
+      if (button) {
+        button.hidden = true;
       }
     });
     return;
@@ -1567,12 +1585,18 @@ async function renderAuthStatus(message, tone = 'neutral') {
     }
   });
 
+  const hasBackup = window.BDFA.dataAdapter
+    && typeof window.BDFA.dataAdapter.hasPreCloudRestoreBackup === 'function'
+    && window.BDFA.dataAdapter.hasPreCloudRestoreBackup();
+
   if (restoreLocalBackupButton) {
-    const hasBackup = window.BDFA.dataAdapter
-      && typeof window.BDFA.dataAdapter.hasPreCloudRestoreBackup === 'function'
-      && window.BDFA.dataAdapter.hasPreCloudRestoreBackup();
     restoreLocalBackupButton.disabled = cloudOperationInProgress || !hasBackup;
     restoreLocalBackupButton.hidden = !hasBackup;
+  }
+
+  if (clearLocalBackupButton) {
+    clearLocalBackupButton.disabled = cloudOperationInProgress || !hasBackup;
+    clearLocalBackupButton.hidden = !hasBackup;
   }
 }
 
@@ -1852,6 +1876,38 @@ async function handleRestoreLocalBackup() {
   await renderAuthStatus('Local backup restored.', 'success');
 }
 
+async function handleClearLocalBackup() {
+  if (cloudOperationInProgress) {
+    return;
+  }
+
+  if (!window.BDFA.dataAdapter
+    || typeof window.BDFA.dataAdapter.readPreCloudRestoreBackup !== 'function'
+    || typeof window.BDFA.dataAdapter.clearPreCloudRestoreBackup !== 'function') {
+    await renderAuthStatus('Local backup could not be cleared.', 'error');
+    return;
+  }
+
+  const backup = window.BDFA.dataAdapter.readPreCloudRestoreBackup();
+
+  if (!backup.valid) {
+    await renderAuthStatus('No local restore backup to clear.', 'neutral');
+    return;
+  }
+
+  if (!confirm(formatClearLocalBackupConfirmation(backup.createdAt))) {
+    return;
+  }
+
+  if (!window.BDFA.dataAdapter.clearPreCloudRestoreBackup()) {
+    await renderAuthStatus('Local backup could not be cleared.', 'error');
+    return;
+  }
+
+  updateLocalBackupTimestamp();
+  await renderAuthStatus('Local restore backup cleared.', 'success');
+}
+
 async function handleSignOut() {
   const supabaseClient = window.BDFA.supabaseClient;
 
@@ -1978,6 +2034,7 @@ addOptionalEventListener('authSignOut', 'click', handleSignOut);
 addOptionalEventListener('cloudSaveButton', 'click', handleManualCloudSave);
 addOptionalEventListener('cloudLoadButton', 'click', handleManualCloudLoad);
 addOptionalEventListener('restoreLocalBackupButton', 'click', handleRestoreLocalBackup);
+addOptionalEventListener('clearLocalBackupButton', 'click', handleClearLocalBackup);
 
 window.addEventListener('bdfa:source-data-updated', handleSourceDataUpdated);
 window.addEventListener('bdfa:supabase-status-changed', event => {

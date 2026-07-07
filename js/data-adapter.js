@@ -182,6 +182,15 @@
     return backup.valid ? backup.createdAt : null;
   }
 
+  function clearPreCloudRestoreBackup() {
+    try {
+      localStorage.removeItem(preCloudRestoreBackupKey);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   function getRowsTotal(rows) {
     return rows.reduce((sum, row) => {
       const amount = Number(row && row.amount);
@@ -406,6 +415,7 @@
     createPreCloudRestoreBackup,
     readPreCloudRestoreBackup,
     getPreCloudRestoreBackupCreatedAt,
+    clearPreCloudRestoreBackup,
     summarizeSourceSnapshot,
     compareSourceSnapshots,
     saveLocalSourceData,
