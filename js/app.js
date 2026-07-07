@@ -1251,6 +1251,105 @@ function formatCloudSyncTime(updatedAt) {
   });
 }
 
+
+function formatLocalBackupTime(createdAt) {
+  if (!createdAt) {
+    return '';
+  }
+
+  const backupDate = new Date(createdAt);
+
+  if (Number.isNaN(backupDate.getTime())) {
+    return '';
+  }
+
+  return backupDate.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+}
+
+function getSnapshotSummary(sourceData) {
+  if (window.BDFA.dataAdapter && typeof window.BDFA.dataAdapter.summarizeSourceSnapshot === 'function') {
+    return window.BDFA.dataAdapter.summarizeSourceSnapshot(sourceData);
+  }
+
+  const validation = validateSourceSnapshot(sourceData);
+
+  if (!validation.valid) {
+    return { valid: false, summary: null };
+  }
+
+  const snapshot = validation.data;
+  const accountsAmount = snapshot.accounts.reduce((sum, account) => {
+    const amount = Number(account && account.amount);
+    return Number.isFinite(amount) ? sum + amount : sum;
+  }, 0);
+
+  return {
+    valid: true,
+    summary: {
+      accountCount: snapshot.accounts.length,
+      billCount: snapshot.bills.length,
+      allocationCount: snapshot.allocations.length,
+      investmentCount: snapshot.investments.length,
+      recurringIncomeCount: snapshot.recurringIncome.length,
+      assetCount: snapshot.assets.length,
+      accountsAmount
+    }
+  };
+}
+
+function pluralizeSnapshotLabel(count, singular, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+function formatCloudLoadConfirmation(updatedAt, summary) {
+  const syncTime = formatCloudSyncTime(updatedAt) || 'the cloud';
+  const lines = [
+    `Load cloud snapshot from ${syncTime}?`,
+    '',
+    'Cloud snapshot includes:',
+    `- ${pluralizeSnapshotLabel(summary.accountCount, 'account')}`,
+    `- ${pluralizeSnapshotLabel(summary.billCount, 'bill')}`,
+    `- ${pluralizeSnapshotLabel(summary.allocationCount, 'allocation')}`,
+    `- ${pluralizeSnapshotLabel(summary.investmentCount, 'investment')}`,
+    `- ${pluralizeSnapshotLabel(summary.recurringIncomeCount, 'income row', 'income rows')}`,
+    `- ${pluralizeSnapshotLabel(summary.assetCount, 'asset')}`
+  ];
+
+  if (Number.isFinite(summary.accountsAmount)) {
+    lines.push(`- ${money.format(summary.accountsAmount)} total account amount`);
+  }
+
+  lines.push(
+    '',
+    'This will replace current local BDFA data on this device.',
+    'A local backup will be created first.'
+  );
+
+  return lines.join('\n');
+}
+
+function updateLocalBackupTimestamp() {
+  const backupTimestamp = document.getElementById('localBackupCreatedAt');
+
+  if (!backupTimestamp) {
+    return;
+  }
+
+  const createdAt = window.BDFA.dataAdapter
+    && typeof window.BDFA.dataAdapter.getPreCloudRestoreBackupCreatedAt === 'function'
+    ? window.BDFA.dataAdapter.getPreCloudRestoreBackupCreatedAt()
+    : null;
+  const backupTime = formatLocalBackupTime(createdAt);
+
+  backupTimestamp.hidden = !backupTime;
+  backupTimestamp.textContent = backupTime ? `Local restore backup created: ${backupTime}` : '';
+}
+
 function getCloudSavedMessage(updatedAt) {
   const syncTime = formatCloudSyncTime(updatedAt);
   return syncTime ? `Cloud last saved: ${syncTime}` : 'Cloud last saved: just now';
@@ -1287,6 +1386,8 @@ async function getAuthUser() {
 }
 
 async function renderAuthStatus(message, tone = 'neutral') {
+  updateLocalBackupTimestamp();
+
   const status = document.getElementById('authStatus');
   const signOutButton = document.getElementById('authSignOut');
   const signUpButton = document.getElementById('authSignUp');
@@ -1528,7 +1629,14 @@ async function handleManualCloudLoad() {
     return;
   }
 
-  if (!confirm('Load cloud snapshot? This will replace the current local BDFA data on this device.')) {
+  const summaryResult = getSnapshotSummary(validation.data);
+
+  if (!summaryResult.valid || !summaryResult.summary) {
+    await renderAuthStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
+    return;
+  }
+
+  if (!confirm(formatCloudLoadConfirmation(result.updatedAt, summaryResult.summary))) {
     await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
     return;
   }
@@ -1553,6 +1661,7 @@ async function handleManualCloudLoad() {
   }
 
   setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
+  updateLocalBackupTimestamp();
   await renderAuthStatus('Cloud snapshot loaded. Previous local data was backed up.', 'success');
 }
 

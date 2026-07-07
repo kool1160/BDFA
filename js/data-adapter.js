@@ -124,7 +124,7 @@
   }
 
   function hasPreCloudRestoreBackup() {
-    return Boolean(localStorage.getItem(preCloudRestoreBackupKey));
+    return readPreCloudRestoreBackup().valid;
   }
 
   function createPreCloudRestoreBackup(options = {}) {
@@ -165,10 +165,51 @@
         return { valid: false, data: null };
       }
 
-      return validateSourceSnapshot(backup.sourceData);
+      const validation = validateSourceSnapshot(backup.sourceData);
+
+      if (!validation.valid) {
+        return { valid: false, data: null, createdAt: null };
+      }
+
+      return { valid: true, data: validation.data, createdAt: backup.createdAt || null };
     } catch {
-      return { valid: false, data: null };
+      return { valid: false, data: null, createdAt: null };
     }
+  }
+
+  function getPreCloudRestoreBackupCreatedAt() {
+    const backup = readPreCloudRestoreBackup();
+    return backup.valid ? backup.createdAt : null;
+  }
+
+  function getRowsTotal(rows) {
+    return rows.reduce((sum, row) => {
+      const amount = Number(row && row.amount);
+      return Number.isFinite(amount) ? sum + amount : sum;
+    }, 0);
+  }
+
+  function summarizeSourceSnapshot(snapshot) {
+    const validation = validateSourceSnapshot(snapshot);
+
+    if (!validation.valid) {
+      return { valid: false, summary: null };
+    }
+
+    const sourceData = validation.data;
+
+    return {
+      valid: true,
+      summary: {
+        accountCount: sourceData.accounts.length,
+        billCount: sourceData.bills.length,
+        allocationCount: sourceData.allocations.length,
+        investmentCount: sourceData.investments.length,
+        recurringIncomeCount: sourceData.recurringIncome.length,
+        assetCount: sourceData.assets.length,
+        accountsAmount: getRowsTotal(sourceData.accounts)
+      }
+    };
   }
 
   function saveCloudSnapshot(sourceData) {
@@ -332,6 +373,8 @@
     hasPreCloudRestoreBackup,
     createPreCloudRestoreBackup,
     readPreCloudRestoreBackup,
+    getPreCloudRestoreBackupCreatedAt,
+    summarizeSourceSnapshot,
     saveLocalSourceData,
     saveCloudSnapshot,
     loadCloudSnapshot

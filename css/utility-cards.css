@@ -184,7 +184,8 @@
   opacity: 0.45;
 }
 
-.cloud-last-sync {
+.cloud-last-sync,
+.cloud-backup-timestamp {
   margin: -8px 0 0;
   max-width: 100%;
   overflow-wrap: anywhere;
