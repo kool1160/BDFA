@@ -1417,6 +1417,59 @@ function getCompactSnapshotComparison(comparison) {
   return `Cloud preview vs this device: ${differences.join(', ')}.`;
 }
 
+
+function getCompactLocalSnapshotComparison(comparison) {
+  const differences = [
+    comparison.accountCount === 0 ? '' : formatSnapshotDifference(comparison.accountCount, 'account count', 'account'),
+    comparison.billCount === 0 ? '' : formatSnapshotDifference(comparison.billCount, 'bill count', 'bill'),
+    comparison.allocationCount === 0 ? '' : formatSnapshotDifference(comparison.allocationCount, 'allocations', 'allocation'),
+    comparison.investmentCount === 0 ? '' : formatSnapshotDifference(comparison.investmentCount, 'investments', 'investment'),
+    comparison.recurringIncomeCount === 0 ? '' : formatSnapshotDifference(comparison.recurringIncomeCount, 'income rows', 'income row', 'income rows'),
+    comparison.assetCount === 0 ? '' : formatSnapshotDifference(comparison.assetCount, 'assets', 'asset'),
+    comparison.accountsAmount === 0 ? '' : formatSnapshotAmountDifference(comparison.accountsAmount)
+  ].filter(Boolean);
+
+  if (!differences.length) {
+    return 'Save preview: same source counts and account amount as cloud.';
+  }
+
+  return `Save preview vs cloud: ${differences.join(', ')}.`;
+}
+
+function formatCloudSaveConfirmation(summary, comparison, hasCloudSnapshot) {
+  const lines = [
+    'Save current local BDFA data to cloud?',
+    '',
+    'Local snapshot includes:',
+    ...getSnapshotSummaryLines(summary)
+  ];
+
+  if (hasCloudSnapshot && comparison) {
+    lines.push(
+      '',
+      'Compared with current cloud:',
+      `- ${formatSnapshotDifference(comparison.accountCount, 'account count', 'account')}`,
+      `- ${formatSnapshotDifference(comparison.billCount, 'bill count', 'bill')}`,
+      `- ${formatSnapshotDifference(comparison.allocationCount, 'allocations', 'allocation')}`,
+      `- ${formatSnapshotDifference(comparison.investmentCount, 'investments', 'investment')}`,
+      `- ${formatSnapshotDifference(comparison.recurringIncomeCount, 'income rows', 'income row', 'income rows')}`,
+      `- ${formatSnapshotDifference(comparison.assetCount, 'assets', 'asset')}`
+    );
+
+    if (Number.isFinite(comparison.accountsAmount)) {
+      lines.push(`- ${formatSnapshotAmountDifference(comparison.accountsAmount)}`);
+    }
+
+    lines.push('', 'This will replace the current cloud snapshot.');
+  } else {
+    lines.push('', 'No current cloud snapshot was found.');
+  }
+
+  lines.push('Local data on this device will not be changed.');
+
+  return lines.join('\n');
+}
+
 function formatCloudLoadConfirmation(updatedAt, summary, comparison) {
   const syncTime = formatCloudSyncTime(updatedAt) || 'the cloud';
   const lines = [
@@ -1713,10 +1766,6 @@ async function handleManualCloudSave() {
     return;
   }
 
-  if (!confirm('Save current local BDFA data to cloud? This will replace the cloud snapshot.')) {
-    return;
-  }
-
   const sourceData = typeof window.BDFA.getSourceData === 'function'
     ? window.BDFA.getSourceData()
     : window.BDFA.dataAdapter.exportData();
@@ -1724,6 +1773,75 @@ async function handleManualCloudSave() {
 
   if (!validation.valid) {
     await renderAuthStatus('Local snapshot is invalid. Cloud save was canceled.', 'error');
+    return;
+  }
+
+  const summaryResult = getSnapshotSummary(validation.data);
+
+  if (!summaryResult.valid || !summaryResult.summary) {
+    await renderAuthStatus('Local snapshot is invalid. Cloud save was canceled.', 'error');
+    return;
+  }
+
+  if (typeof window.BDFA.dataAdapter.loadCloudSnapshot !== 'function') {
+    await renderAuthStatus('Cloud save failed, using local fallback.', 'error');
+    return;
+  }
+
+  const previewResult = await runCloudOperation('Checking current cloud snapshot...', () => window.BDFA.dataAdapter.loadCloudSnapshot({
+    applySnapshot: false,
+    saveMissingSnapshot: false
+  }));
+
+  if (!previewResult) {
+    return;
+  }
+
+  if (previewResult.status === 'local') {
+    setCloudLastSyncMessage('Using local save only');
+    await renderAuthStatus('Signed out · Local mode', 'neutral');
+    return;
+  }
+
+  if (previewResult.status === 'failed') {
+    await renderAuthStatus('Cloud save failed, using local fallback.', 'error');
+    return;
+  }
+
+  if (previewResult.status === 'invalid') {
+    await renderAuthStatus('Cloud snapshot is invalid. Cloud save was canceled.', 'error');
+    return;
+  }
+
+  let comparison = null;
+  const hasCloudSnapshot = previewResult.status !== 'missing' && Boolean(previewResult.data);
+
+  if (hasCloudSnapshot) {
+    const cloudValidation = validateSourceSnapshot(previewResult.data);
+
+    if (!cloudValidation.valid) {
+      await renderAuthStatus('Cloud snapshot is invalid. Cloud save was canceled.', 'error');
+      return;
+    }
+
+    const comparisonResult = getSnapshotComparison(cloudValidation.data, validation.data);
+
+    if (!comparisonResult.valid || !comparisonResult.comparison) {
+      await renderAuthStatus('Cloud snapshot is invalid. Cloud save was canceled.', 'error');
+      return;
+    }
+
+    comparison = comparisonResult.comparison;
+    setCloudLastSyncMessage(getCompactLocalSnapshotComparison(comparison));
+  } else {
+    setCloudLastSyncMessage('Cloud last saved: never');
+  }
+
+  await renderAuthStatus('Review local snapshot before saving to cloud.', 'neutral');
+  await waitForStatusPaint();
+
+  if (!confirm(formatCloudSaveConfirmation(summaryResult.summary, comparison, hasCloudSnapshot))) {
+    await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
     return;
   }
 
