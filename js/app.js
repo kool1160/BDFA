@@ -1278,6 +1278,18 @@ function hydrateLocalChangesPendingCloudSave() {
   setLocalChangesPendingCloudSave(dataAdapter.hasLocalChangesPendingCloudSave());
 }
 
+function hasLocalChangesPendingManualCloudLoad() {
+  if (localChangesPendingCloudSave) {
+    return true;
+  }
+
+  const dataAdapter = window.BDFA.dataAdapter;
+
+  return Boolean(dataAdapter
+    && typeof dataAdapter.hasLocalChangesPendingCloudSave === 'function'
+    && dataAdapter.hasLocalChangesPendingCloudSave());
+}
+
 function formatCloudSyncTime(updatedAt) {
   if (!updatedAt) {
     return '';
@@ -1494,7 +1506,7 @@ function formatCloudSaveConfirmation(summary, comparison, hasCloudSnapshot) {
   return lines.join('\n');
 }
 
-function formatCloudLoadConfirmation(updatedAt, summary, comparison) {
+function formatCloudLoadConfirmation(updatedAt, summary, comparison, hasUnsavedLocalChanges) {
   const syncTime = formatCloudSyncTime(updatedAt) || 'the cloud';
   const lines = [
     `Load cloud snapshot from ${syncTime}?`,
@@ -1516,6 +1528,15 @@ function formatCloudLoadConfirmation(updatedAt, summary, comparison) {
 
   if (Number.isFinite(comparison.accountsAmount)) {
     lines.push(`- ${formatSnapshotAmountDifference(comparison.accountsAmount)}`);
+  }
+
+  if (hasUnsavedLocalChanges) {
+    lines.push(
+      '',
+      'Warning: this device has local changes that have not been saved to cloud yet.',
+      'Loading from cloud will replace those local changes.',
+      'A local restore backup will be created first.'
+    );
   }
 
   lines.push(
@@ -1967,7 +1988,14 @@ async function handleManualCloudLoad() {
   setCloudLastSyncMessage(getCompactSnapshotComparison(comparisonResult.comparison));
   await waitForStatusPaint();
 
-  if (!confirm(formatCloudLoadConfirmation(result.updatedAt, summaryResult.summary, comparisonResult.comparison))) {
+  const hasUnsavedLocalChanges = hasLocalChangesPendingManualCloudLoad();
+
+  if (!confirm(formatCloudLoadConfirmation(
+    result.updatedAt,
+    summaryResult.summary,
+    comparisonResult.comparison,
+    hasUnsavedLocalChanges
+  ))) {
     await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
     return;
   }
