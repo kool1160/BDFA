@@ -1472,7 +1472,29 @@ function getCompactLocalSnapshotComparison(comparison) {
   return `Save preview vs cloud: ${differences.join(', ')}.`;
 }
 
-function formatCloudSaveConfirmation(summary, comparison, hasCloudSnapshot) {
+function hasCloudChangedSinceLastKnownSync(previewUpdatedAt) {
+  const dataAdapter = window.BDFA.dataAdapter;
+
+  if (!previewUpdatedAt
+    || !dataAdapter
+    || typeof dataAdapter.getLastKnownCloudUpdatedAt !== 'function') {
+    return false;
+  }
+
+  const lastKnownCloudUpdatedAt = dataAdapter.getLastKnownCloudUpdatedAt();
+
+  return Boolean(lastKnownCloudUpdatedAt && lastKnownCloudUpdatedAt !== previewUpdatedAt);
+}
+
+function rememberLastKnownCloudUpdatedAt(updatedAt) {
+  const dataAdapter = window.BDFA.dataAdapter;
+
+  if (updatedAt && dataAdapter && typeof dataAdapter.setLastKnownCloudUpdatedAt === 'function') {
+    dataAdapter.setLastKnownCloudUpdatedAt(updatedAt);
+  }
+}
+
+function formatCloudSaveConfirmation(summary, comparison, hasCloudSnapshot, hasCloudConflictWarning) {
   const lines = [
     'Save current local BDFA data to cloud?',
     '',
@@ -1494,6 +1516,14 @@ function formatCloudSaveConfirmation(summary, comparison, hasCloudSnapshot) {
 
     if (Number.isFinite(comparison.accountsAmount)) {
       lines.push(`- ${formatSnapshotAmountDifference(comparison.accountsAmount)}`);
+    }
+
+    if (hasCloudConflictWarning) {
+      lines.push(
+        '',
+        'Warning: the cloud snapshot changed since this device last synced.',
+        'Saving now may overwrite newer cloud changes from another session or device.'
+      );
     }
 
     lines.push('', 'This will replace the current cloud snapshot.');
@@ -1771,6 +1801,7 @@ async function syncCloudSnapshotAfterAuth() {
 
   if (result.status === 'saved-initial') {
     setLocalChangesPendingCloudSave(false);
+    rememberLastKnownCloudUpdatedAt(result.updatedAt);
     setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     await renderAuthStatus('Signed in. Local snapshot saved to cloud.', 'success');
     return;
@@ -1793,6 +1824,7 @@ async function syncCloudSnapshotAfterAuth() {
 
   if (result.status === 'loaded') {
     setLocalChangesPendingCloudSave(false);
+    rememberLastKnownCloudUpdatedAt(result.updatedAt);
     setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
     await renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
     return;
@@ -1860,6 +1892,7 @@ async function handleManualCloudSave() {
 
   let comparison = null;
   const hasCloudSnapshot = previewResult.status !== 'missing' && Boolean(previewResult.data);
+  const hasCloudConflictWarning = hasCloudSnapshot && hasCloudChangedSinceLastKnownSync(previewResult.updatedAt);
 
   if (hasCloudSnapshot) {
     const cloudValidation = validateSourceSnapshot(previewResult.data);
@@ -1885,7 +1918,12 @@ async function handleManualCloudSave() {
   await renderAuthStatus('Review local snapshot before saving to cloud.', 'neutral');
   await waitForStatusPaint();
 
-  if (!confirm(formatCloudSaveConfirmation(summaryResult.summary, comparison, hasCloudSnapshot))) {
+  if (!confirm(formatCloudSaveConfirmation(
+    summaryResult.summary,
+    comparison,
+    hasCloudSnapshot,
+    hasCloudConflictWarning
+  ))) {
     await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
     return;
   }
@@ -1898,6 +1936,7 @@ async function handleManualCloudSave() {
 
   if (result.status === 'saved') {
     setLocalChangesPendingCloudSave(false);
+    rememberLastKnownCloudUpdatedAt(result.updatedAt);
     setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     await renderAuthStatus('Saved to cloud.', 'success');
     return;
@@ -2021,6 +2060,7 @@ async function handleManualCloudLoad() {
 
   setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
   setLocalChangesPendingCloudSave(false);
+  rememberLastKnownCloudUpdatedAt(result.updatedAt);
   updateLocalBackupTimestamp();
   await renderAuthStatus('Cloud snapshot loaded. Previous local data was backed up.', 'success');
 }
@@ -2266,12 +2306,14 @@ window.BDFA.dataAdapter.loadCloudSnapshot().then(result => {
 
   if (result.status === 'saved-initial') {
     setLocalChangesPendingCloudSave(false);
+    rememberLastKnownCloudUpdatedAt(result.updatedAt);
     setCloudLastSyncMessage(getCloudSavedMessage(result.updatedAt));
     renderAuthStatus('Signed in. Local snapshot saved to cloud.', 'success');
   }
 
   if (result.status === 'loaded') {
     setLocalChangesPendingCloudSave(false);
+    rememberLastKnownCloudUpdatedAt(result.updatedAt);
     setCloudLastSyncMessage(getCloudLoadedMessage(result.updatedAt));
     renderAuthStatus('Signed in. Cloud snapshot loaded.', 'success');
   }
