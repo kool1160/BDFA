@@ -1335,6 +1335,23 @@ function pluralizeSnapshotLabel(count, singular, plural = `${singular}s`) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
+function getSnapshotSummaryLines(summary) {
+  const lines = [
+    `- ${pluralizeSnapshotLabel(summary.accountCount, 'account')}`,
+    `- ${pluralizeSnapshotLabel(summary.billCount, 'bill')}`,
+    `- ${pluralizeSnapshotLabel(summary.allocationCount, 'allocation')}`,
+    `- ${pluralizeSnapshotLabel(summary.investmentCount, 'investment')}`,
+    `- ${pluralizeSnapshotLabel(summary.recurringIncomeCount, 'income row', 'income rows')}`,
+    `- ${pluralizeSnapshotLabel(summary.assetCount, 'asset')}`
+  ];
+
+  if (Number.isFinite(summary.accountsAmount)) {
+    lines.push(`- ${money.format(summary.accountsAmount)} total account amount`);
+  }
+
+  return lines;
+}
+
 function formatSnapshotDifference(diff, sameLabel, singular, plural = `${singular}s`) {
   if (diff === 0) {
     return `same ${sameLabel}`;
@@ -1347,23 +1364,45 @@ function formatSnapshotDifference(diff, sameLabel, singular, plural = `${singula
   return `${prefix}${diff} ${label}`;
 }
 
+function formatSnapshotAmountDifference(amount) {
+  if (!Number.isFinite(amount)) {
+    return '';
+  }
+
+  if (amount === 0) {
+    return 'same account amount';
+  }
+
+  const amountPrefix = amount > 0 ? '+' : '-';
+  return `${amountPrefix}${money.format(Math.abs(amount))} account amount`;
+}
+
+function getCompactSnapshotComparison(comparison) {
+  const differences = [
+    comparison.accountCount === 0 ? '' : formatSnapshotDifference(comparison.accountCount, 'account count', 'account'),
+    comparison.billCount === 0 ? '' : formatSnapshotDifference(comparison.billCount, 'bill count', 'bill'),
+    comparison.allocationCount === 0 ? '' : formatSnapshotDifference(comparison.allocationCount, 'allocations', 'allocation'),
+    comparison.investmentCount === 0 ? '' : formatSnapshotDifference(comparison.investmentCount, 'investments', 'investment'),
+    comparison.recurringIncomeCount === 0 ? '' : formatSnapshotDifference(comparison.recurringIncomeCount, 'income rows', 'income row', 'income rows'),
+    comparison.assetCount === 0 ? '' : formatSnapshotDifference(comparison.assetCount, 'assets', 'asset'),
+    comparison.accountsAmount === 0 ? '' : formatSnapshotAmountDifference(comparison.accountsAmount)
+  ].filter(Boolean);
+
+  if (!differences.length) {
+    return 'Cloud preview: same source counts and account amount as this device.';
+  }
+
+  return `Cloud preview vs this device: ${differences.join(', ')}.`;
+}
+
 function formatCloudLoadConfirmation(updatedAt, summary, comparison) {
   const syncTime = formatCloudSyncTime(updatedAt) || 'the cloud';
   const lines = [
     `Load cloud snapshot from ${syncTime}?`,
     '',
     'Cloud snapshot includes:',
-    `- ${pluralizeSnapshotLabel(summary.accountCount, 'account')}`,
-    `- ${pluralizeSnapshotLabel(summary.billCount, 'bill')}`,
-    `- ${pluralizeSnapshotLabel(summary.allocationCount, 'allocation')}`,
-    `- ${pluralizeSnapshotLabel(summary.investmentCount, 'investment')}`,
-    `- ${pluralizeSnapshotLabel(summary.recurringIncomeCount, 'income row', 'income rows')}`,
-    `- ${pluralizeSnapshotLabel(summary.assetCount, 'asset')}`
+    ...getSnapshotSummaryLines(summary)
   ];
-
-  if (Number.isFinite(summary.accountsAmount)) {
-    lines.push(`- ${money.format(summary.accountsAmount)} total account amount`);
-  }
 
   lines.push(
     '',
@@ -1377,13 +1416,7 @@ function formatCloudLoadConfirmation(updatedAt, summary, comparison) {
   );
 
   if (Number.isFinite(comparison.accountsAmount)) {
-    const amountPrefix = comparison.accountsAmount > 0 ? '+' : comparison.accountsAmount < 0 ? '-' : '';
-    const formattedAmount = money.format(Math.abs(comparison.accountsAmount));
-    const amountText = comparison.accountsAmount === 0
-      ? 'same account amount'
-      : `${amountPrefix}${formattedAmount} account amount`;
-
-    lines.push(`- ${amountText}`);
+    lines.push(`- ${formatSnapshotAmountDifference(comparison.accountsAmount)}`);
   }
 
   lines.push(
@@ -1393,6 +1426,26 @@ function formatCloudLoadConfirmation(updatedAt, summary, comparison) {
   );
 
   return lines.join('\n');
+}
+
+function formatRestoreLocalBackupConfirmation(backupCreatedAt, summary) {
+  const backupTime = formatLocalBackupTime(backupCreatedAt) || 'the saved backup';
+  const lines = [
+    `Restore local backup from ${backupTime}?`,
+    '',
+    'Local backup includes:',
+    ...getSnapshotSummaryLines(summary),
+    '',
+    'This will replace current local BDFA data on this device.'
+  ];
+
+  return lines.join('\n');
+}
+
+function waitForStatusPaint() {
+  return new Promise(resolve => {
+    window.setTimeout(resolve, 0);
+  });
 }
 
 function updateLocalBackupTimestamp() {
@@ -1715,6 +1768,10 @@ async function handleManualCloudLoad() {
     return;
   }
 
+  await renderAuthStatus('Review cloud snapshot differences before loading.', 'neutral');
+  setCloudLastSyncMessage(getCompactSnapshotComparison(comparisonResult.comparison));
+  await waitForStatusPaint();
+
   if (!confirm(formatCloudLoadConfirmation(result.updatedAt, summaryResult.summary, comparisonResult.comparison))) {
     await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
     return;
@@ -1754,18 +1811,31 @@ async function handleRestoreLocalBackup() {
     return;
   }
 
-  if (!confirm('Restore the local backup from before the last cloud load? This will replace the current local BDFA data on this device.')) {
+  const backup = window.BDFA.dataAdapter.readPreCloudRestoreBackup();
+
+  if (!backup.valid) {
+    await renderAuthStatus('Local backup could not be restored.', 'error');
+    return;
+  }
+
+  const summaryResult = getSnapshotSummary(backup.data);
+
+  if (!summaryResult.valid || !summaryResult.summary) {
+    await renderAuthStatus('Local backup could not be restored.', 'error');
+    return;
+  }
+
+  if (!confirm(formatRestoreLocalBackupConfirmation(backup.createdAt, summaryResult.summary))) {
     return;
   }
 
   const result = await runCloudOperation('Restoring local backup...', async () => {
-    const backup = window.BDFA.dataAdapter.readPreCloudRestoreBackup();
+    const persistedData = saveSourceDataLocally(backup.data);
 
-    if (!backup.valid) {
+    if (!persistedData) {
       return { status: 'invalid' };
     }
 
-    const persistedData = saveSourceDataLocally(backup.data);
     applyPersistedSourceData(persistedData);
     return { status: 'restored' };
   });
