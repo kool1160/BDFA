@@ -13,6 +13,7 @@
   };
   const preCloudRestoreBackupKey = 'bdfa.preCloudRestoreBackup';
   const localChangesPendingCloudSaveKey = 'bdfa.localChangesPendingCloudSave';
+  const lastKnownCloudUpdatedAtKey = 'bdfa.lastKnownCloudUpdatedAt';
 
   const requiredSourceCollections = ['accounts', 'bills', 'allocations', 'investments'];
   const optionalSourceCollections = ['assets', 'recurringIncome'];
@@ -123,6 +124,27 @@
     } catch {
       return false;
     }
+  }
+
+  function getLastKnownCloudUpdatedAt() {
+    return localStorage.getItem(lastKnownCloudUpdatedAtKey) || null;
+  }
+
+  function setLastKnownCloudUpdatedAt(updatedAt) {
+    try {
+      if (updatedAt) {
+        localStorage.setItem(lastKnownCloudUpdatedAtKey, updatedAt);
+      } else {
+        localStorage.removeItem(lastKnownCloudUpdatedAtKey);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearLastKnownCloudUpdatedAt() {
+    return setLastKnownCloudUpdatedAt(null);
   }
 
   function dispatchSourceDataUpdated(sourceData) {
@@ -300,6 +322,7 @@
       .then(result => {
         if (result.status === 'saved') {
           setLocalChangesPendingCloudSave(false);
+          setLastKnownCloudUpdatedAt(result.updatedAt || null);
         }
 
         return result;
@@ -435,6 +458,7 @@
       }
 
       setLocalChangesPendingCloudSave(false);
+      setLastKnownCloudUpdatedAt(result.updatedAt || null);
       dispatchSourceDataUpdated(currentSourceData);
       return { status: result.status, data: getSourceData(), updatedAt: result.updatedAt || null, error: null };
     }
@@ -465,6 +489,9 @@
     validateSourceSnapshot,
     hasLocalChangesPendingCloudSave,
     setLocalChangesPendingCloudSave,
+    getLastKnownCloudUpdatedAt,
+    setLastKnownCloudUpdatedAt,
+    clearLastKnownCloudUpdatedAt,
     hasPreCloudRestoreBackup,
     createPreCloudRestoreBackup,
     readPreCloudRestoreBackup,
