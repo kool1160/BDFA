@@ -1164,6 +1164,87 @@ h1 {
     letter-spacing: 0.08em;
   }
 
+  body.has-mobile-views .panel-title[data-toggle="accounts"] {
+    padding-bottom: 13px;
+  }
+
+  body.has-mobile-views #accounts {
+    padding-bottom: 8px;
+  }
+
+  body.has-mobile-views #accounts .edit-form {
+    margin-bottom: 12px;
+  }
+
+  body.has-mobile-views #accountsList {
+    display: grid;
+    gap: 7px;
+  }
+
+  body.has-mobile-views #accountsList .account-group-label {
+    margin: 8px 1px -1px;
+    color: rgba(169, 169, 181, 0.7);
+    font-size: 0.62rem;
+    line-height: 1.1;
+    letter-spacing: 0.072em;
+  }
+
+  body.has-mobile-views #accountsList .row {
+    gap: 9px 12px;
+    min-height: 0;
+    padding: 9px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 15px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.044), rgba(255, 255, 255, 0.022));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  }
+
+  body.has-mobile-views #accountsList .account-row.negative-balance {
+    margin-inline: 0;
+    padding-inline: 10px;
+    border-color: rgba(255, 255, 255, 0.072);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.026));
+  }
+
+  body.has-mobile-views #accountsList .row > div strong {
+    color: rgba(247, 247, 251, 0.92);
+    font-size: 0.94rem;
+    line-height: 1.12;
+  }
+
+  body.has-mobile-views #accountsList .row small {
+    margin-top: 3px;
+    color: rgba(169, 169, 181, 0.72);
+    font-size: 0.75rem;
+    line-height: 1.16;
+  }
+
+  body.has-mobile-views #accountsList .row > strong:last-child {
+    color: rgba(247, 247, 251, 0.94);
+    font-size: 1rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+  }
+
+  body.has-mobile-views #accountsList .row-actions {
+    gap: 6px;
+    padding-top: 0;
+  }
+
+  body.has-mobile-views #accountsList .row-actions button {
+    min-height: 36px;
+    padding: 7px 10px;
+    border-color: rgba(255, 255, 255, 0.076);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(247, 247, 251, 0.8);
+    font-size: 0.78rem;
+  }
+
+  body.has-mobile-views #accountsList .row-actions button:last-child {
+    background: transparent;
+    color: rgba(169, 169, 181, 0.74);
+  }
+
   body.has-mobile-views .bill-status-badge {
     margin-top: 5px;
     padding: 4px 7px;
