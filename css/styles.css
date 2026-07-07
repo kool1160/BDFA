@@ -825,6 +825,147 @@ h1 {
     line-height: 1.3;
   }
 
+  body.has-mobile-views .monthly-planning-section {
+    padding: 14px;
+    border-color: rgba(255, 255, 255, 0.078);
+    border-radius: 22px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.028));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      0 14px 38px rgba(0, 0, 0, 0.2);
+  }
+
+  body.has-mobile-views .monthly-planning-header {
+    margin-bottom: 13px;
+  }
+
+  body.has-mobile-views .monthly-planning-header .label,
+  body.has-mobile-views .bill-calendar-strip-label,
+  body.has-mobile-views .cash-timing-label,
+  body.has-mobile-views .monthly-next-step span {
+    font-size: 0.66rem;
+    letter-spacing: 0.055em;
+  }
+
+  body.has-mobile-views .monthly-planning-card,
+  body.has-mobile-views .cash-timing-card,
+  body.has-mobile-views .monthly-next-step {
+    padding: 11px;
+    border-color: rgba(255, 255, 255, 0.07);
+    border-radius: 17px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.046), rgba(255, 255, 255, 0.024));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+  }
+
+  body.has-mobile-views .monthly-flow-summary-panel {
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top-color: rgba(255, 255, 255, 0.06);
+  }
+
+  body.has-mobile-views .monthly-flow-cash-status-card,
+  body.has-mobile-views .monthly-flow-summary-card,
+  body.has-mobile-views .monthly-flow-bills-summary,
+  body.has-mobile-views .monthly-flow-next-bill {
+    gap: 4px;
+    padding: 10px;
+    border-color: rgba(255, 255, 255, 0.068);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.035);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.032);
+  }
+
+  body.has-mobile-views .monthly-flow-cash-status-card {
+    border-color: rgba(76, 217, 100, 0.16);
+    background: linear-gradient(145deg, rgba(76, 217, 100, 0.095), rgba(255, 255, 255, 0.03));
+    box-shadow: 0 10px 24px rgba(76, 217, 100, 0.06);
+  }
+
+  body.has-mobile-views .monthly-flow-summary-card-primary {
+    border-color: rgba(76, 217, 100, 0.14);
+    background: rgba(76, 217, 100, 0.052);
+  }
+
+  body.has-mobile-views .bill-calendar-strip,
+  body.has-mobile-views .cash-timing-card {
+    gap: 10px;
+  }
+
+  body.has-mobile-views .bill-date-chip-list {
+    gap: 8px;
+    margin-inline: -8px;
+    padding: 6px 8px 8px;
+  }
+
+  body.has-mobile-views .bill-date-chip {
+    flex-basis: clamp(82px, 25vw, 98px);
+    gap: 5px;
+    padding: 10px 9px;
+    border-color: rgba(255, 255, 255, 0.075);
+    border-radius: 16px;
+    background: rgba(14, 14, 18, 0.78);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.16);
+  }
+
+  body.has-mobile-views .monthly-flow-timeline-section,
+  body.has-mobile-views .monthly-flow-income-section {
+    gap: 7px;
+    margin-top: 10px;
+  }
+
+  body.has-mobile-views .monthly-flow-timeline-list,
+  body.has-mobile-views .monthly-flow-bills-list,
+  body.has-mobile-views .monthly-flow-income-list {
+    gap: 7px;
+  }
+
+  body.has-mobile-views .monthly-flow-timeline-starting-row,
+  body.has-mobile-views .monthly-flow-timeline-row,
+  body.has-mobile-views .monthly-flow-bill-row,
+  body.has-mobile-views .monthly-flow-income-row,
+  body.has-mobile-views .monthly-flow-timeline-empty,
+  body.has-mobile-views .monthly-flow-bills-empty,
+  body.has-mobile-views .monthly-flow-income-empty {
+    gap: 9px;
+    padding: 9px 10px;
+    border-color: rgba(255, 255, 255, 0.07);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.034);
+  }
+
+  body.has-mobile-views .monthly-flow-timeline-row-income,
+  body.has-mobile-views .monthly-flow-income-row {
+    border-color: rgba(76, 217, 100, 0.12);
+    background: rgba(76, 217, 100, 0.046);
+  }
+
+  body.has-mobile-views .monthly-flow-timeline-row-lowest {
+    border-color: rgba(255, 214, 10, 0.26);
+    background: linear-gradient(135deg, rgba(255, 214, 10, 0.105), rgba(255, 255, 255, 0.04));
+    box-shadow: 0 9px 22px rgba(255, 214, 10, 0.055);
+  }
+
+  body.has-mobile-views .monthly-flow-timeline-details,
+  body.has-mobile-views .monthly-flow-bill-copy,
+  body.has-mobile-views .monthly-flow-income-copy {
+    gap: 3px;
+  }
+
+  body.has-mobile-views .monthly-flow-bill-copy strong,
+  body.has-mobile-views .monthly-flow-income-copy strong {
+    font-size: 0.79rem;
+    line-height: 1.16;
+  }
+
+  body.has-mobile-views .monthly-flow-timeline-starting-row strong,
+  body.has-mobile-views .monthly-flow-timeline-amount,
+  body.has-mobile-views .monthly-flow-bill-amount,
+  body.has-mobile-views .monthly-flow-income-amount {
+    font-size: 0.82rem;
+    line-height: 1.14;
+  }
+
   body.has-mobile-views .row {
     gap: 12px;
     min-height: 54px;
