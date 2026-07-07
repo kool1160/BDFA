@@ -190,6 +190,7 @@
 }
 
 .cloud-last-sync,
+.cloud-dirty-indicator,
 .cloud-backup-timestamp {
   margin: -8px 0 0;
   max-width: 100%;
@@ -197,6 +198,16 @@
   color: rgba(245, 247, 251, 0.62);
   font-size: 0.78rem;
   font-weight: 700;
+}
+
+.cloud-dirty-indicator {
+  width: fit-content;
+  padding: 8px 11px;
+  border: 1px solid rgba(255, 214, 138, 0.2);
+  border-radius: 999px;
+  background: rgba(255, 214, 138, 0.08);
+  color: rgba(255, 223, 166, 0.94);
+  font-weight: 800;
 }
 
 .auth-status {
