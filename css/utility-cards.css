@@ -179,6 +179,12 @@
   min-width: 0;
 }
 
+.cloud-actions #cloudSaveButton[data-cloud-dirty="true"]:not(:disabled) {
+  border-color: rgba(255, 214, 138, 0.32);
+  background: rgba(255, 214, 138, 0.14);
+  color: rgba(255, 237, 204, 0.98);
+}
+
 .cloud-clear-backup-button:not(:disabled) {
   border-color: rgba(255, 159, 159, 0.22);
   color: rgba(255, 221, 221, 0.92);

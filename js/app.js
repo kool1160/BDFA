@@ -1236,14 +1236,28 @@ let cloudLastSyncMessage = 'Using local save only';
 let localChangesPendingCloudSave = false;
 let cloudDirtyIndicatorEligible = false;
 
+function renderCloudSaveButtonState() {
+  const cloudSaveButton = document.getElementById('cloudSaveButton');
+
+  if (!cloudSaveButton) {
+    return;
+  }
+
+  const shouldShowDirtyState = localChangesPendingCloudSave && cloudDirtyIndicatorEligible;
+
+  cloudSaveButton.textContent = shouldShowDirtyState ? 'Save Changes to Cloud' : 'Save to Cloud';
+  cloudSaveButton.dataset.cloudDirty = shouldShowDirtyState ? 'true' : 'false';
+}
+
 function renderCloudDirtyIndicator() {
   const indicator = document.getElementById('cloudDirtyIndicator');
+  const shouldShowIndicator = localChangesPendingCloudSave && cloudDirtyIndicatorEligible;
+
+  renderCloudSaveButtonState();
 
   if (!indicator) {
     return;
   }
-
-  const shouldShowIndicator = localChangesPendingCloudSave && cloudDirtyIndicatorEligible;
 
   indicator.hidden = !shouldShowIndicator;
   indicator.textContent = shouldShowIndicator ? 'Local changes not saved to cloud.' : '';
