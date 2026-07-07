@@ -212,6 +212,38 @@
     };
   }
 
+  function compareSourceSnapshots(localSnapshot, cloudSnapshot) {
+    const localValidation = validateSourceSnapshot(localSnapshot);
+    const cloudValidation = validateSourceSnapshot(cloudSnapshot);
+
+    if (!localValidation.valid || !cloudValidation.valid) {
+      return { valid: false, comparison: null };
+    }
+
+    const localSummaryResult = summarizeSourceSnapshot(localValidation.data);
+    const cloudSummaryResult = summarizeSourceSnapshot(cloudValidation.data);
+
+    if (!localSummaryResult.valid || !cloudSummaryResult.valid) {
+      return { valid: false, comparison: null };
+    }
+
+    const localSummary = localSummaryResult.summary;
+    const cloudSummary = cloudSummaryResult.summary;
+
+    return {
+      valid: true,
+      comparison: {
+        accountCount: cloudSummary.accountCount - localSummary.accountCount,
+        billCount: cloudSummary.billCount - localSummary.billCount,
+        allocationCount: cloudSummary.allocationCount - localSummary.allocationCount,
+        investmentCount: cloudSummary.investmentCount - localSummary.investmentCount,
+        recurringIncomeCount: cloudSummary.recurringIncomeCount - localSummary.recurringIncomeCount,
+        assetCount: cloudSummary.assetCount - localSummary.assetCount,
+        accountsAmount: cloudSummary.accountsAmount - localSummary.accountsAmount
+      }
+    };
+  }
+
   function saveCloudSnapshot(sourceData) {
     const supabaseClient = getSupabaseClient();
     const validation = validateSourceSnapshot(sourceData);
@@ -375,6 +407,7 @@
     readPreCloudRestoreBackup,
     getPreCloudRestoreBackupCreatedAt,
     summarizeSourceSnapshot,
+    compareSourceSnapshots,
     saveLocalSourceData,
     saveCloudSnapshot,
     loadCloudSnapshot

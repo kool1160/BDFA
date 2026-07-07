@@ -1302,11 +1302,52 @@ function getSnapshotSummary(sourceData) {
   };
 }
 
+function getSnapshotComparison(localSnapshot, cloudSnapshot) {
+  if (window.BDFA.dataAdapter && typeof window.BDFA.dataAdapter.compareSourceSnapshots === 'function') {
+    return window.BDFA.dataAdapter.compareSourceSnapshots(localSnapshot, cloudSnapshot);
+  }
+
+  const localSummaryResult = getSnapshotSummary(localSnapshot);
+  const cloudSummaryResult = getSnapshotSummary(cloudSnapshot);
+
+  if (!localSummaryResult.valid || !cloudSummaryResult.valid) {
+    return { valid: false, comparison: null };
+  }
+
+  const localSummary = localSummaryResult.summary;
+  const cloudSummary = cloudSummaryResult.summary;
+
+  return {
+    valid: true,
+    comparison: {
+      accountCount: cloudSummary.accountCount - localSummary.accountCount,
+      billCount: cloudSummary.billCount - localSummary.billCount,
+      allocationCount: cloudSummary.allocationCount - localSummary.allocationCount,
+      investmentCount: cloudSummary.investmentCount - localSummary.investmentCount,
+      recurringIncomeCount: cloudSummary.recurringIncomeCount - localSummary.recurringIncomeCount,
+      assetCount: cloudSummary.assetCount - localSummary.assetCount,
+      accountsAmount: cloudSummary.accountsAmount - localSummary.accountsAmount
+    }
+  };
+}
+
 function pluralizeSnapshotLabel(count, singular, plural = `${singular}s`) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
-function formatCloudLoadConfirmation(updatedAt, summary) {
+function formatSnapshotDifference(diff, sameLabel, singular, plural = `${singular}s`) {
+  if (diff === 0) {
+    return `same ${sameLabel}`;
+  }
+
+  const prefix = diff > 0 ? '+' : '';
+  const absoluteDiff = Math.abs(diff);
+  const label = absoluteDiff === 1 ? singular : plural;
+
+  return `${prefix}${diff} ${label}`;
+}
+
+function formatCloudLoadConfirmation(updatedAt, summary, comparison) {
   const syncTime = formatCloudSyncTime(updatedAt) || 'the cloud';
   const lines = [
     `Load cloud snapshot from ${syncTime}?`,
@@ -1322,6 +1363,27 @@ function formatCloudLoadConfirmation(updatedAt, summary) {
 
   if (Number.isFinite(summary.accountsAmount)) {
     lines.push(`- ${money.format(summary.accountsAmount)} total account amount`);
+  }
+
+  lines.push(
+    '',
+    'Compared with this device:',
+    `- ${formatSnapshotDifference(comparison.accountCount, 'account count', 'account')}`,
+    `- ${formatSnapshotDifference(comparison.billCount, 'bill count', 'bill')}`,
+    `- ${formatSnapshotDifference(comparison.allocationCount, 'allocations', 'allocation')}`,
+    `- ${formatSnapshotDifference(comparison.investmentCount, 'investments', 'investment')}`,
+    `- ${formatSnapshotDifference(comparison.recurringIncomeCount, 'income rows', 'income row', 'income rows')}`,
+    `- ${formatSnapshotDifference(comparison.assetCount, 'assets', 'asset')}`
+  );
+
+  if (Number.isFinite(comparison.accountsAmount)) {
+    const amountPrefix = comparison.accountsAmount > 0 ? '+' : comparison.accountsAmount < 0 ? '-' : '';
+    const formattedAmount = money.format(Math.abs(comparison.accountsAmount));
+    const amountText = comparison.accountsAmount === 0
+      ? 'same account amount'
+      : `${amountPrefix}${formattedAmount} account amount`;
+
+    lines.push(`- ${amountText}`);
   }
 
   lines.push(
@@ -1636,7 +1698,24 @@ async function handleManualCloudLoad() {
     return;
   }
 
-  if (!confirm(formatCloudLoadConfirmation(result.updatedAt, summaryResult.summary))) {
+  const localSourceData = typeof window.BDFA.getSourceData === 'function'
+    ? window.BDFA.getSourceData()
+    : window.BDFA.dataAdapter.exportData();
+  const localValidation = validateSourceSnapshot(localSourceData);
+
+  if (!localValidation.valid) {
+    await renderAuthStatus('Local snapshot is invalid. Cloud load was canceled.', 'error');
+    return;
+  }
+
+  const comparisonResult = getSnapshotComparison(localValidation.data, validation.data);
+
+  if (!comparisonResult.valid || !comparisonResult.comparison) {
+    await renderAuthStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
+    return;
+  }
+
+  if (!confirm(formatCloudLoadConfirmation(result.updatedAt, summaryResult.summary, comparisonResult.comparison))) {
     await renderAuthStatus('Signed in · Cloud save ready', 'neutral');
     return;
   }
