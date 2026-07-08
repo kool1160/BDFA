@@ -771,24 +771,45 @@ h1 {
   body.has-mobile-views .panel-title {
     min-height: 70px;
     padding: 16px 14px 14px 16px;
-    gap: 10px;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    column-gap: 8px;
+    row-gap: 4px;
     font-size: 0.98rem;
     line-height: 1.08;
   }
 
+  body.has-mobile-views .panel.collapsed .panel-title {
+    min-height: 76px;
+    padding: 17px 13px 17px 16px;
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.042), rgba(255, 255, 255, 0.018)),
+      rgba(255, 255, 255, 0.012);
+  }
+
   body.has-mobile-views .panel-label {
     display: grid;
-    gap: 3px;
+    min-width: 0;
+    gap: 4px;
+    align-content: center;
   }
 
   body.has-mobile-views .section-heading {
-    gap: 9px;
+    min-width: 0;
+    gap: 10px;
     line-height: 1.05;
+  }
+
+  body.has-mobile-views .section-heading span:last-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   body.has-mobile-views .section-heading .section-icon {
     width: 32px;
     height: 32px;
+    flex: 0 0 32px;
     font-size: 0.82rem;
   }
 
@@ -797,21 +818,27 @@ h1 {
     color: rgba(169, 169, 181, 0.66);
     font-size: 0.7rem;
     font-weight: 600;
-    line-height: 1.18;
+    line-height: 1.2;
   }
 
   body.has-mobile-views .panel-title > span:last-child {
+    align-self: center;
     width: 40px;
     height: 40px;
     font-size: 1.14rem;
   }
 
   body.has-mobile-views .panel-summary {
-    max-width: 7.8rem;
-    padding: 6px 9px;
-    background: rgba(255, 255, 255, 0.05);
+    align-self: center;
+    min-width: 4.35rem;
+    max-width: min(7.2rem, 24vw);
+    padding: 7px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    background: rgba(255, 255, 255, 0.052);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.055);
     font-size: 0.74rem;
-    line-height: 0.98;
+    line-height: 1;
+    text-align: center;
   }
 
   body.has-mobile-views .panel-body {
