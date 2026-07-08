@@ -1030,8 +1030,8 @@ function renderAllSections() {
 function getSavedCollapsedPanels() {
   const savedPanels = localStorage.getItem(panelStateStorageKey);
 
-  if (!savedPanels) {
-    return [];
+  if (savedPanels === null) {
+    return null;
   }
 
   try {
@@ -1039,7 +1039,7 @@ function getSavedCollapsedPanels() {
     return Array.isArray(parsedPanels) ? parsedPanels : [];
   } catch {
     localStorage.removeItem(panelStateStorageKey);
-    return [];
+    return null;
   }
 }
 
@@ -1065,11 +1065,14 @@ function syncPanelToggleAriaState(button) {
 
 function applySavedPanelState() {
   const collapsedPanels = getSavedCollapsedPanels();
+  const hasSavedPanelState = Array.isArray(collapsedPanels);
 
   document.querySelectorAll('[data-toggle]').forEach(button => {
     const panel = button.closest('.panel');
     const body = panel.querySelector('.panel-body');
-    const shouldCollapse = collapsedPanels.includes(button.dataset.toggle);
+    const shouldCollapse = hasSavedPanelState
+      ? collapsedPanels.includes(button.dataset.toggle)
+      : true;
 
     panel.classList.toggle('collapsed', shouldCollapse);
     body.hidden = shouldCollapse;
