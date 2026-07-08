@@ -761,11 +761,32 @@ h1 {
   }
 
   body.has-mobile-views .panel {
-    border-color: rgba(255, 255, 255, 0.075);
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.062), rgba(255, 255, 255, 0.034));
+    border-color: rgba(255, 255, 255, 0.095);
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.074), rgba(255, 255, 255, 0.036));
     box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.05),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06),
       0 14px 38px rgba(0, 0, 0, 0.22);
+    transition: border-color 180ms ease, background 180ms ease, box-shadow 180ms ease;
+  }
+
+  body.has-mobile-views .panel.collapsed {
+    border-color: rgba(255, 255, 255, 0.07);
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.048), rgba(255, 255, 255, 0.022)),
+      rgba(255, 255, 255, 0.012);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.042),
+      0 10px 28px rgba(0, 0, 0, 0.18);
+  }
+
+  body.has-mobile-views .panel:not(.collapsed) {
+    border-color: rgba(157, 194, 255, 0.18);
+    background:
+      linear-gradient(180deg, rgba(157, 194, 255, 0.068), transparent 42%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.082), rgba(255, 255, 255, 0.04));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.075),
+      0 16px 42px rgba(0, 0, 0, 0.24);
   }
 
   body.has-mobile-views .panel-title {
@@ -782,8 +803,14 @@ h1 {
     min-height: 76px;
     padding: 17px 13px 17px 16px;
     background:
-      linear-gradient(145deg, rgba(255, 255, 255, 0.042), rgba(255, 255, 255, 0.018)),
-      rgba(255, 255, 255, 0.012);
+      linear-gradient(145deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.014)),
+      rgba(255, 255, 255, 0.01);
+  }
+
+  body.has-mobile-views .panel:not(.collapsed) .panel-title {
+    background:
+      linear-gradient(180deg, rgba(157, 194, 255, 0.062), rgba(255, 255, 255, 0.018)),
+      rgba(255, 255, 255, 0.018);
   }
 
   body.has-mobile-views .panel-label {
@@ -825,7 +852,37 @@ h1 {
     align-self: center;
     width: 40px;
     height: 40px;
-    font-size: 1.14rem;
+    border-color: rgba(255, 255, 255, 0.14);
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.24), transparent 34%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.06));
+    color: rgba(247, 247, 251, 0.9);
+    font-size: 1.28rem;
+    line-height: 0;
+    transform: rotate(180deg);
+    transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, box-shadow 180ms ease, color 180ms ease;
+  }
+
+  body.has-mobile-views .panel.collapsed .panel-title > span:last-child {
+    border-color: rgba(157, 194, 255, 0.2);
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.26), transparent 34%),
+      linear-gradient(145deg, rgba(157, 194, 255, 0.2), rgba(255, 255, 255, 0.065));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.16),
+      0 10px 24px rgba(0, 0, 0, 0.22);
+    color: rgba(247, 247, 251, 0.96);
+    transform: rotate(0deg);
+  }
+
+  body.has-mobile-views .panel:not(.collapsed) .panel-title > span:last-child {
+    border-color: rgba(255, 255, 255, 0.18);
+    background:
+      radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.22), transparent 34%),
+      linear-gradient(145deg, rgba(255, 255, 255, 0.145), rgba(157, 194, 255, 0.09));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 8px 22px rgba(0, 0, 0, 0.18);
   }
 
   body.has-mobile-views .panel-summary {
@@ -841,8 +898,26 @@ h1 {
     text-align: center;
   }
 
+  body.has-mobile-views .panel.collapsed .panel-summary {
+    border-color: rgba(255, 255, 255, 0.055);
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(247, 247, 251, 0.64);
+  }
+
+  body.has-mobile-views .panel:not(.collapsed) .panel-summary {
+    border-color: rgba(157, 194, 255, 0.16);
+    background: rgba(157, 194, 255, 0.078);
+    color: rgba(247, 247, 251, 0.82);
+  }
+
   body.has-mobile-views .panel-body {
     padding: 0 16px 6px;
+  }
+
+  body.has-mobile-views .panel:not(.collapsed) .panel-body {
+    border-top: 1px solid rgba(255, 255, 255, 0.065);
+    padding-top: 10px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.026), transparent 72px);
   }
 
   body.has-mobile-views .panel-copy {
