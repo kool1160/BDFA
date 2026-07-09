@@ -574,6 +574,30 @@
         <p>Clear local changes and restore the original premium mock data.</p>
         <button id="resetButton" type="button">Reset Demo Data</button>
       </article>
+
+      <article class="community-feedback-card utility-card" aria-labelledby="communityFeedbackTitle">
+        <div class="community-feedback-intro">
+          <span class="label">Community Feedback</span>
+          <h2 id="communityFeedbackTitle">Help shape BDFA.</h2>
+          <p>BDFA is built around financial clarity. If something feels confusing or missing, leave one focused note.</p>
+        </div>
+        <form class="community-feedback-form" id="communityFeedbackForm">
+          <label for="communityFeedbackIssue">
+            <span>What is one issue you've experienced using BDFA?</span>
+          </label>
+          <textarea id="communityFeedbackIssue" rows="4" placeholder="confusing workflow, bug, missing information, or something that doesn't feel right"></textarea>
+          <label for="communityFeedbackFeature">
+            <span>What is one feature you wish BDFA had?</span>
+          </label>
+          <textarea id="communityFeedbackFeature" rows="4" placeholder="Only one. The best feedback is focused."></textarea>
+          <div class="community-feedback-actions">
+            <button id="communityFeedbackSave" type="submit">Save Feedback Locally</button>
+            <button id="communityFeedbackClear" type="button" class="ghost-button">Clear Feedback</button>
+            <button id="communityFeedbackCopy" type="button" class="ghost-button">Copy Feedback</button>
+          </div>
+          <p id="communityFeedbackStatus" class="community-feedback-status" role="status" aria-live="polite" hidden></p>
+        </form>
+      </article>
     </section>
   </main>
 
