@@ -451,10 +451,13 @@
     <section class="analytics-section" data-mobile-view="analytics" aria-label="Analytics">
       <div class="analytics-header">
         <span class="label">Analytics</span>
-        <h2>Visual money insights.</h2>
-        <p>Simple bar charts using your current mock data.</p>
+        <h2>Financial intelligence snapshot.</h2>
+        <p>Runtime-derived insights from accounts, bills, allocations, investments, income, and assets.</p>
       </div>
-      <div class="analytics-grid">
+      <div class="analytics-snapshot-grid" id="analyticsSnapshotGrid" aria-label="Financial health snapshot"></div>
+      <div class="analytics-insight-grid" id="analyticsInsightGrid" aria-label="What this means"></div>
+      <div class="analytics-breakdown-grid" id="analyticsBreakdownGrid" aria-label="Financial breakdowns"></div>
+      <div class="analytics-grid analytics-existing-grid">
         <article class="analytics-card">
           <div>
             <strong>Cash vs Investments vs Debt</strong>
