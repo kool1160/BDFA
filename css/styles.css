@@ -24,9 +24,92 @@ body {
   color: var(--text);
 }
 
+.startup-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 34%, rgba(255, 255, 255, 0.12), transparent 18rem),
+    radial-gradient(circle at 32% 22%, rgba(80, 120, 255, 0.22), transparent 24rem),
+    radial-gradient(circle at 70% 74%, rgba(61, 220, 151, 0.12), transparent 22rem),
+    rgba(5, 5, 7, 0.98);
+  animation: splash-fade-out 420ms ease 1080ms forwards;
+}
+
+.startup-splash__card {
+  width: min(100%, 420px);
+  padding: 34px 28px;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: var(--radius-xl);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.045));
+  box-shadow:
+    0 28px 90px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  text-align: center;
+  backdrop-filter: blur(22px);
+  animation: splash-card-settle 700ms ease-out both;
+}
+
+.startup-splash__kicker {
+  display: block;
+  color: rgba(169, 169, 181, 0.92);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.startup-splash strong {
+  display: block;
+  margin-top: 12px;
+  color: rgba(247, 247, 251, 0.98);
+  font-size: clamp(2rem, 10vw, 3.45rem);
+  line-height: 0.92;
+  letter-spacing: -0.075em;
+}
+
+.startup-splash p {
+  margin: 14px 0 0;
+  color: rgba(247, 247, 251, 0.72);
+  font-size: clamp(1rem, 4vw, 1.16rem);
+  line-height: 1.35;
+}
+
 button, input, select {
   font: inherit;
   color: inherit;
+}
+
+@keyframes splash-card-settle {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes splash-fade-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .startup-splash,
+  .startup-splash__card {
+    animation-duration: 1ms;
+    animation-delay: 600ms;
+  }
 }
 
 .app-shell {
