@@ -29,7 +29,7 @@ function getAnalyticsRatio(value, totalValue) {
     return 0;
   }
 
-  return Math.max((value / totalValue) * 100, 0);
+  return Math.min(Math.max((value / totalValue) * 100, 0), 100);
 }
 
 function getAnalyticsShare(value, totalValue) {
@@ -42,6 +42,36 @@ function getAnalyticsPercentText(value, totalValue) {
   }
 
   return `${Math.round(getAnalyticsRatio(value, totalValue))}%`;
+}
+
+function getAnalyticsBoundedPercent(value) {
+  const percent = Number(value);
+
+  if (!Number.isFinite(percent)) {
+    return 0;
+  }
+
+  return Math.min(Math.max(percent, 0), 100);
+}
+
+function getAnalyticsScoreStatus(score) {
+  if (score === null) {
+    return 'Needs more data';
+  }
+
+  if (score >= 80) {
+    return 'Strong';
+  }
+
+  if (score >= 60) {
+    return 'Steady';
+  }
+
+  if (score >= 40) {
+    return 'Building';
+  }
+
+  return 'Getting started';
 }
 
 function getAnalyticsMonthlyIncomeAmount(income) {
@@ -86,6 +116,12 @@ function getAnalyticsHealthMetrics() {
   const monthlyIncome = getAnalyticsMonthlyIncomeTotal();
   const monthlySurplus = monthlyIncome - monthlyBills;
   const grossTrackedValue = totals.cash + totals.investments + totals.assets;
+  const accounts = getAnalyticsSafeRows(data.accounts);
+  const bills = getAnalyticsSafeRows(data.bills);
+  const recurringIncome = getAnalyticsSafeRows(data.recurringIncome);
+  const assets = getAnalyticsSafeRows(data.assets);
+  const investments = getAnalyticsSafeRows(data.investments);
+  const allocations = getAnalyticsSafeRows(data.allocations);
 
   return {
     ...totals,
@@ -94,9 +130,145 @@ function getAnalyticsHealthMetrics() {
     monthlySurplus,
     billsToIncomeRatio: monthlyIncome > 0 ? monthlyBills / monthlyIncome : null,
     emergencyMonths: monthlyBills > 0 ? totals.cash / monthlyBills : null,
+    grossTrackedValue,
+    cashShare: grossTrackedValue > 0 ? totals.cash / grossTrackedValue : null,
     investmentShare: grossTrackedValue > 0 ? totals.investments / grossTrackedValue : null,
-    assetShare: grossTrackedValue > 0 ? totals.assets / grossTrackedValue : null
+    assetShare: grossTrackedValue > 0 ? totals.assets / grossTrackedValue : null,
+    counts: {
+      accounts: accounts.length,
+      bills: bills.length,
+      recurringIncome: recurringIncome.length,
+      assets: assets.length,
+      investments: investments.length,
+      allocations: allocations.length
+    },
+    billDueDayCount: bills.filter(hasBillDueDay).length
   };
+}
+
+function getAnalyticsScoreComponent(label, score, explanation, className) {
+  return {
+    label,
+    score: score === null ? null : getAnalyticsBoundedPercent(score),
+    explanation,
+    className
+  };
+}
+
+function getAnalyticsFinancialHealthScore(metrics) {
+  const hasIncome = metrics.monthlyIncome > 0;
+  const hasBills = metrics.monthlyBills > 0;
+  const hasAccounts = metrics.counts.accounts > 0;
+  const hasTrackedValue = metrics.grossTrackedValue > 0;
+  const dataPoints = [
+    hasAccounts,
+    hasBills,
+    hasIncome,
+    metrics.counts.assets > 0,
+    metrics.counts.investments > 0,
+    metrics.counts.allocations > 0
+  ];
+  const dataCompletenessScore = Math.round((dataPoints.filter(Boolean).length / dataPoints.length) * 100);
+  const cashScore = !hasBills
+    ? (hasAccounts ? 50 : null)
+    : Math.min((Math.max(metrics.emergencyMonths, 0) / 6) * 100, 100);
+  const billPressureScore = !hasIncome
+    ? null
+    : Math.max(100 - (Math.max(metrics.billsToIncomeRatio, 0) * 100), 0);
+  const surplusScore = !hasIncome
+    ? null
+    : metrics.monthlySurplus >= 0
+      ? Math.min(60 + (metrics.monthlySurplus / Math.max(metrics.monthlyIncome, 1)) * 80, 100)
+      : Math.max(40 + (metrics.monthlySurplus / Math.max(metrics.monthlyBills, 1)) * 40, 0);
+  const investmentScore = !hasTrackedValue
+    ? null
+    : Math.min((Math.max(metrics.investmentShare || 0, 0) / 0.25) * 100, 100);
+  const assetScore = metrics.counts.assets > 0 ? 100 : (hasTrackedValue ? 45 : null);
+  const debtScore = metrics.debt <= 0
+    ? 100
+    : Math.max(100 - getAnalyticsRatio(metrics.debt, metrics.grossTrackedValue + metrics.debt), 0);
+  const components = [
+    getAnalyticsScoreComponent('Cash Coverage', cashScore, hasBills ? 'Liquid cash compared with monthly recurring bills.' : 'Add bills to measure cash runway more clearly.', 'analytics-positive'),
+    getAnalyticsScoreComponent('Bill Pressure', billPressureScore, hasIncome ? 'Monthly bills compared with recurring income.' : 'Add recurring income to compare bill pressure.', 'analytics-caution'),
+    getAnalyticsScoreComponent('Monthly Surplus', surplusScore, hasIncome ? 'Recurring income minus recurring bills.' : 'Add recurring income to see monthly cushion.', metrics.monthlySurplus >= 0 ? 'analytics-positive' : 'analytics-debt'),
+    getAnalyticsScoreComponent('Investments', investmentScore, hasTrackedValue ? 'Investment share of gross positive tracked value.' : 'Add accounts, assets, or investments to measure participation.', 'analytics-growth'),
+    getAnalyticsScoreComponent('Assets', assetScore, metrics.counts.assets ? 'Manual assets are included in tracked holdings.' : 'Add assets to improve net worth tracking.', 'analytics-growth'),
+    getAnalyticsScoreComponent('Debt Pressure', debtScore, metrics.debt ? 'Debt compared with total tracked value before debt.' : 'No tracked debt pressure from accounts.', 'analytics-debt'),
+    getAnalyticsScoreComponent('Data Completeness', dataCompletenessScore, 'How many source-data areas currently have entries.', 'analytics-positive')
+  ];
+  const scorable = components.filter(component => component.score !== null);
+  const enoughData = hasIncome && hasBills && (hasAccounts || hasTrackedValue);
+  const score = enoughData && scorable.length
+    ? Math.round(scorable.reduce((sum, component) => sum + component.score, 0) / scorable.length)
+    : null;
+
+  return {
+    score,
+    status: getAnalyticsScoreStatus(score),
+    components,
+    summary: score === null
+      ? 'Add recurring income and bills to unlock a better score.'
+      : score >= 80
+        ? 'Your recurring income covers bills well, and cash coverage is healthy.'
+        : score >= 60
+          ? 'Your money picture is taking shape, with a few areas that could be strengthened.'
+          : 'Add more source data and review recurring pressure to make this view more useful.'
+  };
+}
+
+function renderAnalyticsHealthScore(metrics) {
+  const target = document.getElementById('analyticsHealthScore');
+
+  if (!target) {
+    return;
+  }
+
+  const health = getAnalyticsFinancialHealthScore(metrics);
+  const scoreText = health.score === null ? 'Needs more data' : `${health.score} / 100`;
+  const ringValue = health.score === null ? 0 : health.score;
+
+  target.innerHTML = `
+    <article class="analytics-health-card">
+      <div class="analytics-score-ring" style="--score: ${ringValue}%">
+        <strong>${getAnalyticsEscapedText(scoreText)}</strong>
+        <span>${getAnalyticsEscapedText(health.status)}</span>
+      </div>
+      <div>
+        <span class="analytics-kicker">Runtime Financial Health Score</span>
+        <h3>${getAnalyticsEscapedText(health.status)}</h3>
+        <p>${getAnalyticsEscapedText(health.summary)}</p>
+        <small>This score is calculated only in the browser from current source data and is not saved.</small>
+      </div>
+    </article>
+  `;
+}
+
+function renderAnalyticsScoreBreakdown(metrics) {
+  const target = document.getElementById('analyticsScoreGrid');
+
+  if (!target) {
+    return;
+  }
+
+  const health = getAnalyticsFinancialHealthScore(metrics);
+
+  target.innerHTML = health.components.map(component => {
+    const score = component.score === null ? null : Math.round(component.score);
+    const width = score === null ? 0 : score;
+
+    return `
+      <article class="analytics-score-card">
+        <div class="analytics-score-card-heading">
+          <span>${getAnalyticsEscapedText(component.label)}</span>
+          <strong>${score === null ? 'Add data' : `${score}/100`}</strong>
+        </div>
+        <div class="analytics-bar-track" aria-hidden="true">
+          <span class="${component.className}" style="width: ${width}%"></span>
+        </div>
+        <p>${getAnalyticsEscapedText(component.explanation)}</p>
+      </article>
+    `;
+  }).join('');
 }
 
 function getAnalyticsLegendItem(label, className) {
@@ -169,6 +341,125 @@ function renderAnalyticsSnapshot(metrics) {
       <p>${getAnalyticsEscapedText(card.detail)}</p>
     </article>
   `).join('');
+}
+
+function getAnalyticsLargestCashAccount() {
+  const cashAccounts = getAnalyticsSafeRows(data.accounts)
+    .filter(account => account.type === 'Cash' && getAnalyticsSafeAmount(account.amount) > 0);
+
+  return getAnalyticsLargestByAmount(cashAccounts);
+}
+
+function getAnalyticsHoldingsMix(metrics) {
+  if (!metrics.grossTrackedValue) {
+    return '<div class="analytics-empty">Add cash accounts, assets, or investments to see where tracked positive value lives.</div>';
+  }
+
+  const rows = [
+    { label: 'Cash', amount: metrics.cash, className: 'analytics-positive' },
+    { label: 'Investments', amount: metrics.investments, className: 'analytics-growth' },
+    { label: 'Assets', amount: metrics.assets, className: 'analytics-caution' }
+  ];
+  const segments = rows.map(row => `
+    <span class="${row.className}" style="width: ${getAnalyticsShare(row.amount, metrics.grossTrackedValue)}"></span>
+  `).join('');
+  const details = rows.map(row => `
+    <div class="analytics-detail-row">
+      <span>${getAnalyticsEscapedText(row.label)}</span>
+      <strong>${getAnalyticsShare(row.amount, metrics.grossTrackedValue)}</strong>
+    </div>
+  `).join('');
+
+  return `
+    <div class="analytics-strip analytics-holdings-strip" aria-hidden="true">${segments}</div>
+    ${details}
+  `;
+}
+
+function getAnalyticsDataNextSteps(metrics) {
+  const steps = [];
+
+  if (!metrics.counts.recurringIncome) {
+    steps.push('Add recurring income to improve cash-flow insights.');
+  }
+
+  if (!metrics.counts.bills) {
+    steps.push('Add bills to understand monthly pressure.');
+  }
+
+  if (!metrics.counts.assets) {
+    steps.push('Add assets to improve net worth tracking.');
+  }
+
+  if (!metrics.counts.investments) {
+    steps.push('Add investments to improve holdings mix.');
+  }
+
+  return steps.length ? steps : ['Your core Analytics source areas have data. Keep them updated as money changes.'];
+}
+
+function renderAnalyticsDetailPanels(metrics) {
+  const target = document.getElementById('analyticsDetailGrid');
+
+  if (!target) {
+    return;
+  }
+
+  const largestBill = getAnalyticsLargestMonthlyBill();
+  const highestCash = getAnalyticsLargestCashAccount();
+  const dueDayText = metrics.counts.bills
+    ? `${metrics.billDueDayCount} of ${metrics.counts.bills} bills`
+    : 'Add bills';
+  const dataRows = [
+    ['Accounts', metrics.counts.accounts],
+    ['Bills', metrics.counts.bills],
+    ['Recurring income', metrics.counts.recurringIncome],
+    ['Assets', metrics.counts.assets],
+    ['Investments', metrics.counts.investments],
+    ['Allocations', metrics.counts.allocations]
+  ];
+  const dataNextSteps = getAnalyticsDataNextSteps(metrics).map(step => `<li>${getAnalyticsEscapedText(step)}</li>`).join('');
+
+  target.innerHTML = `
+    <article class="analytics-detail-card">
+      <span class="analytics-kicker">Cash Strength</span>
+      <h3>${metrics.emergencyMonths === null ? 'Add bills for runway' : `${metrics.emergencyMonths.toFixed(1)} months`}</h3>
+      <div class="analytics-detail-row"><span>Liquid cash</span><strong>${money.format(metrics.cash)}</strong></div>
+      <div class="analytics-detail-row"><span>Monthly bills</span><strong>${money.format(metrics.monthlyBills)}</strong></div>
+      <div class="analytics-detail-row"><span>Highest cash account</span><strong>${highestCash.row ? `${getAnalyticsEscapedText(highestCash.row.name || 'Unnamed account')} · ${money.format(highestCash.amount)}` : 'Add cash account'}</strong></div>
+      <p>${getAnalyticsEscapedText(metrics.emergencyMonths === null ? 'Add recurring bills to turn cash into a runway estimate.' : 'Cash strength compares liquid cash with normalized monthly bills.')}</p>
+    </article>
+    <article class="analytics-detail-card">
+      <span class="analytics-kicker">Bill Pressure</span>
+      <h3>${metrics.billsToIncomeRatio === null ? 'Add income' : `${Math.round(metrics.billsToIncomeRatio * 100)}% of income`}</h3>
+      <div class="analytics-detail-row"><span>Monthly bills</span><strong>${money.format(metrics.monthlyBills)}</strong></div>
+      <div class="analytics-detail-row"><span>Largest monthly bill</span><strong>${largestBill.row ? `${getAnalyticsEscapedText(largestBill.row.name || 'Unnamed bill')} · ${money.format(largestBill.amount)}/mo` : 'Add bills'}</strong></div>
+      <div class="analytics-detail-row"><span>Bill count</span><strong>${metrics.counts.bills}</strong></div>
+      <div class="analytics-detail-row"><span>Due-day completeness</span><strong>${getAnalyticsEscapedText(dueDayText)}</strong></div>
+    </article>
+    <article class="analytics-detail-card">
+      <span class="analytics-kicker">Income Coverage</span>
+      <h3>${metrics.monthlyIncome ? money.format(metrics.monthlySurplus) : 'Add income'}</h3>
+      <div class="analytics-detail-row"><span>Monthly recurring income</span><strong>${money.format(metrics.monthlyIncome)}</strong></div>
+      <div class="analytics-detail-row"><span>Surplus / shortfall</span><strong>${metrics.monthlyIncome ? money.format(metrics.monthlySurplus) : 'Add income'}</strong></div>
+      <div class="analytics-detail-row"><span>Income sources</span><strong>${metrics.counts.recurringIncome}</strong></div>
+      <p>${getAnalyticsEscapedText(metrics.monthlyIncome ? 'Coverage compares recurring income with recurring bill pressure.' : 'Add recurring income to see whether bills are covered each month.')}</p>
+    </article>
+    <article class="analytics-detail-card">
+      <span class="analytics-kicker">Holdings Mix</span>
+      <h3>${metrics.grossTrackedValue ? money.format(metrics.grossTrackedValue) : 'Add data'}</h3>
+      ${getAnalyticsHoldingsMix(metrics)}
+      <p>Shares use gross positive tracked value, so debt cannot distort the mix.</p>
+    </article>
+    <article class="analytics-detail-card analytics-detail-card-wide">
+      <span class="analytics-kicker">Data Completeness</span>
+      <h3>${dataRows.filter(row => row[1] > 0).length} of ${dataRows.length} areas tracked</h3>
+      <div class="analytics-count-grid">
+        ${dataRows.map(row => `<div><span>${getAnalyticsEscapedText(row[0])}</span><strong>${row[1]}</strong></div>`).join('')}
+      </div>
+      <ul class="analytics-next-steps">${dataNextSteps}</ul>
+    </article>
+  `;
 }
 
 function renderAnalyticsInsights(metrics) {
@@ -404,8 +695,11 @@ function renderAnalytics() {
   const allocations = total(data.allocations);
   const available = Math.max(totals.availableToAllocate, 0);
 
+  renderAnalyticsHealthScore(metrics);
+  renderAnalyticsScoreBreakdown(metrics);
   renderAnalyticsSnapshot(metrics);
   renderAnalyticsInsights(metrics);
+  renderAnalyticsDetailPanels(metrics);
   renderAnalyticsBreakdowns();
 
   renderAnalyticsBars('moneyMixChart', [
