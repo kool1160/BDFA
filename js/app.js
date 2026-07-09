@@ -920,6 +920,10 @@ function renderRecurringIncome() {
 function renderRecurringIncomeDashboard() {
   renderRecurringIncome();
   renderSectionSummaries();
+
+  if (typeof renderAnalytics === 'function') {
+    renderAnalytics();
+  }
 }
 
 function getRecurringIncomeFormData() {
