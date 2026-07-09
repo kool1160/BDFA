@@ -1729,24 +1729,6 @@ h1 {
       inset 0 1px 0 rgba(255, 255, 255, 0.055);
   }
 
-  body.has-mobile-views .edit-form input:invalid,
-  body.has-mobile-views .edit-form select:invalid,
-  body.has-mobile-views .edit-form textarea:invalid {
-    border-color: rgba(255, 177, 166, 0.24);
-    background:
-      linear-gradient(180deg, rgba(255, 177, 166, 0.042), rgba(255, 255, 255, 0.024)),
-      rgba(5, 5, 7, 0.26);
-  }
-
-  body.has-mobile-views .edit-form input:invalid:focus,
-  body.has-mobile-views .edit-form select:invalid:focus,
-  body.has-mobile-views .edit-form textarea:invalid:focus {
-    border-color: rgba(255, 177, 166, 0.4);
-    box-shadow:
-      0 0 0 3px rgba(255, 177, 166, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.055);
-  }
-
   body.has-mobile-views .edit-form input:disabled,
   body.has-mobile-views .edit-form select:disabled,
   body.has-mobile-views .edit-form textarea:disabled,
@@ -1896,20 +1878,6 @@ h1 {
       inset 0 1px 0 rgba(255, 255, 255, 0.055);
   }
 
-  body.has-mobile-views .utility-grid .auth-form input:invalid {
-    border-color: rgba(255, 177, 166, 0.24);
-    background:
-      linear-gradient(180deg, rgba(255, 177, 166, 0.042), rgba(255, 255, 255, 0.024)),
-      rgba(5, 5, 7, 0.28);
-  }
-
-  body.has-mobile-views .utility-grid .auth-form input:invalid:focus {
-    border-color: rgba(255, 177, 166, 0.4);
-    box-shadow:
-      0 0 0 3px rgba(255, 177, 166, 0.07),
-      inset 0 1px 0 rgba(255, 255, 255, 0.055);
-  }
-
   body.has-mobile-views .utility-grid .auth-form input:disabled,
   body.has-mobile-views .utility-grid .auth-form input[readonly] {
     border-color: rgba(255, 255, 255, 0.045);
@@ -2017,20 +1985,6 @@ h1 {
       rgba(5, 5, 7, 0.32);
     box-shadow:
       0 0 0 3px rgba(157, 194, 255, 0.065),
-      inset 0 1px 0 rgba(255, 255, 255, 0.055);
-  }
-
-  body.has-mobile-views .utility-grid textarea:invalid {
-    border-color: rgba(255, 177, 166, 0.24);
-    background:
-      linear-gradient(180deg, rgba(255, 177, 166, 0.04), rgba(255, 255, 255, 0.022)),
-      rgba(5, 5, 7, 0.28);
-  }
-
-  body.has-mobile-views .utility-grid textarea:invalid:focus {
-    border-color: rgba(255, 177, 166, 0.4);
-    box-shadow:
-      0 0 0 3px rgba(255, 177, 166, 0.07),
       inset 0 1px 0 rgba(255, 255, 255, 0.055);
   }
 
