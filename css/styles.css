@@ -1695,20 +1695,53 @@ h1 {
   }
 
   body.has-mobile-views .edit-form input,
-  body.has-mobile-views .edit-form select {
+  body.has-mobile-views .edit-form select,
+  body.has-mobile-views .edit-form textarea {
     min-height: 42px;
     border-color: rgba(255, 255, 255, 0.07);
     border-radius: 13px;
     padding: 0 11px;
     background: rgba(5, 5, 7, 0.26);
     font-size: 0.92rem;
+    color: rgba(247, 247, 251, 0.92);
+    outline: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  }
+
+  body.has-mobile-views .edit-form textarea {
+    min-height: 88px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    resize: vertical;
+  }
+
+  body.has-mobile-views .edit-form input::placeholder,
+  body.has-mobile-views .edit-form textarea::placeholder {
+    color: rgba(169, 169, 181, 0.42);
   }
 
   body.has-mobile-views .edit-form input:focus,
-  body.has-mobile-views .edit-form select:focus {
-    border-color: rgba(157, 194, 255, 0.24);
-    background: rgba(255, 255, 255, 0.065);
-    box-shadow: 0 0 0 3px rgba(157, 194, 255, 0.045);
+  body.has-mobile-views .edit-form select:focus,
+  body.has-mobile-views .edit-form textarea:focus {
+    border-color: rgba(157, 194, 255, 0.34);
+    background:
+      linear-gradient(180deg, rgba(157, 194, 255, 0.06), rgba(255, 255, 255, 0.05)),
+      rgba(5, 5, 7, 0.32);
+    box-shadow:
+      0 0 0 3px rgba(157, 194, 255, 0.07),
+      inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  }
+
+  body.has-mobile-views .edit-form input:disabled,
+  body.has-mobile-views .edit-form select:disabled,
+  body.has-mobile-views .edit-form textarea:disabled,
+  body.has-mobile-views .edit-form input[readonly],
+  body.has-mobile-views .edit-form textarea[readonly] {
+    border-color: rgba(255, 255, 255, 0.045);
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(169, 169, 181, 0.68);
+    opacity: 1;
   }
 
   body.has-mobile-views .form-actions {
@@ -1829,6 +1862,32 @@ h1 {
     border-radius: 14px;
     padding: 0 12px;
     background: rgba(5, 5, 7, 0.28);
+    color: rgba(247, 247, 251, 0.92);
+    outline: 0;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+  }
+
+  body.has-mobile-views .utility-grid .auth-form input::placeholder {
+    color: rgba(169, 169, 181, 0.42);
+  }
+
+  body.has-mobile-views .utility-grid .auth-form input:focus {
+    border-color: rgba(159, 231, 192, 0.34);
+    background:
+      linear-gradient(180deg, rgba(159, 231, 192, 0.055), rgba(255, 255, 255, 0.045)),
+      rgba(5, 5, 7, 0.32);
+    box-shadow:
+      0 0 0 3px rgba(159, 231, 192, 0.065),
+      inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  }
+
+  body.has-mobile-views .utility-grid .auth-form input:disabled,
+  body.has-mobile-views .utility-grid .auth-form input[readonly] {
+    border-color: rgba(255, 255, 255, 0.045);
+    background: rgba(255, 255, 255, 0.035);
+    color: rgba(169, 169, 181, 0.68);
+    opacity: 1;
   }
 
   body.has-mobile-views .utility-grid .cloud-actions {
@@ -1900,6 +1959,54 @@ h1 {
     border-color: rgba(255, 214, 138, 0.17);
     background: rgba(255, 214, 138, 0.065);
     color: rgba(255, 223, 166, 0.88);
+  }
+
+  body.has-mobile-views .utility-grid textarea {
+    width: 100%;
+    min-height: 132px;
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 15px;
+    padding: 12px;
+    background: rgba(5, 5, 7, 0.28);
+    color: rgba(247, 247, 251, 0.9);
+    font: inherit;
+    font-size: 0.86rem;
+    line-height: 1.35;
+    outline: 0;
+    resize: vertical;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+    transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, color 160ms ease;
+  }
+
+  body.has-mobile-views .utility-grid textarea::placeholder {
+    color: rgba(169, 169, 181, 0.42);
+  }
+
+  body.has-mobile-views .utility-grid textarea:focus {
+    border-color: rgba(157, 194, 255, 0.34);
+    background:
+      linear-gradient(180deg, rgba(157, 194, 255, 0.055), rgba(255, 255, 255, 0.04)),
+      rgba(5, 5, 7, 0.32);
+    box-shadow:
+      0 0 0 3px rgba(157, 194, 255, 0.065),
+      inset 0 1px 0 rgba(255, 255, 255, 0.055);
+  }
+
+  body.has-mobile-views .utility-grid textarea:disabled,
+  body.has-mobile-views .utility-grid textarea[readonly] {
+    border-color: rgba(255, 255, 255, 0.052);
+    background:
+      linear-gradient(180deg, rgba(157, 194, 255, 0.035), rgba(255, 255, 255, 0.022)),
+      rgba(5, 5, 7, 0.2);
+    color: rgba(169, 169, 181, 0.72);
+    opacity: 1;
+  }
+
+  body.has-mobile-views .utility-grid .auth-status[data-tone="error"],
+  body.has-mobile-views .utility-grid .status-message[data-tone="error"] {
+    border-color: rgba(255, 177, 166, 0.18);
+    background: rgba(255, 177, 166, 0.07);
+    color: rgba(255, 225, 221, 0.92);
   }
 
   body.has-mobile-views .panel[data-mobile-view]:not([hidden]),
