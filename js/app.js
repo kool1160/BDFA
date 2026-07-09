@@ -5,7 +5,9 @@ const money = new Intl.NumberFormat('en-US', {
 });
 
 const panelStateStorageKey = 'bdfa.panelState';
+const communityFeedbackDraftStorageKey = 'bdfa.communityFeedbackDraft';
 let statusTimer;
+let communityFeedbackStatusTimer;
 
 const billFrequencies = {
   monthly: { label: 'Monthly', months: 1 },
@@ -105,6 +107,150 @@ function showStatus(message, tone = 'success') {
   statusTimer = setTimeout(() => {
     target.hidden = true;
   }, 3600);
+}
+
+function getCommunityFeedbackElements() {
+  return {
+    form: document.getElementById('communityFeedbackForm'),
+    issue: document.getElementById('communityFeedbackIssue'),
+    featureWish: document.getElementById('communityFeedbackFeature'),
+    status: document.getElementById('communityFeedbackStatus')
+  };
+}
+
+function getCommunityFeedbackDraft() {
+  try {
+    const savedDraft = localStorage.getItem(communityFeedbackDraftStorageKey);
+
+    if (!savedDraft) {
+      return { issue: '', featureWish: '', updatedAt: null };
+    }
+
+    const draft = JSON.parse(savedDraft);
+
+    if (!draft || typeof draft !== 'object' || Array.isArray(draft)) {
+      return { issue: '', featureWish: '', updatedAt: null };
+    }
+
+    return {
+      issue: typeof draft.issue === 'string' ? draft.issue : '',
+      featureWish: typeof draft.featureWish === 'string' ? draft.featureWish : '',
+      updatedAt: typeof draft.updatedAt === 'string' ? draft.updatedAt : null
+    };
+  } catch {
+    return { issue: '', featureWish: '', updatedAt: null };
+  }
+}
+
+function renderCommunityFeedbackStatus(message) {
+  const { status } = getCommunityFeedbackElements();
+
+  if (!status) {
+    return;
+  }
+
+  clearTimeout(communityFeedbackStatusTimer);
+  status.textContent = message;
+  status.hidden = false;
+
+  communityFeedbackStatusTimer = setTimeout(() => {
+    status.hidden = true;
+  }, 3600);
+}
+
+function saveCommunityFeedbackDraft(event) {
+  if (event) {
+    event.preventDefault();
+  }
+
+  const { issue, featureWish } = getCommunityFeedbackElements();
+
+  if (!issue || !featureWish) {
+    return null;
+  }
+
+  const draft = {
+    issue: issue.value.trim(),
+    featureWish: featureWish.value.trim(),
+    updatedAt: new Date().toISOString()
+  };
+
+  localStorage.setItem(communityFeedbackDraftStorageKey, JSON.stringify(draft));
+  renderCommunityFeedbackStatus('Feedback saved locally.');
+
+  return draft;
+}
+
+function clearCommunityFeedbackDraft() {
+  const { issue, featureWish } = getCommunityFeedbackElements();
+
+  localStorage.removeItem(communityFeedbackDraftStorageKey);
+
+  if (issue) {
+    issue.value = '';
+  }
+
+  if (featureWish) {
+    featureWish.value = '';
+  }
+
+  renderCommunityFeedbackStatus('Feedback cleared.');
+}
+
+function getCommunityFeedbackSummary(draft) {
+  const issue = draft.issue || 'No issue entered.';
+  const featureWish = draft.featureWish || 'No feature wish entered.';
+
+  return `BDFA Community Feedback
+
+1. What is one issue you've experienced using BDFA?
+${issue}
+
+2. What is one feature you wish BDFA had?
+${featureWish}`;
+}
+
+function copyTextWithFallback(text) {
+  if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+    return navigator.clipboard.writeText(text);
+  }
+
+  const scratch = document.createElement('textarea');
+  scratch.value = text;
+  scratch.setAttribute('readonly', '');
+  scratch.style.position = 'fixed';
+  scratch.style.top = '-1000px';
+  document.body.appendChild(scratch);
+  scratch.select();
+  document.execCommand('copy');
+  scratch.remove();
+
+  return Promise.resolve();
+}
+
+async function copyCommunityFeedbackDraft() {
+  const draft = saveCommunityFeedbackDraft();
+  const summary = getCommunityFeedbackSummary(draft || getCommunityFeedbackDraft());
+
+  try {
+    await copyTextWithFallback(summary);
+    renderCommunityFeedbackStatus('Feedback copied.');
+  } catch {
+    renderCommunityFeedbackStatus('Feedback could not be copied.');
+  }
+}
+
+function hydrateCommunityFeedbackDraft() {
+  const { issue, featureWish } = getCommunityFeedbackElements();
+  const draft = getCommunityFeedbackDraft();
+
+  if (issue) {
+    issue.value = draft.issue;
+  }
+
+  if (featureWish) {
+    featureWish.value = draft.featureWish;
+  }
 }
 
 function getEmptyState(title, message) {
@@ -2336,6 +2482,9 @@ addOptionalEventListener('recurringIncomeList', 'click', handleRecurringIncomeAc
 addOptionalEventListener('importButton', 'click', importDemoData);
 addOptionalEventListener('exportButton', 'click', exportDemoData);
 addOptionalEventListener('resetButton', 'click', resetDemoData);
+addOptionalEventListener('communityFeedbackForm', 'submit', saveCommunityFeedbackDraft);
+addOptionalEventListener('communityFeedbackClear', 'click', clearCommunityFeedbackDraft);
+addOptionalEventListener('communityFeedbackCopy', 'click', copyCommunityFeedbackDraft);
 addOptionalEventListener('authForm', 'submit', event => {
   event.preventDefault();
   handleAuthAction('signin');
@@ -2365,6 +2514,7 @@ document.querySelectorAll('[data-toggle]').forEach(button => {
 });
 
 applySourceDataSnapshot(window.BDFA.dataAdapter.loadSourceData(demoData));
+hydrateCommunityFeedbackDraft();
 hydrateLocalChangesPendingCloudSave();
 renderAllSections();
 applySavedPanelState();
