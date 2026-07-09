@@ -1,3 +1,12 @@
+function getAnalyticsSafeAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function getAnalyticsSafeRows(rows) {
+  return Array.isArray(rows) ? rows : [];
+}
+
 function getAnalyticsBarWidth(value, maxValue) {
   if (!maxValue || maxValue <= 0) {
     return 0;
@@ -6,12 +15,72 @@ function getAnalyticsBarWidth(value, maxValue) {
   return Math.max((value / maxValue) * 100, value > 0 ? 6 : 0);
 }
 
-function getAnalyticsShare(value, totalValue) {
+function getAnalyticsRatio(value, totalValue) {
   if (!totalValue || totalValue <= 0) {
-    return '0%';
+    return 0;
   }
 
-  return `${Math.round((value / totalValue) * 100)}%`;
+  return Math.max((value / totalValue) * 100, 0);
+}
+
+function getAnalyticsShare(value, totalValue) {
+  return `${Math.round(getAnalyticsRatio(value, totalValue))}%`;
+}
+
+function getAnalyticsPercentText(value, totalValue) {
+  if (!totalValue || totalValue <= 0) {
+    return 'Add data';
+  }
+
+  return `${Math.round(getAnalyticsRatio(value, totalValue))}%`;
+}
+
+function getAnalyticsMonthlyIncomeAmount(income) {
+  const amount = getAnalyticsSafeAmount(income.amount);
+
+  if (income.frequency === 'weekly') {
+    return amount * 52 / 12;
+  }
+
+  if (income.frequency === 'biweekly') {
+    return amount * 26 / 12;
+  }
+
+  if (income.frequency === 'semimonthly') {
+    return amount * 2;
+  }
+
+  return amount;
+}
+
+function getAnalyticsMonthlyIncomeTotal() {
+  return getAnalyticsSafeRows(data.recurringIncome).reduce((sum, income) => sum + getAnalyticsMonthlyIncomeAmount(income), 0);
+}
+
+function getAnalyticsLargestByAmount(rows, amountKey = 'amount') {
+  return getAnalyticsSafeRows(rows).reduce((largest, row) => {
+    const amount = Math.abs(getAnalyticsSafeAmount(row[amountKey]));
+    return amount > largest.amount ? { row, amount } : largest;
+  }, { row: null, amount: 0 });
+}
+
+function getAnalyticsHealthMetrics() {
+  const totals = getDashboardTotals();
+  const monthlyBills = getMonthlyBillsTotal();
+  const monthlyIncome = getAnalyticsMonthlyIncomeTotal();
+  const monthlySurplus = monthlyIncome - monthlyBills;
+  const grossTrackedValue = totals.cash + totals.investments + totals.assets;
+
+  return {
+    ...totals,
+    monthlyBills,
+    monthlyIncome,
+    monthlySurplus,
+    billsToIncomeRatio: monthlyIncome > 0 ? monthlyBills / monthlyIncome : null,
+    emergencyMonths: monthlyBills > 0 ? totals.cash / monthlyBills : null,
+    investmentShare: grossTrackedValue > 0 ? totals.investments / grossTrackedValue : null,
+    assetShare: grossTrackedValue > 0 ? totals.assets / grossTrackedValue : null
+  };
 }
 
 function getAnalyticsLegendItem(label, className) {
@@ -43,9 +112,10 @@ function renderAnalyticsBars(targetId, rows, contextText = '') {
     return;
   }
 
-  const maxValue = Math.max(...rows.map(row => row.amount), 0);
-  const totalValue = rows.reduce((sum, row) => sum + row.amount, 0);
-  const bars = rows.map(row => getAnalyticsBarRow(
+  const safeRows = rows.map(row => ({ ...row, amount: getAnalyticsSafeAmount(row.amount) }));
+  const maxValue = Math.max(...safeRows.map(row => row.amount), 0);
+  const totalValue = safeRows.reduce((sum, row) => sum + row.amount, 0);
+  const bars = safeRows.map(row => getAnalyticsBarRow(
     row.label,
     row.amount,
     maxValue,
@@ -54,7 +124,132 @@ function renderAnalyticsBars(targetId, rows, contextText = '') {
   )).join('');
   const context = contextText ? `<div class="analytics-context">${contextText}</div>` : '';
 
-  target.innerHTML = `${getAnalyticsLegend(rows)}<div class="analytics-bar-list">${bars}</div>${context}`;
+  target.innerHTML = `${getAnalyticsLegend(safeRows)}<div class="analytics-bar-list">${bars}</div>${context}`;
+}
+
+function renderAnalyticsSnapshot(metrics) {
+  const target = document.getElementById('analyticsSnapshotGrid');
+
+  if (!target) {
+    return;
+  }
+
+  const cards = [
+    { label: 'Net Worth', value: money.format(metrics.netWorth), detail: 'Cash + investments + assets minus debt.', tone: 'aurora' },
+    { label: 'Liquid Cash', value: money.format(metrics.cash), detail: 'Tracked cash accounts available for planning.', tone: 'mint' },
+    { label: 'Monthly Income', value: metrics.monthlyIncome ? money.format(metrics.monthlyIncome) : 'Add income', detail: 'Recurring income converted to monthly impact.', tone: 'blue' },
+    { label: 'Monthly Bills', value: metrics.monthlyBills ? money.format(metrics.monthlyBills) : 'Add bills', detail: 'Recurring bills normalized to monthly pressure.', tone: 'gold' },
+    { label: 'Monthly Surplus / Shortfall', value: metrics.monthlyIncome ? money.format(metrics.monthlySurplus) : 'Add income', detail: metrics.monthlyIncome ? 'Income minus recurring bills.' : 'Add recurring income for this insight.', tone: metrics.monthlySurplus >= 0 ? 'mint' : 'coral' },
+    { label: 'Bills-to-Income Ratio', value: metrics.billsToIncomeRatio === null ? 'Add income' : `${Math.round(metrics.billsToIncomeRatio * 100)}%`, detail: metrics.billsToIncomeRatio === null ? 'Add income to compare bill pressure.' : 'Lower means more room for goals.', tone: 'purple' },
+    { label: 'Emergency Fund Coverage', value: metrics.emergencyMonths === null ? 'Add bills' : `${metrics.emergencyMonths.toFixed(1)} mo`, detail: metrics.emergencyMonths === null ? 'Add bills to measure cash runway.' : 'Liquid cash divided by monthly bills.', tone: 'teal' },
+    { label: 'Investment Share', value: metrics.investmentShare === null ? 'Add data' : `${Math.round(metrics.investmentShare * 100)}%`, detail: 'Investments as a share of tracked positive value.', tone: 'blue' },
+    { label: 'Asset Share', value: metrics.assetShare === null ? 'Add data' : `${Math.round(metrics.assetShare * 100)}%`, detail: metrics.assets ? 'Manual assets as a share of tracked holdings.' : 'Add assets to make tracked holdings more complete.', tone: 'violet' }
+  ];
+
+  target.innerHTML = cards.map(card => `
+    <article class="analytics-snapshot-card ${card.tone}">
+      <span>${card.label}</span>
+      <strong>${card.value}</strong>
+      <p>${card.detail}</p>
+    </article>
+  `).join('');
+}
+
+function renderAnalyticsInsights(metrics) {
+  const target = document.getElementById('analyticsInsightGrid');
+
+  if (!target) {
+    return;
+  }
+
+  const largestBill = getAnalyticsLargestByAmount(data.bills);
+  const highestAccount = getAnalyticsLargestByAmount(data.accounts);
+  const insights = [
+    metrics.emergencyMonths === null ? 'Add recurring bills to see how many months your cash could cover.' : `You have enough liquid cash to cover ${metrics.emergencyMonths.toFixed(1)} months of recurring bills.`,
+    metrics.billsToIncomeRatio === null ? 'Add recurring income to understand how much of income bills use.' : `Bills currently use ${Math.round(metrics.billsToIncomeRatio * 100)}% of recurring monthly income.`,
+    metrics.investmentShare === null ? 'Add cash, investments, or assets to see your investment share.' : `Investments represent ${Math.round(metrics.investmentShare * 100)}% of tracked positive value.`,
+    largestBill.row ? `Your largest recurring bill is ${largestBill.row.name || 'Unnamed bill'} at ${money.format(getMonthlyBillAmount(largestBill.row))}/mo.` : 'Add bills to identify your largest recurring commitment.',
+    highestAccount.row ? `Your highest-value account is ${highestAccount.row.name || 'Unnamed account'} at ${money.format(highestAccount.amount)}.` : 'Add accounts to identify where your largest cash or debt balance sits.',
+    metrics.assetShare === null || !metrics.assets ? 'Add assets such as a home or vehicle to improve tracked holdings.' : `Tracked assets make up ${Math.round(metrics.assetShare * 100)}% of tracked holdings.`
+  ];
+
+  target.innerHTML = insights.map((insight, index) => `
+    <article class="analytics-insight-card">
+      <span>Insight ${index + 1}</span>
+      <p>${insight}</p>
+    </article>
+  `).join('');
+}
+
+function getAnalyticsBreakdownRows(kind) {
+  if (kind === 'accounts') {
+    return getAnalyticsSafeRows(data.accounts).map(account => ({ label: account.name || 'Account', detail: account.type || 'Account', amount: Math.abs(getAnalyticsSafeAmount(account.amount)), className: account.amount < 0 ? 'analytics-debt' : 'analytics-positive' }));
+  }
+
+  if (kind === 'bills') {
+    return getAnalyticsSafeRows(data.bills).map(bill => ({ label: bill.name || 'Bill', detail: 'Monthly impact', amount: getMonthlyBillAmount(bill), className: 'analytics-caution' }));
+  }
+
+  if (kind === 'income') {
+    return getAnalyticsSafeRows(data.recurringIncome).map(income => ({ label: income.name || 'Income', detail: getRecurringIncomeFrequencyLabel(income.frequency), amount: getAnalyticsMonthlyIncomeAmount(income), className: 'analytics-positive' }));
+  }
+
+  if (kind === 'assets') {
+    return getAnalyticsSafeRows(data.assets).map(asset => ({ label: asset.name || 'Asset', detail: asset.type || 'Asset', amount: getAnalyticsSafeAmount(asset.value), className: 'analytics-growth' }));
+  }
+
+  return getAnalyticsSafeRows(data.investments).map(investment => ({ label: investment.name || 'Investment', detail: investment.detail || 'Investment', amount: getAnalyticsSafeAmount(investment.amount), className: 'analytics-growth' }));
+}
+
+function getAnalyticsBreakdownCard(title, emptyTitle, emptyCopy, rows) {
+  const safeRows = rows.filter(row => row.amount > 0);
+
+  if (!safeRows.length) {
+    return `
+      <article class="analytics-breakdown-card">
+        <strong>${title}</strong>
+        <div class="analytics-empty"><b>${emptyTitle}</b><br>${emptyCopy}</div>
+      </article>
+    `;
+  }
+
+  const totalValue = safeRows.reduce((sum, row) => sum + row.amount, 0);
+  const maxValue = Math.max(...safeRows.map(row => row.amount), 0);
+  const strips = safeRows.map(row => `<span class="${row.className}" style="width: ${getAnalyticsShare(row.amount, totalValue)}"></span>`).join('');
+  const list = safeRows.map(row => `
+    <div class="analytics-mini-row">
+      <div>
+        <span>${row.label}</span>
+        <small>${row.detail}</small>
+      </div>
+      <strong>${money.format(row.amount)}</strong>
+      <div class="analytics-bar-track" aria-hidden="true"><span class="${row.className}" style="width: ${getAnalyticsBarWidth(row.amount, maxValue)}%"></span></div>
+    </div>
+  `).join('');
+
+  return `
+    <article class="analytics-breakdown-card">
+      <div class="analytics-breakdown-heading"><strong>${title}</strong><span>${money.format(totalValue)}</span></div>
+      <div class="analytics-strip" aria-hidden="true">${strips}</div>
+      <div class="analytics-mini-list">${list}</div>
+    </article>
+  `;
+}
+
+function renderAnalyticsBreakdowns() {
+  const target = document.getElementById('analyticsBreakdownGrid');
+
+  if (!target) {
+    return;
+  }
+
+  target.innerHTML = [
+    getAnalyticsBreakdownCard('Cash/accounts breakdown', 'No accounts yet', 'Add accounts to see where cash and balances live.', getAnalyticsBreakdownRows('accounts')),
+    getAnalyticsBreakdownCard('Bills breakdown', 'No bills yet', 'Add bills to understand recurring monthly pressure.', getAnalyticsBreakdownRows('bills')),
+    getAnalyticsBreakdownCard('Income breakdown', 'No income yet', 'Add recurring income for surplus and ratio insights.', getAnalyticsBreakdownRows('income')),
+    getAnalyticsBreakdownCard('Assets breakdown', 'No assets yet', 'Assets can make net worth tracking more complete.', getAnalyticsBreakdownRows('assets')),
+    getAnalyticsBreakdownCard('Investments breakdown', 'No investments yet', 'Add investments to see how they support tracked net worth.', getAnalyticsBreakdownRows('investments'))
+  ].join('');
 }
 
 function renderDistributionChart(totals) {
@@ -186,9 +381,14 @@ function renderAllocationTargetOverview() {
 
 function renderAnalytics() {
   const totals = getDashboardTotals();
+  const metrics = getAnalyticsHealthMetrics();
   const bills = getMonthlyBillsTotal();
   const allocations = total(data.allocations);
   const available = Math.max(totals.availableToAllocate, 0);
+
+  renderAnalyticsSnapshot(metrics);
+  renderAnalyticsInsights(metrics);
+  renderAnalyticsBreakdowns();
 
   renderAnalyticsBars('moneyMixChart', [
     { label: 'Cash', amount: totals.cash, className: 'analytics-positive' },
