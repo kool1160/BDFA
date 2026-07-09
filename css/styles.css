@@ -2180,6 +2180,8 @@ h1 {
 
 .analytics-snapshot-grid,
 .analytics-insight-grid,
+.analytics-score-grid,
+.analytics-detail-grid,
 .analytics-breakdown-grid {
   display: grid;
   gap: 14px;
@@ -2194,12 +2196,27 @@ h1 {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.analytics-score-grid {
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+}
+
+.analytics-detail-grid {
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+}
+
 .analytics-breakdown-grid {
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
 }
 
+.analytics-health-score {
+  margin-bottom: 16px;
+}
+
+.analytics-health-card,
 .analytics-snapshot-card,
 .analytics-insight-card,
+.analytics-score-card,
+.analytics-detail-card,
 .analytics-breakdown-card {
   min-width: 0;
   border: 1px solid rgba(255, 255, 255, 0.09);
@@ -2210,6 +2227,168 @@ h1 {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.055),
     0 16px 42px rgba(0, 0, 0, 0.16);
+}
+
+.analytics-health-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  padding: 18px;
+}
+
+.analytics-score-ring {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  width: 132px;
+  height: 132px;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at center, rgba(8, 10, 18, 0.94) 0 58%, transparent 59%),
+    conic-gradient(var(--money-positive) var(--score), rgba(255, 255, 255, 0.1) 0);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 18px 34px rgba(0, 0, 0, 0.22);
+  text-align: center;
+}
+
+.analytics-score-ring strong,
+.analytics-health-card h3,
+.analytics-detail-card h3 {
+  margin: 0;
+  color: rgba(247, 247, 251, 0.96);
+  letter-spacing: -0.055em;
+}
+
+.analytics-score-ring strong {
+  max-width: 92px;
+  font-size: 1.28rem;
+  line-height: 0.98;
+}
+
+.analytics-score-ring span,
+.analytics-kicker {
+  display: block;
+  color: rgba(247, 247, 251, 0.62);
+  font-size: 0.66rem;
+  font-weight: 820;
+  letter-spacing: 0.075em;
+  line-height: 1.15;
+  text-transform: uppercase;
+}
+
+.analytics-health-card h3,
+.analytics-detail-card h3 {
+  margin-top: 7px;
+  font-size: clamp(1.45rem, 4vw, 2.18rem);
+  line-height: 0.98;
+}
+
+.analytics-health-card p,
+.analytics-health-card small,
+.analytics-score-card p,
+.analytics-detail-card p,
+.analytics-next-steps {
+  color: rgba(247, 247, 251, 0.72);
+  font-size: 0.86rem;
+  line-height: 1.42;
+}
+
+.analytics-health-card p,
+.analytics-detail-card p {
+  margin: 10px 0 0;
+}
+
+.analytics-health-card small {
+  display: block;
+  margin-top: 8px;
+  color: rgba(169, 169, 181, 0.78);
+}
+
+.analytics-score-card,
+.analytics-detail-card {
+  display: grid;
+  gap: 11px;
+  padding: 16px;
+}
+
+.analytics-score-card-heading,
+.analytics-detail-row {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.analytics-score-card-heading span,
+.analytics-detail-row span {
+  min-width: 0;
+  overflow: hidden;
+  color: rgba(247, 247, 251, 0.72);
+  font-size: 0.78rem;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analytics-score-card-heading strong,
+.analytics-detail-row strong {
+  color: rgba(247, 247, 251, 0.9);
+  font-size: 0.86rem;
+  font-weight: 820;
+  text-align: right;
+}
+
+.analytics-score-card p {
+  margin: 0;
+}
+
+.analytics-holdings-strip {
+  height: 15px;
+}
+
+.analytics-count-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.analytics-count-grid div {
+  min-width: 0;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-radius: 15px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.analytics-count-grid span,
+.analytics-count-grid strong {
+  display: block;
+}
+
+.analytics-count-grid span {
+  overflow: hidden;
+  color: rgba(169, 169, 181, 0.78);
+  font-size: 0.72rem;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.analytics-count-grid strong {
+  margin-top: 4px;
+  color: rgba(247, 247, 251, 0.92);
+  font-size: 1.2rem;
+  letter-spacing: -0.045em;
+}
+
+.analytics-next-steps {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
 }
 
 .analytics-snapshot-card {
@@ -2371,17 +2550,32 @@ h1 {
 @media (max-width: 680px) {
   .analytics-snapshot-grid,
   .analytics-insight-grid,
+  .analytics-score-grid,
+  .analytics-detail-grid,
   .analytics-breakdown-grid {
     grid-template-columns: 1fr;
     gap: 10px;
     margin-bottom: 12px;
   }
 
+  .analytics-health-card,
   .analytics-snapshot-card,
   .analytics-insight-card,
+  .analytics-score-card,
+  .analytics-detail-card,
   .analytics-breakdown-card {
     border-radius: 18px;
     padding: 13px;
+  }
+
+  .analytics-health-card {
+    grid-template-columns: 1fr;
+    justify-items: start;
+  }
+
+  .analytics-score-ring {
+    width: 112px;
+    height: 112px;
   }
 
   .analytics-snapshot-card strong {
