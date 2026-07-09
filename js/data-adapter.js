@@ -9,14 +9,15 @@
     allocations: 'bdfa.mockAllocations',
     investments: 'bdfa.mockInvestments',
     assets: 'bdfa.mockAssets',
-    recurringIncome: 'bdfa.mockRecurringIncome'
+    recurringIncome: 'bdfa.mockRecurringIncome',
+    transactions: 'bdfa.transactions'
   };
   const preCloudRestoreBackupKey = 'bdfa.preCloudRestoreBackup';
   const localChangesPendingCloudSaveKey = 'bdfa.localChangesPendingCloudSave';
   const lastKnownCloudUpdatedAtKey = 'bdfa.lastKnownCloudUpdatedAt';
 
   const requiredSourceCollections = ['accounts', 'bills', 'allocations', 'investments'];
-  const optionalSourceCollections = ['assets', 'recurringIncome'];
+  const optionalSourceCollections = ['assets', 'recurringIncome', 'transactions'];
   const sourceCollections = [...requiredSourceCollections, ...optionalSourceCollections];
   let currentSourceData = null;
   let cloudSavePromise = Promise.resolve();
@@ -54,12 +55,62 @@
     localStorage.setItem(storageKeys[collection], JSON.stringify(clone(rows)));
   }
 
+  function createId(prefix = 'item') {
+    return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  function getRequiredString(value) {
+    return typeof value === 'string' ? value : '';
+  }
+
+  function getOptionalString(value) {
+    return typeof value === 'string' ? value : null;
+  }
+
+  function getFiniteAmount(value) {
+    const amount = Number(value);
+    return Number.isFinite(amount) ? amount : 0;
+  }
+
+  function normalizeTransaction(row) {
+    const transaction = row && typeof row === 'object' && !Array.isArray(row) ? row : {};
+    const now = new Date().toISOString();
+
+    return {
+      id: getRequiredString(transaction.id).trim() || createId('transaction'),
+      accountId: getOptionalString(transaction.accountId),
+      date: getRequiredString(transaction.date),
+      postedDate: getOptionalString(transaction.postedDate),
+      name: getRequiredString(transaction.name),
+      merchantName: getOptionalString(transaction.merchantName),
+      amount: getFiniteAmount(transaction.amount),
+      type: getRequiredString(transaction.type) || 'unknown',
+      category: getOptionalString(transaction.category),
+      subcategory: getOptionalString(transaction.subcategory),
+      pending: Boolean(transaction.pending),
+      source: getRequiredString(transaction.source) || 'manual',
+      providerName: getOptionalString(transaction.providerName),
+      providerTransactionId: getOptionalString(transaction.providerTransactionId),
+      notes: getOptionalString(transaction.notes),
+      createdAt: getRequiredString(transaction.createdAt) || now,
+      updatedAt: getRequiredString(transaction.updatedAt) || now
+    };
+  }
+
+  function normalizeCollection(collection, rows) {
+    if (collection === 'transactions') {
+      return Array.isArray(rows) ? rows.map(normalizeTransaction) : [];
+    }
+
+    return Array.isArray(rows) ? clone(rows) : [];
+  }
+
   function readStoredSourceData() {
     return sourceCollections.reduce((sourceData, collection) => {
       const storedRows = getStoredRows(collection);
 
       if (storedRows) {
-        sourceData[collection] = clone(storedRows);
+        sourceData[collection] = normalizeCollection(collection, storedRows);
       }
 
       return sourceData;
@@ -82,14 +133,16 @@
         return { valid: false, data: null };
       }
 
-      sourceData[collection] = clone(snapshot[collection]);
+      sourceData[collection] = normalizeCollection(collection, snapshot[collection]);
     }
 
     for (const collection of optionalSourceCollections) {
       if (snapshot[collection] === undefined) {
         sourceData[collection] = [];
       } else if (Array.isArray(snapshot[collection])) {
-        sourceData[collection] = clone(snapshot[collection]);
+        sourceData[collection] = normalizeCollection(collection, snapshot[collection]);
+      } else if (collection === 'transactions') {
+        sourceData[collection] = [];
       } else {
         return { valid: false, data: null };
       }
@@ -267,6 +320,7 @@
         investmentCount: sourceData.investments.length,
         recurringIncomeCount: sourceData.recurringIncome.length,
         assetCount: sourceData.assets.length,
+        transactionCount: sourceData.transactions.length,
         accountsAmount: getRowsTotal(sourceData.accounts)
       }
     };
@@ -299,6 +353,7 @@
         investmentCount: cloudSummary.investmentCount - localSummary.investmentCount,
         recurringIncomeCount: cloudSummary.recurringIncomeCount - localSummary.recurringIncomeCount,
         assetCount: cloudSummary.assetCount - localSummary.assetCount,
+        transactionCount: cloudSummary.transactionCount - localSummary.transactionCount,
         accountsAmount: cloudSummary.accountsAmount - localSummary.accountsAmount
       }
     };
