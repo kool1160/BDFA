@@ -50,6 +50,7 @@ const demoData = {
     { id: 'brokerage', name: 'Brokerage', detail: 'Taxable investing', amount: 105102 }
   ],
   assets: [],
+  transactions: [],
   recurringIncome: [
     { id: 'primary-paycheck', name: 'Primary Paycheck', amount: 2100, frequency: 'biweekly', nextPayDay: '2026-07-08' },
     { id: 'side-income', name: 'Side Income', amount: 375, frequency: 'monthly', nextPayDay: '10' }
@@ -174,10 +175,62 @@ function cloneSourceData(sourceData) {
   return JSON.parse(JSON.stringify(sourceData));
 }
 
+const sourceDataCollections = ['accounts', 'bills', 'allocations', 'investments', 'assets', 'recurringIncome', 'transactions'];
+
+function createSourceDataId(prefix = 'item') {
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function getRequiredSourceString(value) {
+  return typeof value === 'string' ? value : '';
+}
+
+function getOptionalSourceString(value) {
+  return typeof value === 'string' ? value : null;
+}
+
+function getSourceAmount(value) {
+  const amount = Number(value);
+  return Number.isFinite(amount) ? amount : 0;
+}
+
+function normalizeTransactionRow(row) {
+  const transaction = row && typeof row === 'object' && !Array.isArray(row) ? row : {};
+  const now = new Date().toISOString();
+
+  return {
+    id: getRequiredSourceString(transaction.id).trim() || createSourceDataId('transaction'),
+    accountId: getOptionalSourceString(transaction.accountId),
+    date: getRequiredSourceString(transaction.date),
+    postedDate: getOptionalSourceString(transaction.postedDate),
+    name: getRequiredSourceString(transaction.name),
+    merchantName: getOptionalSourceString(transaction.merchantName),
+    amount: getSourceAmount(transaction.amount),
+    type: getRequiredSourceString(transaction.type) || 'unknown',
+    category: getOptionalSourceString(transaction.category),
+    subcategory: getOptionalSourceString(transaction.subcategory),
+    pending: Boolean(transaction.pending),
+    source: getRequiredSourceString(transaction.source) || 'manual',
+    providerName: getOptionalSourceString(transaction.providerName),
+    providerTransactionId: getOptionalSourceString(transaction.providerTransactionId),
+    notes: getOptionalSourceString(transaction.notes),
+    createdAt: getRequiredSourceString(transaction.createdAt) || now,
+    updatedAt: getRequiredSourceString(transaction.updatedAt) || now
+  };
+}
+
+function normalizeSourceCollection(collection, rows) {
+  if (collection === 'transactions') {
+    return Array.isArray(rows) ? rows.map(normalizeTransactionRow) : [];
+  }
+
+  return Array.isArray(rows) ? cloneSourceData(rows) : [];
+}
+
 function applySourceDataSnapshot(sourceData) {
-  ['accounts', 'bills', 'allocations', 'investments', 'assets', 'recurringIncome'].forEach(collection => {
+  sourceDataCollections.forEach(collection => {
     if (Array.isArray(sourceData[collection])) {
-      data[collection] = cloneSourceData(sourceData[collection]);
+      data[collection] = normalizeSourceCollection(collection, sourceData[collection]);
     }
   });
 }
@@ -193,11 +246,13 @@ function validateSourceSnapshot(sourceData) {
 
   const snapshot = {};
 
-  for (const collection of ['accounts', 'bills', 'allocations', 'investments', 'assets', 'recurringIncome']) {
+  for (const collection of sourceDataCollections) {
     if (sourceData[collection] === undefined) {
       snapshot[collection] = [];
     } else if (Array.isArray(sourceData[collection])) {
-      snapshot[collection] = cloneSourceData(sourceData[collection]);
+      snapshot[collection] = normalizeSourceCollection(collection, sourceData[collection]);
+    } else if (collection === 'transactions') {
+      snapshot[collection] = [];
     } else {
       return { valid: false, data: null };
     }
@@ -1114,7 +1169,7 @@ function isValidAllocationRow(row) {
 }
 
 function areImportRowsValid(sourceData) {
-  const { accounts, bills, allocations, investments, assets, recurringIncome } = sourceData;
+  const { accounts, bills, allocations, investments, assets, recurringIncome, transactions } = sourceData;
   const accountsValid = accounts.every(account => (
     account &&
     isText(account.id) &&
@@ -1130,7 +1185,13 @@ function areImportRowsValid(sourceData) {
 
   const recurringIncomeValid = recurringIncome.every(isValidRecurringIncomeRow);
 
-  return accountsValid && billsValid && allocations.every(isValidAllocationRow) && investments.every(isBasicMoneyRow) && assets.every(isValidAssetRow) && recurringIncomeValid;
+  return accountsValid &&
+    billsValid &&
+    allocations.every(isValidAllocationRow) &&
+    investments.every(isBasicMoneyRow) &&
+    assets.every(isValidAssetRow) &&
+    recurringIncomeValid &&
+    Array.isArray(transactions);
 }
 
 function getValidImportSnapshot(importedData) {
@@ -1228,7 +1289,8 @@ function getExportData() {
     allocations: data.allocations,
     investments: data.investments,
     recurringIncome: data.recurringIncome,
-    assets: data.assets
+    assets: data.assets,
+    transactions: data.transactions
   };
 }
 
@@ -2207,6 +2269,7 @@ function resetDemoData() {
   data.investments = freshData.investments;
   data.assets = freshData.assets;
   data.recurringIncome = freshData.recurringIncome;
+  data.transactions = freshData.transactions;
   resetAccountForm();
   resetBillForm();
   resetAllocationForm();
