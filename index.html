@@ -54,7 +54,7 @@
     <section class="mobile-view-header" data-mobile-view="flow" aria-label="Monthly Flow view introduction">
       <span class="label">Flow</span>
       <h2>Monthly Flow</h2>
-      <p>See upcoming cash timing before it happens.</p>
+      <p>Plan the month before the month surprises you.</p>
     </section>
 
     <section class="mobile-view-header" data-mobile-view="bills" aria-label="Bills view introduction">
@@ -291,8 +291,9 @@
     <section class="monthly-planning-section" data-mobile-view="flow" aria-label="Monthly Flow">
       <div class="monthly-planning-header">
         <span class="label">Monthly Flow</span>
-        <h2>Plan the month before it happens.</h2>
-        <p>A clean planning surface for upcoming bills and cash timing.</p>
+        <h2>Monthly Flow is your planning command center.</h2>
+        <p>Monthly Flow shows what is coming in, what is going out, and what remains safe to use.</p>
+        <p class="monthly-flow-estimate-note">Projections are estimates based on current source data.</p>
       </div>
       <div class="monthly-planning-card" aria-label="Monthly Flow planning card">
         <div class="month-selector-row" aria-label="Month selector">
@@ -346,26 +347,30 @@
         </div>
         <div class="monthly-flow-summary-panel" aria-label="Monthly Flow live planning summary">
           <div class="monthly-flow-cash-status-card">
-            <span>Cash status</span>
+            <span>Planning signal</span>
             <strong id="monthlyFlowCashStatus" class="monthly-flow-cash-status monthly-flow-cash-status-safe">Looks safe</strong>
+            <small>Based on whether projected cash stays above $0 this month.</small>
           </div>
           <div class="monthly-flow-cash-snapshot" aria-label="Monthly Flow cash after bills snapshot">
             <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
-              <span>Lowest projected cash this month</span>
+              <span>Lowest projected balance</span>
               <strong id="monthlyFlowLowestProjectedCash">$0.00</strong>
               <small id="monthlyFlowLowestCashPointDetail" class="monthly-flow-lowest-point-detail">Lowest point: starting cash</small>
             </div>
             <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
-              <span>Projected after remaining bills</span>
+              <span>Safe to Spend</span>
               <strong id="monthlyFlowProjectedAfterRemainingBills">$0.00</strong>
+              <small>Estimated money available after expected bills and planned obligations.</small>
             </div>
             <div class="monthly-flow-summary-card">
-              <span>Cash available</span>
+              <span>Incoming cash base</span>
               <strong id="monthlyFlowCashAvailable">$0.00</strong>
+              <small>Current cash source data before upcoming bill timing.</small>
             </div>
             <div class="monthly-flow-summary-card">
-              <span>After estimated monthly bills</span>
+              <span>Safe to Invest</span>
               <strong id="monthlyFlowCashAfterBills">$0.00</strong>
+              <small>Estimated money that may be available after protecting near-term cash needs.</small>
             </div>
           </div>
           <div class="monthly-flow-secondary-summary" aria-label="Monthly Flow bill timing summary">
@@ -384,39 +389,39 @@
           </div>
         </div>
         <section class="monthly-flow-timeline-section" aria-label="Monthly Flow cash timeline explanation">
-          <h3>Cash timeline</h3>
+          <h3>What happens next</h3>
           <div id="monthlyFlowCashTimeline" class="monthly-flow-timeline-list" aria-live="polite"></div>
         </section>
         <div id="monthlyFlowBillsList" class="monthly-flow-bills-list" aria-live="polite"></div>
         <section class="monthly-flow-income-section" aria-label="Monthly Flow upcoming income">
-          <h3>Upcoming income</h3>
+          <h3>Incoming income</h3>
           <div id="monthlyFlowIncomeList" class="monthly-flow-income-list" aria-live="polite"></div>
         </section>
         <div class="monthly-summary-bar" aria-label="Monthly Flow summary placeholders">
           <div class="monthly-summary-item">
-            <span>Monthly Income</span>
+            <span>Incoming Income</span>
             <strong>$4,200</strong>
           </div>
           <div class="monthly-summary-item">
-            <span>Monthly Bills</span>
+            <span>Upcoming Bills</span>
             <strong>$1,596</strong>
           </div>
           <div class="monthly-summary-item">
-            <span>Left to Allocate</span>
+            <span>Future Outlook</span>
             <strong>$2,604</strong>
           </div>
         </div>
         <div class="cash-timing-card">
           <div class="cash-timing-copy">
-            <span class="cash-timing-label">Cash Timing</span>
-            <p>Future balance changes will map across the month here.</p>
+            <span class="cash-timing-label">Projected Balances</span>
+            <p>Future balance changes will map across the month here as estimates.</p>
           </div>
           <div class="cash-timing-placeholder" aria-label="Cash timing timeline placeholder"></div>
         </div>
         <div class="cash-timing-card" aria-label="Cash Flow Confidence placeholder">
           <div class="cash-timing-copy">
-            <span class="cash-timing-label">Cash Flow Confidence</span>
-            <p>A future confidence signal will show how safe the monthly plan looks.</p>
+            <span class="cash-timing-label">Planning Signal</span>
+            <p>A future confidence signal will show whether the month looks Safe, Watch, Tight, or Needs Attention.</p>
           </div>
           <div class="monthly-summary-bar" aria-label="Static cash flow confidence placeholders">
             <div class="monthly-summary-item">
@@ -436,7 +441,7 @@
         <div class="cash-timing-card" aria-label="Scenario placeholders">
           <div class="cash-timing-copy">
             <span class="cash-timing-label">Scenario</span>
-            <p>Users will be able to test financial decisions before committing to them.</p>
+            <p>Future scenarios will let users test spending, debt, and investing choices before committing.</p>
           </div>
           <div class="monthly-planning-legend" aria-label="Static scenario chips">
             <span class="legend-item">Buy Something</span>
@@ -446,7 +451,7 @@
         </div>
         <div class="monthly-next-step">
           <span>Next Step</span>
-          <p>Future controls will connect bills, income, and timing into one monthly planning flow.</p>
+          <p>Use income, bills, projected balances, Safe to Spend, and Safe to Invest together before making cash decisions.</p>
         </div>
         <div class="monthly-planning-legend" aria-label="Monthly Flow planning legend">
           <span class="legend-item legend-income"><i aria-hidden="true"></i>Income</span>

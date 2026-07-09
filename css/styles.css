@@ -2665,3 +2665,38 @@ h1 {
     font-size: 1.45rem;
   }
 }
+
+.monthly-flow-estimate-note {
+  margin-top: 8px;
+  color: rgba(247, 247, 251, 0.72);
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.monthly-flow-summary-card small,
+.monthly-flow-cash-status-card small {
+  color: rgba(196, 199, 211, 0.78);
+  font-size: 0.77rem;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.monthly-flow-summary-card-primary small {
+  color: rgba(225, 237, 226, 0.78);
+}
+
+.monthly-flow-cash-status-card small {
+  max-width: 18rem;
+}
+
+@media (max-width: 420px) {
+  .monthly-flow-estimate-note {
+    font-size: 0.82rem;
+  }
+
+  .monthly-flow-summary-card small,
+  .monthly-flow-cash-status-card small {
+    font-size: 0.74rem;
+    line-height: 1.34;
+  }
+}
