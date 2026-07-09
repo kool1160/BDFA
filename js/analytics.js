@@ -1,3 +1,12 @@
+function getAnalyticsEscapedText(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
 function getAnalyticsSafeAmount(value) {
   const amount = Number(value);
   return Number.isFinite(amount) ? amount : 0;
@@ -64,6 +73,13 @@ function getAnalyticsLargestByAmount(rows, amountKey = 'amount') {
   }, { row: null, amount: 0 });
 }
 
+function getAnalyticsLargestMonthlyBill() {
+  return getAnalyticsSafeRows(data.bills).reduce((largest, bill) => {
+    const amount = getAnalyticsSafeAmount(getMonthlyBillAmount(bill));
+    return amount > largest.amount ? { row: bill, amount } : largest;
+  }, { row: null, amount: 0 });
+}
+
 function getAnalyticsHealthMetrics() {
   const totals = getDashboardTotals();
   const monthlyBills = getMonthlyBillsTotal();
@@ -84,7 +100,7 @@ function getAnalyticsHealthMetrics() {
 }
 
 function getAnalyticsLegendItem(label, className) {
-  return `<span><i class="${className}" aria-hidden="true"></i>${label}</span>`;
+  return `<span><i class="${className}" aria-hidden="true"></i>${getAnalyticsEscapedText(label)}</span>`;
 }
 
 function getAnalyticsLegend(rows) {
@@ -95,7 +111,7 @@ function getAnalyticsBarRow(label, amount, maxValue, className, shareText = '') 
   return `
     <div class="analytics-bar-row">
       <div class="analytics-bar-meta">
-        <span>${label}</span>
+        <span>${getAnalyticsEscapedText(label)}</span>
         <strong>${money.format(amount)}${shareText ? `<em>${shareText}</em>` : ''}</strong>
       </div>
       <div class="analytics-bar-track" aria-hidden="true">
@@ -162,14 +178,14 @@ function renderAnalyticsInsights(metrics) {
     return;
   }
 
-  const largestBill = getAnalyticsLargestByAmount(data.bills);
+  const largestBill = getAnalyticsLargestMonthlyBill();
   const highestAccount = getAnalyticsLargestByAmount(data.accounts);
   const insights = [
     metrics.emergencyMonths === null ? 'Add recurring bills to see how many months your cash could cover.' : `You have enough liquid cash to cover ${metrics.emergencyMonths.toFixed(1)} months of recurring bills.`,
     metrics.billsToIncomeRatio === null ? 'Add recurring income to understand how much of income bills use.' : `Bills currently use ${Math.round(metrics.billsToIncomeRatio * 100)}% of recurring monthly income.`,
     metrics.investmentShare === null ? 'Add positive net worth data to see your investment share.' : `Investments represent ${Math.round(metrics.investmentShare * 100)}% of tracked net worth.`,
-    largestBill.row ? `Your largest recurring bill is ${largestBill.row.name || 'Unnamed bill'} at ${money.format(getMonthlyBillAmount(largestBill.row))}/mo.` : 'Add bills to identify your largest recurring commitment.',
-    highestAccount.row ? `Your highest-value account is ${highestAccount.row.name || 'Unnamed account'} at ${money.format(highestAccount.amount)}.` : 'Add accounts to identify where your largest cash or debt balance sits.',
+    largestBill.row ? `Your largest recurring bill is ${getAnalyticsEscapedText(largestBill.row.name || 'Unnamed bill')} at ${money.format(largestBill.amount)}/mo.` : 'Add bills to identify your largest recurring commitment.',
+    highestAccount.row ? `Your highest-value account is ${getAnalyticsEscapedText(highestAccount.row.name || 'Unnamed account')} at ${money.format(highestAccount.amount)}.` : 'Add accounts to identify where your largest cash or debt balance sits.',
     metrics.assetShare === null || !metrics.assets ? 'Add assets such as a home or vehicle to improve net worth tracking.' : `Tracked assets make up ${Math.round(metrics.assetShare * 100)}% of total net worth.`
   ];
 
@@ -219,8 +235,8 @@ function getAnalyticsBreakdownCard(title, emptyTitle, emptyCopy, rows) {
   const list = safeRows.map(row => `
     <div class="analytics-mini-row">
       <div>
-        <span>${row.label}</span>
-        <small>${row.detail}</small>
+        <span>${getAnalyticsEscapedText(row.label)}</span>
+        <small>${getAnalyticsEscapedText(row.detail)}</small>
       </div>
       <strong>${money.format(row.amount)}</strong>
       <div class="analytics-bar-track" aria-hidden="true"><span class="${row.className}" style="width: ${getAnalyticsBarWidth(row.amount, maxValue)}%"></span></div>
@@ -270,7 +286,7 @@ function renderDistributionChart(totals) {
   `).join('');
   const details = rows.map(row => `
     <div class="distribution-detail">
-      <span>${row.label}</span>
+      <span>${getAnalyticsEscapedText(row.label)}</span>
       <strong>${getAnalyticsShare(row.amount, totalValue)}</strong>
     </div>
   `).join('');
@@ -359,7 +375,7 @@ function renderAllocationTargetOverview() {
     return `
       <div class="analytics-bar-row">
         <div class="analytics-bar-meta">
-          <span>${allocation.name}</span>
+          <span>${getAnalyticsEscapedText(allocation.name)}</span>
           <strong>${Math.round(percent)}%<em>${detailText}</em></strong>
         </div>
         <div class="analytics-bar-track" aria-hidden="true">
