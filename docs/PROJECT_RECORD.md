@@ -1,5 +1,30 @@
 # BDFA Project Record
 
+## Task 174 — Verify Supabase RLS And User Isolation
+
+- Date opened: 2026-07-10
+- Pull request: Pending
+- Migration or SQL file path: `supabase/migrations/20260710000000_bdfa_source_snapshots_rls.sql`
+- Security documentation: `docs/SUPABASE_RLS_BDFA_SOURCE_SNAPSHOTS.md`
+- Protected table: `public.bdfa_source_snapshots`
+- Exact policy names:
+  - `bdfa_source_snapshots_select_own`
+  - `bdfa_source_snapshots_insert_own`
+  - `bdfa_source_snapshots_update_own`
+  - `bdfa_source_snapshots_delete_own`
+- No secrets committed: Confirmed by repository diff review and service-role keyword scan. No Supabase service-role key, password, token, or private credential was added.
+- Test matrix:
+  - RLS enable statement exists: Passed by manual migration review.
+  - SELECT policy exists and restricts access with `auth.uid() = user_id`: Passed by manual migration review.
+  - INSERT policy exists and restricts access with `auth.uid() = user_id`: Passed by manual migration review.
+  - UPDATE policy exists and restricts access with `auth.uid() = user_id`: Passed by manual migration review.
+  - DELETE policy exists and restricts access with `auth.uid() = user_id`: Passed by manual migration review.
+  - Two-user live Supabase isolation verification: Pending; cannot be performed from repository-only changes.
+  - Unauthenticated live Supabase access verification: Pending; cannot be performed from repository-only changes.
+  - No unrelated files changed: Passed by final diff review; only allowed `supabase/migrations/*` and `docs/*` files changed.
+- Production commit SHA: Pending
+- Production verification: Pending
+
 ## Task 173 — Consolidate PRs #104, #105, And #106 Into One Clean Production Baseline
 
 - Date opened: 2026-07-10
