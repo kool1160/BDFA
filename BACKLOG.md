@@ -5,10 +5,12 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 ## Operating rules
 
 - Work on the first incomplete milestone unless Chris explicitly changes priority.
-- Do not create or begin the next milestone until the preceding milestone is completed and its required verification evidence is recorded.
-- Break high-risk milestones into separately verifiable phases.
+- Planning hands Codex the complete milestone, not a chain of separately authorized micro-tasks.
+- High-risk milestones may contain internal phases, but Codex should complete every safe phase automatically.
+- Pause only at the explicit approval boundaries in `AGENTS.md` or when a material unknown prevents safe progress.
 - Use focused commits as checkpoints.
-- Prefer one milestone pull request over many tiny pull requests.
+- Prefer one milestone pull request over many phase-level or documentation-only pull requests.
+- Do not require separate approval merely to move from assessment to design, documentation, test preparation, or other safe internal phases.
 - Update this file when a milestone changes state.
 - Do not buy or commit to a financial-data provider before confirming support for Chris's actual institutions.
 
@@ -26,7 +28,7 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 
 ## Milestone 2 — Lock the application to Chris
 
-**Status:** Active — Task 180 security assessment passed review. Phase A approved-user schema and security design is next; no security controls have been implemented.
+**Status:** Active — Task 180 assessment and Task 181 design are complete. Continue the remaining milestone work under one 4X milestone handoff, pausing only immediately before live authentication, RLS, or database changes that require Chris's approval.
 
 - Apply and verify Supabase RLS in the live project.
 - Restrict access to the approved owner identity.
@@ -37,7 +39,7 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 - Confirm logout, recovery, and session behavior.
 - Record policies and live test evidence.
 
-**Recommended level:** 4X. Begin with a read-only assessment and use separate implementation and live-verification phases.
+**Recommended level:** 4X for the complete milestone. Begin with repository and live-state preflight, continue through all safe preparation automatically, and pause only at the live security-change boundary.
 
 ## Milestone 3 — Create the actual account coverage matrix
 
