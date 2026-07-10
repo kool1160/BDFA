@@ -1,5 +1,19 @@
 # BDFA Project Record
 
+## Milestone 1 — Trusted Baseline
+
+- Baseline verification date: 2026-07-10
+- Authoritative local branch: `main`, tracking `origin/main`
+- Baseline commit: `9ea8905d623f05b4433f946627f9b38b2fadbf22` (`docs: add simplified milestone backlog`)
+- Remote: `https://github.com/kool1160/BDFA.git`
+- Working tree before baseline recording: clean
+- Superseded pull requests closed: #104, #105, and #106. Their closure was authorized by Task 173 after merged consolidation PR #107.
+- Open pull requests retained: #97, #108, and #109. They contain unmerged work and were not treated as superseded by this milestone.
+- Tracked-file and reachable-history credential scan: no matches for common AWS, Google, GitHub, OpenAI, Supabase service-role, or private-key signatures. No rotation is indicated by this scan.
+- Production deployment commit: unverified. The repository contains no deployed production URL or deployment metadata, and no public deployment could be identified during baseline verification.
+- Production smoke test: pending an identifiable production deployment URL.
+- Milestone status: Active pending production deployment verification and smoke-test evidence.
+
 ## Task 173 — Consolidate PRs #104, #105, And #106 Into One Clean Production Baseline
 
 - Date opened: 2026-07-10
