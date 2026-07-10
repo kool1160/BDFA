@@ -455,7 +455,7 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, projecte
   if (cashStatusTarget) {
     const isCashStatusNegative = lowestProjectedCash < 0;
 
-    cashStatusTarget.textContent = isCashStatusNegative ? 'Cash dips below $0' : 'Looks safe';
+    cashStatusTarget.textContent = isCashStatusNegative ? 'Cash dips below $0' : 'On track';
     cashStatusTarget.classList.toggle('monthly-flow-cash-status-negative', isCashStatusNegative);
     cashStatusTarget.classList.toggle('monthly-flow-cash-status-safe', !isCashStatusNegative);
   }
