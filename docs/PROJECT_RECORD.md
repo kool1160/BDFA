@@ -3,7 +3,7 @@
 ## Task 180 — Single-Owner Authentication and Approved-User Security Assessment
 
 - Date opened: 2026-07-10
-- Pull request: Pending creation
+- Pull request: #110 (draft)
 - Assessment document: `docs/SINGLE_OWNER_AUTH_SECURITY_ASSESSMENT.md`
 - Files inspected: `index.html`, `js/supabase-config.js`, `js/supabase-client.js`, `js/app.js`, `js/data-adapter.js`, current Supabase-related repository paths, Vercel configuration, security/product documents, PR #108, and PR #109.
 - Authentication-flow summary: Browser email/password signup, sign-in, sign-out, session lookup, and auth-state subscription are implemented. Password reset and OAuth flows are not represented in the repository. No approved-user check exists.
