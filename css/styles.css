@@ -1403,6 +1403,12 @@ h1 {
     background: rgba(76, 217, 100, 0.052);
   }
 
+  body.has-mobile-views .monthly-flow-summary-helper {
+    color: rgba(169, 169, 181, 0.74);
+    font-size: 0.74rem;
+    line-height: 1.28;
+  }
+
   body.has-mobile-views .bill-calendar-strip,
   body.has-mobile-views .cash-timing-card {
     gap: 10px;

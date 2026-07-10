@@ -346,8 +346,8 @@
         </div>
         <div class="monthly-flow-summary-panel" aria-label="Monthly Flow live planning summary">
           <div class="monthly-flow-cash-status-card">
-            <span>Cash status</span>
-            <strong id="monthlyFlowCashStatus" class="monthly-flow-cash-status monthly-flow-cash-status-safe">Looks safe</strong>
+            <span>Planning signal</span>
+            <strong id="monthlyFlowCashStatus" class="monthly-flow-cash-status monthly-flow-cash-status-safe">On track</strong>
           </div>
           <div class="monthly-flow-cash-snapshot" aria-label="Monthly Flow cash after bills snapshot">
             <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
@@ -356,16 +356,18 @@
               <small id="monthlyFlowLowestCashPointDetail" class="monthly-flow-lowest-point-detail">Lowest point: starting cash</small>
             </div>
             <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
-              <span>Projected after remaining bills</span>
+              <span>Projected Ending Balance</span>
               <strong id="monthlyFlowProjectedAfterRemainingBills">$0.00</strong>
+              <small class="monthly-flow-summary-helper">Estimated ending balance after currently dated income and bills.</small>
             </div>
             <div class="monthly-flow-summary-card">
               <span>Cash available</span>
               <strong id="monthlyFlowCashAvailable">$0.00</strong>
             </div>
             <div class="monthly-flow-summary-card">
-              <span>After estimated monthly bills</span>
+              <span>Cash After Estimated Bills</span>
               <strong id="monthlyFlowCashAfterBills">$0.00</strong>
+              <small class="monthly-flow-summary-helper">Cash after estimated monthly bills only — not a recommendation to invest.</small>
             </div>
           </div>
           <div class="monthly-flow-secondary-summary" aria-label="Monthly Flow bill timing summary">
@@ -416,7 +418,7 @@
         <div class="cash-timing-card" aria-label="Cash Flow Confidence placeholder">
           <div class="cash-timing-copy">
             <span class="cash-timing-label">Cash Flow Confidence</span>
-            <p>A future confidence signal will show how safe the monthly plan looks.</p>
+            <p>A future confidence signal will show how steady the monthly plan looks.</p>
           </div>
           <div class="monthly-summary-bar" aria-label="Static cash flow confidence placeholders">
             <div class="monthly-summary-item">
