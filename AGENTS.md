@@ -64,6 +64,24 @@ Use the lowest level that can safely complete the work:
 
 Do not run every task through all levels. Planning should recommend one primary level and state whether read-only assessment or multiple runs are required.
 
+## Planning handoff requirement
+
+Every completed milestone must end with a concise `Planning Handoff` containing:
+
+- task name and status
+- runtime, database, authentication, RLS, and financial-impact summary
+- files changed
+- pull request number and state, when applicable
+- commit SHA
+- tests and verification results
+- unresolved items or approval blockers
+- recommended next milestone
+- recommended reasoning level for the next milestone
+
+If the current pull request is still draft, unreviewed, unmerged, or otherwise incomplete, state that clearly and do not describe the milestone as fully closed.
+
+Keep the handoff short and directly reusable in the BDFA Planning chat.
+
 ## Completion standard
 
 No task is complete until the implementation evidence is recorded clearly. Include changed files, checks performed, commit SHA, deployment or PR information when applicable, and remaining risks.
