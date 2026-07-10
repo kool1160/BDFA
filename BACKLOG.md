@@ -5,6 +5,7 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 ## Operating rules
 
 - Work on the first incomplete milestone unless Chris explicitly changes priority.
+- Do not create or begin the next milestone until the preceding milestone is completed and its required verification evidence is recorded.
 - Break high-risk milestones into separately verifiable phases.
 - Use focused commits as checkpoints.
 - Prefer one milestone pull request over many tiny pull requests.
