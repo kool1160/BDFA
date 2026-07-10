@@ -81,6 +81,7 @@ Monthly Flow should help users quickly understand:
 - upcoming bills
 - cash flow
 - projected balances
-- Safe to Spend
-- Safe to Invest
+- Planning signal
+- Projected Ending Balance
+- Cash After Estimated Bills
 - future outlook
