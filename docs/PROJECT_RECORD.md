@@ -2,13 +2,17 @@
 
 ## Task 173 — Consolidate PRs #104, #105, And #106 Into One Clean Production Baseline
 
-- Date completed: 2026-07-10
-- Pull request: TBD by repository host after PR creation
-- Head commit SHA: TBD by repository host after PR creation
+- Date opened: 2026-07-10
+- Pull request: #107
+- Head commit SHA: 5c931cecd65cb60f930fe3dc871a703596874723
+- Status: PR approved pending merge, production deployment, and production smoke-test evidence.
+- Authoritative consolidation PR: #107
 - Superseded PRs: #104, #105, #106
-- Status: PR-ready consolidation baseline; not fully complete until production commit SHA and production smoke-test result are recorded after merge and deployment.
-- Final production commit SHA: TBD after merge and deployment
-- Production smoke-test result: TBD after deployment
+- Superseded PR closure timing: close PRs #104, #105, and #106 only after PR #107 is merged successfully.
+- Vercel preview status: Ready
+- Preview deployment verification date: 2026-07-10
+- Final production commit SHA: Pending merge and production deployment
+- Production smoke-test result: Pending production deployment
 
 ### Approved changes consolidated
 
@@ -21,9 +25,9 @@
 - Analytics received premium dark visual corrections for gradients, score ring contrast, score bars, and positive/caution/growth/debt accents.
 - Overview Accounts collapsed-card mobile spacing was tightened so the amount chip and chevron remain clean at iPhone widths.
 
-### Financial math confirmation
+### Protected-contract confirmation
 
-Financial math was unchanged. This consolidation changed labels, helper copy, layout structure, and CSS presentation only. Monthly Flow formulas, Analytics calculations, source data, source-data contracts, Supabase behavior, cloud save/load, auth behavior, localStorage behavior, import/export behavior, CRUD behavior, panel behavior, mobile bottom-nav logic, community feedback storage, and the transactions scaffold were not intentionally modified.
+Financial calculations were unchanged. Source-data contracts were unchanged. This consolidation changed labels, helper copy, layout structure, CSS presentation, and project-record evidence only. Monthly Flow formulas, Analytics calculations, source data, source-data contracts, Supabase behavior, cloud save/load, auth behavior, localStorage behavior, import/export behavior, CRUD behavior, panel behavior, mobile bottom-nav logic, community feedback storage, and the transactions scaffold were not intentionally modified.
 
 ### Verification evidence
 
@@ -32,4 +36,6 @@ Financial math was unchanged. This consolidation changed labels, helper copy, la
 - Syntax check: `node --check js/analytics.js` — passed on 2026-07-10
 - Diff check: `git diff --check` — passed on 2026-07-10
 - Forbidden phrase search: passed on 2026-07-10 for deprecated Monthly Flow recommendation wording
-- Browser/mobile verification: static responsive code inspection completed on 2026-07-10 for iPhone-width Accounts header spacing, Monthly Flow week overflow safeguards, two-line timeline wrapping, section spacing, and premium Analytics visuals. Live browser verification and production smoke test remain TBD after deployment.
+- Browser/mobile verification: static responsive code inspection completed on 2026-07-10 for iPhone-width Accounts header spacing, Monthly Flow week overflow safeguards, two-line timeline wrapping, section spacing, and premium Analytics visuals.
+- Vercel preview verification: Ready preview verified on 2026-07-10.
+- Production verification: pending production deployment; this task must not be marked fully complete until the final production commit SHA and production smoke-test result are recorded.
