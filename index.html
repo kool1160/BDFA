@@ -291,8 +291,8 @@
     <section class="monthly-planning-section" data-mobile-view="flow" aria-label="Monthly Flow">
       <div class="monthly-planning-header">
         <span class="label">Monthly Flow</span>
-        <h2>Plan the month before it happens.</h2>
-        <p>A clean planning surface for upcoming bills and cash timing.</p>
+        <h2>Your monthly cash command center.</h2>
+        <p>See how dated income and bills shape your projected balance before the month gets away from you.</p>
       </div>
       <div class="monthly-planning-card" aria-label="Monthly Flow planning card">
         <div class="month-selector-row" aria-label="Month selector">
@@ -335,7 +335,7 @@
         <div class="bill-calendar-strip">
           <div class="bill-calendar-strip-copy">
             <span class="bill-calendar-strip-label">Bill Calendar</span>
-            <p id="monthlyFlowBillCalendarHelper">Upcoming dated bills for this month.</p>
+            <p id="monthlyFlowBillCalendarHelper">Projection estimates use currently dated income and bills. Update source data whenever timing changes.</p>
           </div>
           <div id="monthlyFlowBillDateChipList" class="bill-date-chip-list" aria-label="Monthly Flow bill dates">
             <span class="bill-date-chip"><strong>01</strong><span>Rent</span></span>
@@ -346,8 +346,8 @@
         </div>
         <div class="monthly-flow-summary-panel" aria-label="Monthly Flow live planning summary">
           <div class="monthly-flow-cash-status-card">
-            <span>Cash status</span>
-            <strong id="monthlyFlowCashStatus" class="monthly-flow-cash-status monthly-flow-cash-status-safe">Looks safe</strong>
+            <span>Planning signal</span>
+            <strong id="monthlyFlowCashStatus" class="monthly-flow-cash-status monthly-flow-cash-status-safe">On track</strong>
           </div>
           <div class="monthly-flow-cash-snapshot" aria-label="Monthly Flow cash after bills snapshot">
             <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
@@ -356,7 +356,8 @@
               <small id="monthlyFlowLowestCashPointDetail" class="monthly-flow-lowest-point-detail">Lowest point: starting cash</small>
             </div>
             <div class="monthly-flow-summary-card monthly-flow-summary-card-primary">
-              <span>Projected after remaining bills</span>
+              <span>Projected Ending Balance</span>
+              <small>Estimated ending balance after currently dated income and bills.</small>
               <strong id="monthlyFlowProjectedAfterRemainingBills">$0.00</strong>
             </div>
             <div class="monthly-flow-summary-card">
@@ -364,7 +365,8 @@
               <strong id="monthlyFlowCashAvailable">$0.00</strong>
             </div>
             <div class="monthly-flow-summary-card">
-              <span>After estimated monthly bills</span>
+              <span>Cash After Estimated Bills</span>
+              <small>Cash after estimated monthly bills only. It is not a recommendation to invest.</small>
               <strong id="monthlyFlowCashAfterBills">$0.00</strong>
             </div>
           </div>
@@ -384,12 +386,12 @@
           </div>
         </div>
         <section class="monthly-flow-timeline-section" aria-label="Monthly Flow cash timeline explanation">
-          <h3>Cash timeline</h3>
+          <h3>What happens next</h3>
           <div id="monthlyFlowCashTimeline" class="monthly-flow-timeline-list" aria-live="polite"></div>
         </section>
         <div id="monthlyFlowBillsList" class="monthly-flow-bills-list" aria-live="polite"></div>
         <section class="monthly-flow-income-section" aria-label="Monthly Flow upcoming income">
-          <h3>Upcoming income</h3>
+          <h3>Incoming income</h3>
           <div id="monthlyFlowIncomeList" class="monthly-flow-income-list" aria-live="polite"></div>
         </section>
         <div class="monthly-summary-bar" aria-label="Monthly Flow summary placeholders">

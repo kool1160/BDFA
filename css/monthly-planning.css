@@ -1,9 +1,12 @@
 .monthly-planning-section {
   margin-top: 20px;
   padding: 20px;
+  overflow-x: clip;
   border: 1px solid rgba(255, 255, 255, 0.105);
   border-radius: var(--radius-lg);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
+  background:
+    radial-gradient(circle at 14% 0%, rgba(76, 217, 100, 0.12), transparent 34%),
+    linear-gradient(145deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.035));
   box-shadow: 0 18px 52px rgba(0, 0, 0, 0.24);
 }
 
@@ -137,8 +140,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  margin: 0 -2px 16px;
+  max-width: 100%;
+  margin: 0 0 16px;
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 8px 2px 10px;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -608,13 +613,13 @@
 .monthly-flow-bills-list {
   display: grid;
   gap: 8px;
-  margin: 10px 0 0;
+  margin: 16px 0 0;
 }
 
 .monthly-flow-timeline-section {
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 .monthly-flow-timeline-section h3 {
@@ -670,9 +675,25 @@
   display: grid;
   gap: 5px;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.monthly-flow-timeline-event-line,
+.monthly-flow-timeline-balance-line {
+  display: block;
+  min-width: 0;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.monthly-flow-timeline-balance-line {
+  color: inherit;
+  font-weight: 820;
 }
 
 .monthly-flow-timeline-lowest-label {
@@ -776,8 +797,8 @@
 
 .monthly-flow-income-section {
   display: grid;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 18px;
 }
 
 .monthly-flow-income-section h3 {
@@ -1018,10 +1039,11 @@
   }
 
   .weekly-timeline {
-    margin-right: -10px;
-    margin-left: -10px;
+    margin-right: 0;
+    margin-left: 0;
     padding-right: 10px;
     padding-left: 10px;
+    scroll-padding-inline: 10px;
     scroll-snap-type: x proximity;
   }
 
@@ -1043,7 +1065,13 @@
     flex: 1 1 auto;
   }
 
-  .monthly-flow-timeline-details {
+  .monthly-flow-timeline-details,
+  .monthly-flow-timeline-event-line,
+  .monthly-flow-timeline-balance-line {
+    min-width: 0;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    white-space: normal;
     line-height: 1.38;
   }
 
@@ -1187,4 +1215,11 @@
   .cash-timing-placeholder {
     min-height: 88px;
   }
+}
+
+.monthly-flow-timeline-balance-line .monthly-flow-timeline-amount {
+  display: inline;
+  max-width: none;
+  overflow: visible;
+  white-space: normal;
 }
