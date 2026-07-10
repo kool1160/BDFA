@@ -25,7 +25,7 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 
 ## Milestone 2 — Lock the application to Chris
 
-**Status:** Pending
+**Status:** Active — Task 180 security assessment is awaiting review; no security controls have been implemented.
 
 - Apply and verify Supabase RLS in the live project.
 - Restrict access to the approved owner identity.

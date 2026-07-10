@@ -1,5 +1,27 @@
 # BDFA Project Record
 
+## Task 180 — Single-Owner Authentication and Approved-User Security Assessment
+
+- Date opened: 2026-07-10
+- Pull request: Pending creation
+- Assessment document: `docs/SINGLE_OWNER_AUTH_SECURITY_ASSESSMENT.md`
+- Files inspected: `index.html`, `js/supabase-config.js`, `js/supabase-client.js`, `js/app.js`, `js/data-adapter.js`, current Supabase-related repository paths, Vercel configuration, security/product documents, PR #108, and PR #109.
+- Authentication-flow summary: Browser email/password signup, sign-in, sign-out, session lookup, and auth-state subscription are implemented. Password reset and OAuth flows are not represented in the repository. No approved-user check exists.
+- User-owned tables identified: `public.bdfa_source_snapshots` is the only user-owned table referenced by current runtime code.
+- Repository RLS evidence: Current `main` has no tracked schema or migration SQL. PR #108 contains an unmerged ownership-only RLS proposal that does not enforce approved-user status and cannot prove or clear unknown live legacy policies.
+- Service-role exposure result: No committed service-role key or common secret-token signature was found. The browser-visible project URL and publishable/anon key are intentionally not reproduced here.
+- Approved-user design status: Proposed only; no table, helper function, grants, or policy changes were implemented.
+- Deployed-state verification status: Pending.
+- Live negative-testing status: Pending.
+- Runtime code changed: No.
+- Database changed: No.
+- Authentication changed: No.
+- Financial calculations changed: No.
+- Source-data contracts changed: No.
+- Production commit SHA: Pending.
+- Next implementation phase: Pending approval of assessment; Phase A — approved-user schema and security design.
+- Status: Assessment drafted; do not mark Task 180 complete until the documentation PR is reviewed and evidence is updated.
+
 ## Milestone 1 — Trusted Baseline
 
 - Baseline verification date: 2026-07-10
