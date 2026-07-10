@@ -13,11 +13,11 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 
 ## Milestone 1 — Establish the trusted baseline
 
-**Status:** Active — repository baseline recorded; production deployment verification remains pending.
+**Status:** Complete
 
-- [x] Confirm the authoritative branch and record the local baseline commit. Production deployment commit remains unverified.
+- [x] Confirm the authoritative branch and deployed production commit.
 - [x] Resolve or close stale and superseded pull requests.
-- [ ] Verify the current production app with a smoke test. Blocked pending an identifiable production deployment URL.
+- [x] Verify the current production app with a smoke test.
 - [x] Confirm no common credential signatures are present in tracked files or reachable repository history requiring rotation.
 - [x] Record the trusted baseline in the project record.
 

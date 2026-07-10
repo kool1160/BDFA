@@ -10,9 +10,10 @@
 - Superseded pull requests closed: #104, #105, and #106. Their closure was authorized by Task 173 after merged consolidation PR #107.
 - Open pull requests retained: #97, #108, and #109. They contain unmerged work and were not treated as superseded by this milestone.
 - Tracked-file and reachable-history credential scan: no matches for common AWS, Google, GitHub, OpenAI, Supabase service-role, or private-key signatures. No rotation is indicated by this scan.
-- Production deployment commit: unverified. The repository contains no deployed production URL or deployment metadata, and no public deployment could be identified during baseline verification.
-- Production smoke test: pending an identifiable production deployment URL.
-- Milestone status: Active pending production deployment verification and smoke-test evidence.
+- Production deployment: `https://bdfa-fawn.vercel.app` is the production alias of READY Vercel deployment `dpl_Faers8xkJVJUnYBCD1cpuvyP6oNv`.
+- Production deployment commit: verified as `4a785241e6dd4cb62f6717f9e2c58b6689192889` (`docs: record trusted repository baseline`) from Vercel deployment metadata.
+- Production smoke test: passed on 2026-07-10. The production URL returned HTTP 200; the dashboard, Accounts, Monthly Flow, and Analytics rendered; and no browser console errors were recorded.
+- Milestone status: Complete.
 
 ## Task 173 — Consolidate PRs #104, #105, And #106 Into One Clean Production Baseline
 
