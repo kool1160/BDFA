@@ -19,18 +19,20 @@ The primary product goal is automatic assembly of Chris's complete financial pic
 
 ## Working style
 
-Agents should make reasonable implementation decisions without asking Chris about routine technical details when the task, product direction, and acceptance criteria are clear.
+Agents should make reasonable implementation decisions without asking Chris about routine technical details when the milestone, product direction, and acceptance criteria are clear.
 
-Prefer completing one coherent milestone over creating many tiny pull requests. Small related changes may be grouped when they share one objective and can be verified together.
+Planning should hand Codex one complete milestone, not a chain of small sequential tasks. A high-risk milestone may contain internal phases, but Codex should proceed through all safe phases automatically within the same milestone.
 
-Do not create a pull request for every copy, spacing, documentation, or isolated low-risk fix unless explicitly requested. Use focused commits as checkpoints. Pull requests should normally represent meaningful milestones.
+Prefer completing one coherent milestone over creating many tiny pull requests. Use focused commits as checkpoints. Pull requests should normally represent whole milestones, not each internal phase.
+
+Do not create a pull request for every copy, spacing, documentation, assessment, design, or isolated low-risk fix unless explicitly requested.
 
 ## Stop-and-ask boundaries
 
-Stop and obtain explicit approval before:
+Stop and obtain explicit approval immediately before:
 
-- destructive database changes
-- authentication or RLS changes that could lock out the owner or expose data
+- a live database or migration change that could lose, overwrite, expose, or corrupt data
+- an authentication or RLS change that could lock out the owner or expose data
 - handling live financial-provider credentials or production access tokens
 - purchasing or enabling a paid service
 - deleting major existing functionality
@@ -38,20 +40,24 @@ Stop and obtain explicit approval before:
 - changing the product direction
 - introducing a major framework, backend, or source-of-truth migration
 
-## Task execution
+Do not stop merely because an internal assessment, design, documentation phase, commit, branch, or draft pull request is complete. Continue through safe phases until reaching a real approval boundary or completing the milestone.
 
-For each task:
+## Milestone execution
+
+For each milestone:
 
 1. Read the governing documents listed above.
 2. Inspect the actual repository and report material differences from the plan.
-3. Make the smallest complete change that advances the active backlog milestone.
+3. Complete all safe internal phases needed to satisfy the milestone.
 4. Run risk-appropriate tests and checks.
-5. Fix failures caused by the change.
+5. Fix failures caused by the work.
 6. Review the diff.
-7. Commit verified work with a clear message.
-8. Report what changed, what was tested, unresolved risks, and the next backlog item.
+7. Commit verified checkpoints with clear messages.
+8. Push changes and manage the milestone pull request when applicable.
+9. Pause only at a stop-and-ask boundary or when a material unknown prevents safe progress.
+10. Finish with a concise Planning Handoff.
 
-For high-risk work, begin with a read-only assessment and divide the work into separately verifiable phases.
+For high-risk work, begin with a read-only assessment, but keep the assessment, design, implementation preparation, testing preparation, documentation, and other safe phases inside the same milestone unless a stop-and-ask boundary is reached.
 
 ## Reasoning level guidance
 
@@ -62,26 +68,26 @@ Use the lowest level that can safely complete the work:
 - **3X:** provider integrations, normalization, synchronization, portfolio calculations, meaningful migrations, and cross-system work
 - **4X:** RLS, authentication architecture, access-token storage, destructive migrations, source-of-truth redesign, recovery architecture, or financial methodology where silent errors could be severe
 
-Do not run every task through all levels. Planning should recommend one primary level and state whether read-only assessment or multiple runs are required.
+Do not run every task through all levels. Planning should recommend one primary level for the full milestone and identify the exact approval boundaries inside it.
 
 ## Planning handoff requirement
 
-Every completed milestone must end with a concise `Planning Handoff` containing:
+Every completed or paused milestone must end with a concise `Planning Handoff` containing:
 
-- task name and status
+- milestone name and status
 - runtime, database, authentication, RLS, and financial-impact summary
 - files changed
 - pull request number and state, when applicable
 - commit SHA
 - tests and verification results
-- unresolved items or approval blockers
+- unresolved items or the exact approval blocker
 - recommended next milestone
 - recommended reasoning level for the next milestone
 
-If the current pull request is still draft, unreviewed, unmerged, or otherwise incomplete, state that clearly and do not describe the milestone as fully closed.
+If the milestone is paused at a real approval boundary, state exactly what approval is needed and what Codex will do after approval.
 
 Keep the handoff short and directly reusable in the BDFA Planning chat.
 
 ## Completion standard
 
-No task is complete until the implementation evidence is recorded clearly. Include changed files, checks performed, commit SHA, deployment or PR information when applicable, and remaining risks.
+No milestone is complete until the implementation evidence is recorded clearly. Include changed files, checks performed, commit SHA, deployment or PR information when applicable, and remaining risks.
