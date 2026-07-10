@@ -1,5 +1,9 @@
 # BDFA Project Record
 
+## Vercel Operational Note
+
+- Vercel Node.js version changed from 24.x to 22.x LTS after preview deployments failed during build-container initialization. Redeploy succeeded after the change.
+
 ## Task 180 — Single-Owner Authentication and Approved-User Security Assessment
 
 - Date opened: 2026-07-10
