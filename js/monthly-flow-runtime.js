@@ -455,7 +455,7 @@ function renderMonthlyFlowCashSnapshot(accounts, estimatedMonthlyBills, projecte
   if (cashStatusTarget) {
     const isCashStatusNegative = lowestProjectedCash < 0;
 
-    cashStatusTarget.textContent = isCashStatusNegative ? 'Cash dips below $0' : 'Looks safe';
+    cashStatusTarget.textContent = isCashStatusNegative ? 'Cash dips below $0' : 'On track';
     cashStatusTarget.classList.toggle('monthly-flow-cash-status-negative', isCashStatusNegative);
     cashStatusTarget.classList.toggle('monthly-flow-cash-status-safe', !isCashStatusNegative);
   }
@@ -722,18 +722,29 @@ function createMonthlyFlowTimelineRow(timelineEvent, isLowestPoint) {
   amount.className = 'monthly-flow-timeline-amount';
   label.className = 'monthly-flow-timeline-lowest-label';
 
-  details.textContent = `Day ${timelineEvent.day} · ${typeLabel} · ${timelineEvent.name} · Balance ${monthlyFlowMoney.format(timelineEvent.balanceAfterEvent)}`;
+  details.innerHTML = '';
+
+  const eventLine = document.createElement('span');
+  const balanceLine = document.createElement('span');
+
+  eventLine.className = 'monthly-flow-timeline-event-line';
+  balanceLine.className = 'monthly-flow-timeline-balance-line';
+  eventLine.textContent = `Day ${timelineEvent.day} · ${typeLabel} · ${timelineEvent.name}`;
+  balanceLine.textContent = `Balance ${monthlyFlowMoney.format(timelineEvent.balanceAfterEvent)}`;
   amount.textContent = `${signedAmount >= 0 ? '+' : '-'}${monthlyFlowMoney.format(Math.abs(signedAmount))}`;
   amount.classList.toggle('monthly-flow-timeline-amount-income', timelineEvent.type === 'income');
   amount.classList.toggle('monthly-flow-timeline-amount-bill', timelineEvent.type === 'bill');
   applyMonthlyFlowMoneyTone(details, timelineEvent.balanceAfterEvent);
+
+  balanceLine.append(amount);
+  details.append(eventLine, balanceLine);
 
   if (isLowestPoint) {
     label.textContent = 'Lowest point';
     details.append(label);
   }
 
-  row.append(details, amount);
+  row.append(details);
 
   return row;
 }
