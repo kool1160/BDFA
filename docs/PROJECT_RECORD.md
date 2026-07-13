@@ -1,5 +1,20 @@
 # BDFA Project Record
 
+## Milestone 2 — Single-Owner Security Implementation Preparation
+
+- Date prepared: 2026-07-13
+- Scope: Repository-only preparation up to the live database/authentication approval boundary.
+- Runtime preparation: Public signup UI/client call removed; approved-account password reset and recovery completion flow added; recovery events no longer trigger automatic cloud synchronization before password update.
+- Database preparation: Read-only catalog preflight and an interactive, transaction-protected approved-owner allowlist/RLS script prepared. Owner identity and email remain execution-time inputs and are not stored in the repository.
+- Verification preparation: Anonymous, approved-owner, authenticated-unapproved, forged-owner, disablement, session, logout, and recovery checks documented in `docs/SINGLE_OWNER_SECURITY_RUNBOOK.md`.
+- Automated checks: `bash scripts/ci.sh` includes single-owner security preparation assertions.
+- Live Supabase catalog inspected: No; protected action pending approval.
+- Live database/RLS changed: No.
+- Live Auth settings changed: No.
+- Runtime deployed: No.
+- Financial calculations or source-data contracts changed: No.
+- Status: Approval required before live catalog access, applying the transaction, changing Auth/signup settings, using test identities, or deploying the prepared client.
+
 ## Vercel Operational Note
 
 - Vercel Node.js version changed from 24.x to 22.x LTS after preview deployments failed during build-container initialization. Redeploy succeeded after the change.

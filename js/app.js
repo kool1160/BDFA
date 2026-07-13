@@ -1450,6 +1450,7 @@ let cloudOperationInProgress = false;
 let cloudLastSyncMessage = 'Using local save only';
 let localChangesPendingCloudSave = false;
 let cloudDirtyIndicatorEligible = false;
+let passwordRecoveryInProgress = false;
 
 function renderCloudSaveButtonState() {
   const cloudSaveButton = document.getElementById('cloudSaveButton');
@@ -1882,8 +1883,9 @@ async function renderAuthStatus(message, tone = 'neutral') {
 
   const status = document.getElementById('authStatus');
   const signOutButton = document.getElementById('authSignOut');
-  const signUpButton = document.getElementById('authSignUp');
   const signInButton = document.getElementById('authSignIn');
+  const resetPasswordButton = document.getElementById('authResetPassword');
+  const updatePasswordButton = document.getElementById('authUpdatePassword');
   const cloudSaveButton = document.getElementById('cloudSaveButton');
   const cloudLoadButton = document.getElementById('cloudLoadButton');
   const restoreLocalBackupButton = document.getElementById('restoreLocalBackupButton');
@@ -1933,15 +1935,19 @@ async function renderAuthStatus(message, tone = 'neutral') {
   }
   status.dataset.tone = tone;
   authInputs.forEach(input => {
-    input.disabled = Boolean(user);
+    input.disabled = Boolean(user) && !(passwordRecoveryInProgress && input.id === 'authPassword');
   });
 
-  if (signUpButton) {
-    signUpButton.hidden = Boolean(user);
+  if (signInButton) {
+    signInButton.hidden = Boolean(user) || passwordRecoveryInProgress;
   }
 
-  if (signInButton) {
-    signInButton.hidden = Boolean(user);
+  if (resetPasswordButton) {
+    resetPasswordButton.hidden = Boolean(user) || passwordRecoveryInProgress;
+  }
+
+  if (updatePasswordButton) {
+    updatePasswordButton.hidden = !passwordRecoveryInProgress;
   }
 
   if (signOutButton) {
@@ -1984,7 +1990,7 @@ async function runCloudOperation(statusMessage, operation) {
   }
 }
 
-async function handleAuthAction(action) {
+async function handleSignIn() {
   const supabaseClient = window.BDFA.supabaseClient;
   const emailField = document.getElementById('authEmail');
   const passwordField = document.getElementById('authPassword');
@@ -2001,7 +2007,7 @@ async function handleAuthAction(action) {
     return;
   }
 
-  const result = action === 'signup' ? await supabaseClient.signUp(email, password) : await supabaseClient.signIn(email, password);
+  const result = await supabaseClient.signIn(email, password);
 
   if (result.error) {
     await renderAuthStatus(result.error.message || 'Auth failed.', 'error');
@@ -2009,6 +2015,49 @@ async function handleAuthAction(action) {
   }
 
   await syncCloudSnapshotAfterAuth();
+}
+
+async function handlePasswordResetRequest() {
+  const supabaseClient = window.BDFA.supabaseClient;
+  const emailField = document.getElementById('authEmail');
+  const email = emailField ? emailField.value.trim() : '';
+
+  if (!supabaseClient || !supabaseClient.isConfigured()) {
+    await renderAuthStatus('Supabase not configured');
+    return;
+  }
+
+  if (!email) {
+    await renderAuthStatus('Enter the approved account email to continue.', 'error');
+    return;
+  }
+
+  const result = await supabaseClient.requestPasswordReset(email);
+  await renderAuthStatus(result.error
+    ? result.error.message || 'Password reset request failed.'
+    : 'If this is the approved account, check its email for a password reset link.', result.error ? 'error' : 'success');
+}
+
+async function handlePasswordUpdate() {
+  const supabaseClient = window.BDFA.supabaseClient;
+  const passwordField = document.getElementById('authPassword');
+  const password = passwordField ? passwordField.value : '';
+
+  if (!password) {
+    await renderAuthStatus('Enter a new password to continue.', 'error');
+    return;
+  }
+
+  const result = await supabaseClient.updatePassword(password);
+
+  if (result.error) {
+    await renderAuthStatus(result.error.message || 'Password update failed.', 'error');
+    return;
+  }
+
+  passwordRecoveryInProgress = false;
+  passwordField.value = '';
+  await renderAuthStatus('Password updated. Owner access is restored.', 'success');
 }
 
 async function syncCloudSnapshotAfterAuth() {
@@ -2487,10 +2536,15 @@ addOptionalEventListener('communityFeedbackClear', 'click', clearCommunityFeedba
 addOptionalEventListener('communityFeedbackCopy', 'click', copyCommunityFeedbackDraft);
 addOptionalEventListener('authForm', 'submit', event => {
   event.preventDefault();
-  handleAuthAction('signin');
+  if (passwordRecoveryInProgress) {
+    handlePasswordUpdate();
+    return;
+  }
+  handleSignIn();
 });
-addOptionalEventListener('authSignUp', 'click', () => handleAuthAction('signup'));
-addOptionalEventListener('authSignIn', 'click', () => handleAuthAction('signin'));
+addOptionalEventListener('authSignIn', 'click', handleSignIn);
+addOptionalEventListener('authResetPassword', 'click', handlePasswordResetRequest);
+addOptionalEventListener('authUpdatePassword', 'click', handlePasswordUpdate);
 addOptionalEventListener('authSignOut', 'click', handleSignOut);
 addOptionalEventListener('cloudSaveButton', 'click', handleManualCloudSave);
 addOptionalEventListener('cloudLoadButton', 'click', handleManualCloudLoad);
@@ -2504,7 +2558,12 @@ window.addEventListener('bdfa:supabase-status-changed', event => {
 });
 
 if (window.BDFA.supabaseClient) {
-  window.BDFA.supabaseClient.onAuthStateChange(() => {
+  window.BDFA.supabaseClient.onAuthStateChange(event => {
+    if (event === 'PASSWORD_RECOVERY') {
+      passwordRecoveryInProgress = true;
+      renderAuthStatus('Enter a new password for the approved account.', 'neutral');
+      return;
+    }
     syncCloudSnapshotAfterAuth();
   });
 }

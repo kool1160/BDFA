@@ -514,7 +514,7 @@
         <div>
           <span class="label">Account</span>
           <h2>Cloud save.</h2>
-          <p>Sign in with Supabase to keep your BDFA snapshot synced. Without Supabase, BDFA stays in local mode.</p>
+          <p>Approved-owner access only. Sign in with Supabase to keep your BDFA snapshot synced. Without Supabase, BDFA stays in local mode.</p>
         </div>
         <form class="auth-form" id="authForm">
           <label>
@@ -526,8 +526,9 @@
             <input id="authPassword" data-auth-input type="password" autocomplete="current-password" placeholder="Password" />
           </label>
           <div class="form-actions">
-            <button id="authSignUp" data-auth-input type="button">Sign Up</button>
             <button id="authSignIn" data-auth-input type="button">Sign In</button>
+            <button id="authResetPassword" data-auth-input type="button" class="ghost-button">Forgot Password</button>
+            <button id="authUpdatePassword" type="button" hidden>Set New Password</button>
             <button id="authSignOut" type="button" class="ghost-button" hidden>Sign Out</button>
           </div>
           <div class="cloud-actions" aria-label="Cloud save controls">
