@@ -1,5 +1,17 @@
 # BDFA Project Record
 
+## Milestone 3 — Account Coverage Matrix
+
+- Date prepared: 2026-07-13
+- Scope: Repository-only account and asset coverage matrix; no provider connection or live credential handling.
+- Matrix: `docs/ACCOUNT_COVERAGE_MATRIX.md`
+- Coverage: Checking/savings, credit cards, loans, brokerage, retirement, HealthEquity HSA, and manual assets are represented with required data, freshness, provider-verification, and fallback fields.
+- HealthEquity: Required test case; support remains unverified and no secondary provider was selected in advance.
+- Privacy: No account numbers, masks, balances, credentials, tokens, production identifiers, or institution-level owner claims were added.
+- Provider testing: Not performed. Plaid and any secondary provider require later Sandbox testing against an owner-confirmed inventory.
+- Runtime/database/authentication/RLS/financial calculations: Unchanged.
+- Status: Complete for repository preparation; owner confirmation is required before institution-specific coverage testing.
+
 ## Milestone 2 — Single-Owner Security Implementation Preparation
 
 - Date prepared: 2026-07-13
