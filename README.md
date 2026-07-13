@@ -46,3 +46,9 @@ No build step is required.
 - Planning: vision, features, UX, acceptance criteria
 - Task Runner: Codex-ready implementation tasks
 - Testing: QA, responsive checks, regression notes
+
+## Automation
+
+- `BDFA CI` validates the static app and milestone backlog on pull requests and pushes to `main`.
+- `BDFA Foreman` can run the next incomplete milestone through Codex and open one reviewable milestone pull request.
+- Foreman setup, safety boundaries, and operating instructions are documented in [`docs/AUTOMATION.md`](docs/AUTOMATION.md).
