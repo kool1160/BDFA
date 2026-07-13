@@ -1,5 +1,14 @@
 # BDFA Project Record
 
+## Milestone 5 — Secure Provider Backend Design Preparation
+
+- Date prepared: 2026-07-13
+- Scope: Repository-only security and implementation design up to the protected backend boundary.
+- Design: `docs/SECURE_PROVIDER_BACKEND_DESIGN.md` defines a provider-neutral server boundary, endpoint contract, token storage/deletion rules, webhook verification, normalized persistence boundary, safe logging, approval gates, and synthetic sandbox verification requirements.
+- Privacy: No provider credentials, access tokens, account identifiers, live payloads, or personal identity values were added.
+- Runtime/database/authentication/RLS/provider/financial calculations: Unchanged. No backend runtime, dependency, migration, live catalog access, provider selection, or deployment was performed.
+- Status: Approval required before server implementation, token storage, database/schema work, provider sandbox credentials, live Auth/RLS verification, or deployment.
+
 ## Milestone 4 — Normalized Financial Model Design
 
 - Date completed: 2026-07-13
