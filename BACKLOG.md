@@ -100,7 +100,7 @@ RLS, provider credential, or financial calculation changes were made.
 
 ## Milestone 5 — Build the secure provider backend
 
-**Status:** Pending
+**Status:** Blocked — repository-only secure backend design is prepared. Server implementation, token storage, database/schema work, provider sandbox credentials, live Auth/RLS verification, and deployment require explicit approval and the confirmed institution inventory.
 
 **Issue:** #117
 
@@ -120,6 +120,13 @@ Add server-side capabilities for:
 No provider secret or permanent access token may reach browser code.
 
 **Recommended level:** 4X for security design and token storage; 3X for contained provider endpoints after the design is approved.
+
+**Prepared evidence:** `docs/SECURE_PROVIDER_BACKEND_DESIGN.md` defines the
+server trust boundary, provider-neutral endpoint contract, token and webhook
+handling, normalized persistence boundary, safe logging, approval gates, and
+the synthetic sandbox verification contract. No runtime, database,
+authentication, RLS, provider, credential, or financial calculation changes
+were made.
 
 ## Milestone 6 — Prove Plaid coverage
 
