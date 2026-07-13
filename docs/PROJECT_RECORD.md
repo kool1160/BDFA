@@ -1,5 +1,17 @@
 # BDFA Project Record
 
+## Milestone 4 — Normalized Financial Model Design
+
+- Date completed: 2026-07-13
+- Scope: Repository-only provider-independent source-data model and implementation sequence.
+- Design: `docs/NORMALIZED_FINANCIAL_MODEL.md` defines institutions, financial connections, accounts and provider links, balance history, transactions, holdings, investment transactions, liabilities, recurring items, manual assets and valuations, sync runs, connection events, and snapshot/audit metadata.
+- Source-of-truth rule: BDFA normalized records are the future product source of truth; provider payloads remain adapter inputs; derived outputs remain computed.
+- Recovery: Existing `bdfa_source_snapshots` remains a complete portable recovery/fallback mechanism while normalized syncing is proven.
+- Privacy: No personal account identifiers, balances, credentials, tokens, or production identifiers were added.
+- Runtime/database/authentication/RLS/provider/financial calculations: Unchanged. No migration was executed and no provider was selected.
+- Verification: `bash scripts/ci.sh` and `git diff --check` passed after the design changes.
+- Status: Complete — next implementation requires synthetic fixtures and a separately approved database/security phase before any live persistence work.
+
 ## Milestone 3 — Account Coverage Matrix Preparation
 
 - Date prepared: 2026-07-13

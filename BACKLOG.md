@@ -69,7 +69,7 @@ HealthEquity is a required test case. This is a practical provider-selection che
 
 ## Milestone 4 — Define the normalized financial model
 
-**Status:** Pending
+**Status:** Complete — repository-only model design recorded; live schema/database implementation remains a later protected milestone.
 
 **Issue:** #116
 
@@ -91,6 +91,12 @@ Design provider-independent records for:
 Preserve the existing snapshot system as a recovery and portability mechanism while normalized syncing is proven.
 
 **Recommended level:** 4X for architecture, followed by 3X implementation phases.
+
+**Evidence:** `docs/NORMALIZED_FINANCIAL_MODEL.md` defines the owner-scoped,
+provider-independent records, provenance and temporal metadata, idempotency and
+reconciliation boundaries, snapshot recovery contract, derived-data boundary,
+and safe implementation sequence. No runtime, live database, authentication,
+RLS, provider credential, or financial calculation changes were made.
 
 ## Milestone 5 — Build the secure provider backend
 
