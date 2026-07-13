@@ -5,6 +5,8 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 ## Operating rules
 
 - Work on the first incomplete milestone unless Chris explicitly changes priority.
+- Foreman automatically skips milestones whose status begins with Blocked, Paused, or Waiting.
+- A blocked milestone may still be selected explicitly by number after Chris approves the protected work.
 - Planning hands Codex the complete milestone, not a chain of separately authorized micro-tasks.
 - High-risk milestones may contain internal phases, but Codex should complete every safe phase automatically.
 - Pause only at the explicit approval boundaries in `AGENTS.md` or when a material unknown prevents safe progress.
@@ -28,7 +30,9 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 
 ## Milestone 2 — Lock the application to Chris
 
-**Status:** Active — assessment, design, transactional SQL, catalog checks, negative-test runbook, and client signup/recovery preparation are complete. Approval is required before applying or deploying the live database, RLS, and authentication changes.
+**Status:** Blocked — repository preparation merged in PR #113. Live Supabase catalog access, RLS/database execution, Auth changes, real credentials, test identities, and production verification require Chris's explicit approval.
+
+**Issue:** #114
 
 - Apply and verify Supabase RLS in the live project.
 - Restrict access to the approved owner identity.
@@ -39,11 +43,13 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 - Confirm logout, recovery, and session behavior.
 - Record policies and live test evidence.
 
-**Recommended level:** 4X for the complete milestone. Begin with repository and live-state preflight, continue through all safe preparation automatically, and pause only at the live security-change boundary.
+**Recommended level:** 4X for protected live execution and security review. Select this milestone explicitly only after approval.
 
 ## Milestone 3 — Create the actual account coverage matrix
 
 **Status:** Pending
+
+**Issue:** #115
 
 Create a concise private inventory of the accounts Chris actually uses. For each account record:
 
@@ -62,6 +68,8 @@ HealthEquity is a required test case. This is a practical provider-selection che
 ## Milestone 4 — Define the normalized financial model
 
 **Status:** Pending
+
+**Issue:** #116
 
 Design provider-independent records for:
 
@@ -86,6 +94,8 @@ Preserve the existing snapshot system as a recovery and portability mechanism wh
 
 **Status:** Pending
 
+**Issue:** #117
+
 Add server-side capabilities for:
 
 - link or connection token creation
@@ -107,6 +117,8 @@ No provider secret or permanent access token may reach browser code.
 
 **Status:** Pending
 
+**Issue:** #118
+
 - Implement Plaid Sandbox first.
 - Connect Chris's real institutions gradually only after security foundations are verified.
 - Record balances, transactions, liabilities, holdings, refresh behavior, reauthentication behavior, and missing data for each institution.
@@ -118,6 +130,8 @@ No provider secret or permanent access token may reach browser code.
 
 **Status:** Pending
 
+**Issue:** #119
+
 Choose a second provider only from the gaps proven during Milestone 6, with HealthEquity treated as a required case.
 
 The second provider must normalize into the same BDFA data model. The interface should not depend on which provider supplied an account.
@@ -127,6 +141,8 @@ The second provider must normalize into the same BDFA data model. The interface 
 ## Milestone 8 — Connection health and automatic sync
 
 **Status:** Pending
+
+**Issue:** #120
 
 Add:
 
@@ -146,6 +162,8 @@ Add:
 ## Milestone 9 — Complete financial truth
 
 **Status:** Pending
+
+**Issue:** #121
 
 Build trusted outputs from normalized source data:
 
@@ -167,6 +185,8 @@ Every derived number must remain traceable to source records and covered by repr
 ## Milestone 10 — Planning toward age 55
 
 **Status:** Pending
+
+**Issue:** #122
 
 After source data and calculations are trustworthy, add:
 
