@@ -13,23 +13,21 @@ on:
         default: true
         type: boolean
 
-permissions:
-  contents: write
-  pull-requests: write
-  issues: write
-
 concurrency:
   group: bdfa-foreman
   cancel-in-progress: false
 
 jobs:
-  build:
+  codex:
     name: Build the selected milestone with Codex
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    permissions:
+      contents: read
     outputs:
-      pr_url: ${{ steps.publish.outputs.pr_url }}
-      issue_url: ${{ steps.publish.outputs.issue_url }}
+      milestone_number: ${{ steps.milestone.outputs.number }}
+      milestone_title: ${{ steps.milestone.outputs.title }}
+      branch_base: ${{ steps.milestone.outputs.branch }}
     steps:
       - name: Check out authoritative main
         uses: actions/checkout@v5
@@ -61,18 +59,8 @@ jobs:
             --context .bdfa/selected-milestone.md
           printf '.bdfa/\n' >> .git/info/exclude
 
-      - name: Create milestone branch
-        shell: bash
-        env:
-          BASE_BRANCH: ${{ steps.milestone.outputs.branch }}
-        run: |
-          set -euo pipefail
-          branch="${BASE_BRANCH}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          git switch -c "$branch"
-          echo "BDFA_BRANCH=$branch" >> "$GITHUB_ENV"
-
       - name: Run Codex milestone agent
-        id: codex
+        id: run_codex
         continue-on-error: true
         uses: openai/codex-action@v1
         with:
@@ -87,9 +75,9 @@ jobs:
         if: always()
         run: rm -rf .bdfa
 
-      - name: Validate Codex changes
+      - name: Validate Codex workspace
         id: validation
-        if: steps.codex.outcome == 'success'
+        if: steps.run_codex.outcome == 'success'
         continue-on-error: true
         shell: bash
         run: |
@@ -97,40 +85,144 @@ jobs:
           git diff --check
           bash scripts/ci.sh
 
-      - name: Publish pull request or approval issue
+      - name: Export review artifact
+        if: always()
+        shell: bash
+        env:
+          CODEX_OUTCOME: ${{ steps.run_codex.outcome }}
+          VALIDATION_OUTCOME: ${{ steps.validation.outcome }}
+          MILESTONE_NUMBER: ${{ steps.milestone.outputs.number }}
+          MILESTONE_TITLE: ${{ steps.milestone.outputs.title }}
+        run: |
+          set -euo pipefail
+          artifact_dir="$RUNNER_TEMP/bdfa-foreman"
+          mkdir -p "$artifact_dir"
+
+          handoff_source="$RUNNER_TEMP/bdfa-planning-handoff.json"
+          if [[ -f "$handoff_source" ]] && jq -e . "$handoff_source" >/dev/null 2>&1; then
+            cp "$handoff_source" "$artifact_dir/planning-handoff.json"
+          else
+            jq -n \
+              --arg status "blocked" \
+              --argjson milestone_number "${MILESTONE_NUMBER:-0}" \
+              --arg milestone_name "${MILESTONE_TITLE:-Unknown milestone}" \
+              --arg summary "Codex did not return a valid structured Planning Handoff." \
+              '{status:$status,milestone_number:$milestone_number,milestone_name:$milestone_name,summary:$summary,runtime_impact:"Unknown",database_impact:"Unknown",authentication_rls_impact:"Unknown",financial_impact:"Unknown",files_changed:[],tests:[],approval_required:null,unresolved_items:["Review the failed Codex run."],recommended_next_milestone:null,recommended_next_level:null}' \
+              > "$artifact_dir/planning-handoff.json"
+          fi
+
+          git add -A
+          git diff --cached --binary --full-index main -- . > "$artifact_dir/bdfa.patch"
+
+          jq -n \
+            --arg codex_outcome "$CODEX_OUTCOME" \
+            --arg validation_outcome "${VALIDATION_OUTCOME:-skipped}" \
+            '{codex_outcome:$codex_outcome,validation_outcome:$validation_outcome}' \
+            > "$artifact_dir/metadata.json"
+
+      - name: Upload Foreman artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bdfa-foreman-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/bdfa-foreman
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Fail clearly when Codex could not run
+        if: steps.run_codex.outcome != 'success'
+        shell: bash
+        run: |
+          echo "Codex did not complete. Confirm the OPENAI_API_KEY repository secret exists and review the Codex step logs." >&2
+          exit 1
+
+  publish:
+    name: Publish the milestone handoff
+    needs: codex
+    if: needs.codex.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+    steps:
+      - name: Check out clean main
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download Foreman artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: bdfa-foreman-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/bdfa-foreman
+
+      - name: Apply Codex patch
+        id: patch
+        shell: bash
+        env:
+          PATCH_FILE: ${{ runner.temp }}/bdfa-foreman/bdfa.patch
+        run: |
+          set -euo pipefail
+          if [[ -s "$PATCH_FILE" ]]; then
+            git apply --index --3way "$PATCH_FILE"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js 22
+        if: steps.patch.outputs.has_changes == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        if: steps.patch.outputs.has_changes == 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Validate cleanly applied changes
+        id: validation
+        if: steps.patch.outputs.has_changes == 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --cached --check
+          bash scripts/ci.sh
+
+      - name: Create pull request or approval issue
         id: publish
-        if: always() && steps.codex.outcome == 'success'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-          MILESTONE_NUMBER: ${{ steps.milestone.outputs.number }}
-          MILESTONE_TITLE: ${{ steps.milestone.outputs.title }}
+          MILESTONE_NUMBER: ${{ needs.codex.outputs.milestone_number }}
+          MILESTONE_TITLE: ${{ needs.codex.outputs.milestone_title }}
+          BRANCH_BASE: ${{ needs.codex.outputs.branch_base }}
+          HAS_CHANGES: ${{ steps.patch.outputs.has_changes }}
           VALIDATION_OUTCOME: ${{ steps.validation.outcome }}
           DRAFT_PR: ${{ inputs.draft_pr }}
-          HANDOFF_FILE: ${{ runner.temp }}/bdfa-planning-handoff.json
+          HANDOFF_FILE: ${{ runner.temp }}/bdfa-foreman/planning-handoff.json
         run: |
           set -euo pipefail
-
-          if ! jq -e . "$HANDOFF_FILE" >/dev/null 2>&1; then
-            echo '{"status":"blocked","summary":"Codex did not return a valid structured Planning Handoff."}' > "$HANDOFF_FILE"
-          fi
 
           status="$(jq -r '.status // "blocked"' "$HANDOFF_FILE")"
           approval="$(jq -r '.approval_required // empty' "$HANDOFF_FILE")"
           summary="$(jq -r '.summary // "Codex milestone run completed."' "$HANDOFF_FILE")"
 
-          dirty=false
-          if [[ -n "$(git status --porcelain)" ]] || [[ "$(git rev-list --count main..HEAD)" -gt 0 ]]; then
-            dirty=true
-          fi
+          git config --local core.hooksPath /dev/null
+          git remote set-url origin "https://github.com/${GITHUB_REPOSITORY}.git"
 
-          if [[ "$dirty" == true ]]; then
+          if [[ "$HAS_CHANGES" == "true" ]]; then
+            branch="${BRANCH_BASE}-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+            git switch -c "$branch"
             git config user.name "BDFA Foreman"
             git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            if [[ -n "$(git status --porcelain)" ]]; then
-              git add -A
-              git commit -m "feat: execute BDFA milestone ${MILESTONE_NUMBER}"
-            fi
+            git commit -m "feat: execute BDFA milestone ${MILESTONE_NUMBER}"
 
             credential_helper="$RUNNER_TEMP/git-credential-bdfa"
             printf '%s\n' \
@@ -139,7 +231,7 @@ jobs:
               'echo "password=$GH_TOKEN"' \
               > "$credential_helper"
             chmod 700 "$credential_helper"
-            git -c credential.helper="$credential_helper" push --set-upstream origin "$BDFA_BRANCH"
+            git -c credential.helper= -c credential.helper="$credential_helper" push --set-upstream origin "$branch"
             rm -f "$credential_helper"
 
             pr_body="$RUNNER_TEMP/bdfa-pr-body.md"
@@ -151,7 +243,7 @@ jobs:
               echo "$summary"
               echo
               echo "- Codex status: \`$status\`"
-              echo "- Repository validation: \`$VALIDATION_OUTCOME\`"
+              echo "- Clean-patch validation: \`$VALIDATION_OUTCOME\`"
               if [[ -n "$approval" ]]; then
                 echo "- Approval boundary: $approval"
               fi
@@ -172,8 +264,9 @@ jobs:
             fi
 
             pr_url="$(gh pr create \
+              --repo "$GITHUB_REPOSITORY" \
               --base main \
-              --head "$BDFA_BRANCH" \
+              --head "$branch" \
               --title "Milestone ${MILESTONE_NUMBER}: ${MILESTONE_TITLE}" \
               --body-file "$pr_body" \
               "${draft_flag[@]}")"
@@ -198,17 +291,11 @@ jobs:
               echo '```'
             } > "$issue_body"
             issue_url="$(gh issue create \
+              --repo "$GITHUB_REPOSITORY" \
               --title "Milestone ${MILESTONE_NUMBER} handoff: ${MILESTONE_TITLE}" \
               --body-file "$issue_body")"
             echo "issue_url=$issue_url" >> "$GITHUB_OUTPUT"
           fi
-
-      - name: Fail clearly when Codex could not run
-        if: steps.codex.outcome != 'success'
-        shell: bash
-        run: |
-          echo "Codex did not complete. Confirm the OPENAI_API_KEY repository secret exists and review the Codex step logs." >&2
-          exit 1
 
       - name: Record workflow summary
         if: always()
