@@ -6,6 +6,10 @@ This document defines BDFA source-data shapes, naming conventions, ownership exp
 
 The contract exists to protect future backend, adapter, import/export, and migration work from accidentally turning temporary frontend quirks into permanent database design. It should be used before adding persistence, adapters, imports, exports, migrations, or backend-owned financial records.
 
+The complete normalized relational design is defined in
+`docs/NORMALIZED_FINANCIAL_MODEL.md`. This document remains the compatibility
+contract for the current frontend snapshot and event seams.
+
 ## 2. Core Rule
 
 Source data is stored.
