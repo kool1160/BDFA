@@ -68,6 +68,14 @@ function isComplete(status) {
   return /^complete\b/i.test(status);
 }
 
+function isBlocked(status) {
+  return /^(blocked|paused|waiting)\b/i.test(status);
+}
+
+function isAutoSelectable(status) {
+  return !isComplete(status) && !isBlocked(status);
+}
+
 function slugify(value) {
   return value
     .toLowerCase()
@@ -109,8 +117,8 @@ if (args.number.trim()) {
   if (!selected) fail(`Milestone ${requested} was not found`);
   if (isComplete(selected.status)) fail(`Milestone ${requested} is already complete`);
 } else {
-  selected = milestones.find((milestone) => !isComplete(milestone.status));
-  if (!selected) fail('all milestones are complete');
+  selected = milestones.find((milestone) => isAutoSelectable(milestone.status));
+  if (!selected) fail('all remaining milestones are complete or blocked');
 }
 
 const context = [
