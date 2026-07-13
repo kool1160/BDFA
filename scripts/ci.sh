@@ -24,6 +24,10 @@ else
 fi
 echo "::endgroup::"
 
+echo "::group::Single-owner security preparation"
+python3 scripts/check-single-owner-security.py
+echo "::endgroup::"
+
 echo "::group::Static asset integrity"
 python3 scripts/check-static-site.py
 echo "::endgroup::"

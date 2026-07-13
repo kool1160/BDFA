@@ -28,7 +28,7 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 
 ## Milestone 2 — Lock the application to Chris
 
-**Status:** Active — Task 180 assessment and Task 181 design are complete. Continue the remaining milestone work under one 4X milestone handoff, pausing only immediately before live authentication, RLS, or database changes that require Chris's approval.
+**Status:** Active — assessment, design, transactional SQL, catalog checks, negative-test runbook, and client signup/recovery preparation are complete. Approval is required before applying or deploying the live database, RLS, and authentication changes.
 
 - Apply and verify Supabase RLS in the live project.
 - Restrict access to the approved owner identity.

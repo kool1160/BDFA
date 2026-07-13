@@ -82,27 +82,37 @@
     return session ? session.user : null;
   }
 
-  async function signUp(email, password) {
+  async function requestPasswordReset(email) {
     const supabase = getClient();
 
     if (!supabase) {
       return { data: null, error: new Error(getConfigurationLabel()) };
     }
 
-    const result = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: getEmailRedirectUrl()
-      }
+    const result = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: getEmailRedirectUrl()
     });
 
     if (result.error) {
-      setStatus(result.error.message || 'Sign up failed.', 'error');
+      setStatus(result.error.message || 'Password reset request failed.', 'error');
     } else {
-      setStatus('Sign up complete. Check your email to confirm, then return here and sign in.', 'success');
+      setStatus('If this is the approved account, check its email for a password reset link.', 'success');
     }
 
+    return result;
+  }
+
+  async function updatePassword(password) {
+    const supabase = getClient();
+
+    if (!supabase) {
+      return { data: null, error: new Error(getConfigurationLabel()) };
+    }
+
+    const result = await supabase.auth.updateUser({ password });
+    setStatus(result.error
+      ? result.error.message || 'Password update failed.'
+      : 'Password updated. Owner access is restored.', result.error ? 'error' : 'success');
     return result;
   }
 
@@ -233,7 +243,8 @@
     getStatus,
     getSession,
     getUser,
-    signUp,
+    requestPasswordReset,
+    updatePassword,
     signIn,
     signOut,
     loadSnapshot,
