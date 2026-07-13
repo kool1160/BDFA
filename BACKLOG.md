@@ -47,7 +47,7 @@ This is the short implementation order for BDFA. It is intentionally milestone-b
 
 ## Milestone 3 — Create the actual account coverage matrix
 
-**Status:** Complete — repository-only matrix prepared; owner confirmation and provider testing remain explicit follow-up gates.
+**Status:** Waiting — the privacy-safe matrix template is prepared, but Chris must confirm the actual institutions and account types before this milestone can be complete or provider coverage can be tested.
 
 **Issue:** #115
 
@@ -65,7 +65,7 @@ HealthEquity is a required test case. This is a practical provider-selection che
 
 **Recommended level:** 2X for inventory and documentation; 3X when testing provider APIs or real connection behavior.
 
-**Evidence:** `docs/ACCOUNT_COVERAGE_MATRIX.md` records the required account and asset coverage, the mandatory HealthEquity test case, provider-verification boundaries, refresh expectations, and fallbacks without storing personal account identifiers. The repository did not contain a confirmed institution inventory, so the matrix makes that missing owner input explicit rather than inventing institutions or provider support claims.
+**Prepared evidence:** `docs/ACCOUNT_COVERAGE_MATRIX.md` records the required account and asset categories, the mandatory HealthEquity test case, provider-verification boundaries, refresh expectations, and fallbacks without storing personal account identifiers. Completion is still waiting on Chris's actual institution inventory.
 
 ## Milestone 4 — Define the normalized financial model
 
