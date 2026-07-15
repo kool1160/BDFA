@@ -82,6 +82,14 @@
   padding-top: 6px;
 }
 
+.portfolio-analytics-panel {
+  display: grid;
+  gap: 16px;
+  padding-top: 6px;
+}
+
+.portfolio-analytics-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
 @media (max-width: 900px) {
   .financial-truth-grid,
   .planning-output-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }

@@ -422,7 +422,7 @@ changes, paid services, or financial calculations were used.
 
 ## Milestone 18 — Add portfolio analytics depth
 
-**Status:** Pending
+**Status:** Complete — repository-only derived portfolio analytics are implemented and verified. Live normalized provider/database integration remains outside this milestone.
 
 Expand investment analytics after the basic financial truth engine is visible and tested.
 
@@ -439,6 +439,8 @@ Add derived outputs for:
 All outputs must remain derived from source records and clearly label missing or partial investment data. Do not infer performance from balances alone.
 
 **Recommended level:** 3X for contained calculations; 4X for performance methodology.
+
+**Evidence:** `js/portfolio-analytics.js` computes allocation by asset class and account type, concentration risk, symbol overlap, dividends and interest, account-level contribution/gain breakdowns, HSA/401(k) contribution progress, and explicit realized/unrealized gain states without inferring performance from balances. `js/financial-truth-dashboard.js` and `index.html` expose the derived outputs with partial and missing-data labels. `scripts/test-portfolio-analytics.mjs` covers representative holdings, activity, overlap, contribution progress, and missing performance data. No database, authentication, RLS, provider credential, or deployment changes were made.
 
 ## Milestone 19 — Add Monthly Flow and bill intelligence
 

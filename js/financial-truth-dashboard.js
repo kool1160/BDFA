@@ -26,13 +26,15 @@ function render() {
   const sourceData = typeof window.BDFA?.getSourceData === 'function' ? window.BDFA.getSourceData() : null;
   const summary = document.getElementById('financialTruthSummary');
   const planning = document.getElementById('planningOutputSummary');
+  const portfolio = document.getElementById('portfolioAnalyticsSummary');
 
-  if (!sourceData || !summary || !planning) return;
+  if (!sourceData || !summary || !planning || !portfolio) return;
 
   const pipeline = runFinancialPipeline(sourceData);
   const truth = pipeline.financialTruth;
   const projection = pipeline.forecastOutputs.retirementProjection;
   const scenarios = pipeline.forecastOutputs.scenarios;
+  const analytics = truth.portfolio.analytics;
 
   summary.innerHTML = summaryCards.map(([id, label, detail]) => cardMarkup(
     label,
@@ -45,12 +47,21 @@ function render() {
     detail,
     formatPlanningValue(id, projection, scenarios),
   )).join('');
+  portfolio.innerHTML = [
+    ['Largest holding', analytics.concentrationRisk.largestHolding || 'Needs holdings', 'Current-value concentration only.'],
+    ['Dividends + interest', money.format(analytics.income.total), 'Explicitly labeled investment income.'],
+    ['Overlapping symbols', String(analytics.overlappingHoldings.length), 'Requires source symbols across accounts.'],
+    ['Realized gains', analytics.performance.realizedGains.status === 'available' ? money.format(analytics.performance.realizedGains.value) : 'Missing activity', 'Never inferred from balances.'],
+    ['Unrealized gains', analytics.performance.unrealizedGains.status === 'available' ? money.format(analytics.performance.unrealizedGains.value) : 'Missing activity', 'Requires an explicit source value.'],
+  ].map(([label, value, detail]) => cardMarkup(label, detail, value)).join('');
 
   setText('financialTruthStatus', `Derived · ${Object.values(truth.sourceCounts).reduce((sum, count) => sum + count, 0)} source records`);
   setText('planningOutputStatus', projection.status === 'illustrative' ? 'Assumption-based' : 'Missing planning assumptions');
   setText('planningOutputNote', projection.status === 'illustrative'
     ? `${projection.confidence.explanation} Source data is only as fresh as the latest saved snapshot.`
     : 'Add a current age to the planning source data before age-55 projections can be calculated. Source data is only as fresh as the latest saved snapshot.');
+  setText('portfolioAnalyticsStatus', analytics.dataQuality.status === 'available' ? 'Activity available' : analytics.dataQuality.status === 'partial' ? 'Partial investment data' : 'Waiting for holdings');
+  setText('portfolioAnalyticsNote', `${analytics.performance.note} ${analytics.dataQuality.missing.length ? `Missing: ${analytics.dataQuality.missing.join(', ')}.` : 'Source records cover the displayed analytics.'}`);
 }
 
 function formatSummaryValue(id, truth) {

@@ -124,9 +124,17 @@ export function mapMockInvestments(mockInvestments = []) {
     name: investment.name,
     detail: investment.detail,
     balance: investment.amount,
+    marketValue: investment.marketValue,
+    symbol: investment.symbol || investment.ticker,
+    ticker: investment.ticker,
+    accountId: investment.accountId,
     accountType: investment.accountType,
     assetClass: investment.assetClass,
     contributionAmount: investment.contributionAmount,
+    annualContributionTarget: investment.annualContributionTarget,
+    contributionTarget: investment.contributionTarget,
+    realizedGain: investment.realizedGain,
+    unrealizedGain: investment.unrealizedGain,
     source: 'mock-dashboard',
   }));
 }
