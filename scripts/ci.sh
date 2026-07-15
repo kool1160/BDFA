@@ -48,4 +48,8 @@ echo "::group::Manual source record representative checks"
 node scripts/test-manual-source-records.mjs
 echo "::endgroup::"
 
+echo "::group::Normalized source reconciliation representative checks"
+node scripts/test-normalized-source-reconciliation.mjs
+echo "::endgroup::"
+
 echo "BDFA repository checks passed."
