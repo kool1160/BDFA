@@ -1,6 +1,6 @@
 # Plaid Sandbox Coverage Protocol
 
-**Milestone:** 6 — Prove Plaid coverage  
+**Milestone:** 6 — Prove Plaid coverage
 **Status:** Prepared; execution blocked at the approved sandbox/backend boundary
 
 This protocol defines the evidence required to evaluate Plaid without putting
