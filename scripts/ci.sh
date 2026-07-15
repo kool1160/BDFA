@@ -28,6 +28,10 @@ echo "::group::Single-owner security preparation"
 python3 scripts/check-single-owner-security.py
 echo "::endgroup::"
 
+echo "::group::Normalized schema migration draft safety"
+python3 scripts/check-normalized-schema-draft.py
+echo "::endgroup::"
+
 echo "::group::Static asset integrity"
 python3 scripts/check-static-site.py
 echo "::endgroup::"
