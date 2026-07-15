@@ -131,3 +131,24 @@ Financial calculations were unchanged. Source-data contracts were unchanged. Thi
 - Browser/mobile verification: static responsive code inspection completed on 2026-07-10 for iPhone-width Accounts header spacing, Monthly Flow week overflow safeguards, two-line timeline wrapping, section spacing, and premium Analytics visuals.
 - Vercel preview verification: Ready preview verified on 2026-07-10.
 - Production verification: pending production deployment; this task must not be marked fully complete until the final production commit SHA and production smoke-test result are recorded.
+
+## Task 179 — Chris’s Financial Institution And Account Coverage Matrix
+
+- Date opened: 2026-07-10
+- Pull request: #109
+- Roadmap document path: `docs/roadmap.md`
+- Coverage matrix document path: `docs/CHRIS_FINANCIAL_ACCOUNT_COVERAGE_MATRIX.md`
+- Confirmed institutions identified: 1. HealthEquity is explicitly identified as a required coverage test case; exact account inventory remains pending Chris confirmation.
+- Confirmed accounts identified: 0. No repository evidence verifies a specific real account as confirmed.
+- Unconfirmed named institutions from mock/demo data: 3 (`Chase`, `Huntington`, `Capital One`).
+- Unconfirmed account candidates from mock/demo data: 7 rows.
+- Placeholder account rows: 9 rows.
+- Number requiring Chris confirmation: All 16 account matrix rows remain pending Chris review; Task 179 must not be marked complete until Chris confirms every actual account is represented.
+- HealthEquity status: Explicitly identified as a required coverage test case; exact account inventory remains pending Chris confirmation.
+- Plaid implementation status: Blocked pending Task 179 approval.
+- Secondary-provider selection status: Blocked pending real coverage testing.
+- Financial calculations changed: No.
+- Runtime code changed: No.
+- Source-data contracts changed: No.
+- Production commit SHA: Pending.
+- Task status: Draft inventory pending Chris review.
