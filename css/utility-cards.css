@@ -206,6 +206,85 @@
   font-weight: 700;
 }
 
+.connection-health {
+  display: grid;
+  gap: 12px;
+  margin-top: 4px;
+  padding: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.connection-health-heading,
+.connection-health-details div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.connection-health-heading .label {
+  margin: 0;
+}
+
+.connection-health-badge {
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: rgba(245, 247, 251, 0.72);
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.connection-health-badge[data-tone="success"] {
+  border-color: rgba(110, 231, 183, 0.28);
+  color: rgba(170, 255, 218, 0.96);
+}
+
+.connection-health-badge[data-tone="warning"] {
+  border-color: rgba(255, 214, 138, 0.28);
+  color: rgba(255, 230, 177, 0.96);
+}
+
+.connection-health-badge[data-tone="error"] {
+  border-color: rgba(255, 159, 159, 0.28);
+  color: rgba(255, 205, 205, 0.96);
+}
+
+.connection-health-details {
+  display: grid;
+  gap: 7px;
+  margin: 0;
+}
+
+.connection-health-details dt,
+.connection-health-details dd {
+  margin: 0;
+  font-size: 0.75rem;
+}
+
+.connection-health-details dt {
+  color: rgba(245, 247, 251, 0.58);
+}
+
+.connection-health-details dd {
+  color: rgba(245, 247, 251, 0.86);
+  font-weight: 700;
+  text-align: right;
+}
+
+.connection-health-warning {
+  margin: 0;
+  color: rgba(255, 223, 166, 0.94);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.connection-health #cloudRefreshButton {
+  justify-self: start;
+}
+
 .cloud-dirty-indicator {
   width: fit-content;
   padding: 8px 11px;
