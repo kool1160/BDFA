@@ -191,3 +191,9 @@ Financial calculations were unchanged. Source-data contracts were unchanged. Thi
 - Coverage: complete cash, debt, investment, recurring-item, asset, liability, and investment-activity records; healthy, stale/partial, duplicate/error, and missing/reauthentication-required sync-health states.
 - Verification: deterministic financial truth and age-55 planning outputs, source-count reconciliation, duplicate visibility, stale timestamp ordering, and insufficient-data behavior all pass through `bash scripts/ci.sh`.
 - Safety boundary: no real financial records, provider calls, credentials, production identifiers, database, authentication, RLS, or deployment changes.
+## Milestone 14 — Import, export, and recovery controls
+
+- Scope: Repository-only redacted source-data export, validated import, merge analysis, and local recovery controls.
+- Implementation: `js/data-adapter.js` provides a versioned redacted export envelope, duplicate/stale analysis, ID-based merge support, and recovery backup APIs. `index.html` and `js/app.js` provide validation-before-replace import warnings, export download, backup timestamp/source summary, and recovery restore controls.
+- Verification: `bash scripts/ci.sh` passed, including `scripts/test-source-recovery.mjs`, which verifies sensitive-key redaction, merge/recovery behavior, and derived output regeneration from imported source records. `git diff --check` passed.
+- Boundaries: No secrets, provider credentials, account numbers, sensitive logs, live database changes, authentication/RLS changes, provider calls, or financial formula changes.

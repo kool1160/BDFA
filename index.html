@@ -613,6 +613,11 @@
           <button id="cloudRefreshButton" type="button" class="ghost-button" disabled>Refresh connection</button>
         </div>
         <p id="localBackupCreatedAt" class="cloud-backup-timestamp" hidden></p>
+        <div class="cloud-actions" aria-label="Source recovery controls">
+          <button id="createRecoveryBackupButton" type="button" class="ghost-button">Create Recovery Backup</button>
+          <button id="restoreRecoveryBackupButton" type="button" class="ghost-button" disabled>Restore Recovery Backup</button>
+        </div>
+        <p id="recoveryBackupSummary" class="cloud-backup-timestamp" hidden></p>
         <p id="statusMessage" class="status-message" hidden></p>
       </article>
 
@@ -629,7 +634,7 @@
       <article class="import-card utility-card">
         <span class="label">Local Data</span>
         <h2>Import mock data.</h2>
-        <p>Paste exported BDFA JSON to restore dashboard data on this device.</p>
+        <p>Paste a redacted BDFA export to validate and restore source data on this device.</p>
         <textarea id="importData" placeholder='Paste JSON here'></textarea>
         <button id="importButton" type="button">Import Data</button>
       </article>
@@ -637,7 +642,7 @@
       <article class="export-card utility-card">
         <span class="label">Backup</span>
         <h2>Export your local data.</h2>
-        <p>Copy your current mock dashboard data as JSON.</p>
+        <p>Download a redacted source snapshot. Secrets and provider logs are excluded.</p>
         <button id="exportButton" type="button">Export Data</button>
         <textarea id="exportData" readonly placeholder="Exported JSON will appear here"></textarea>
       </article>
