@@ -1,6 +1,6 @@
 # Protected-Live Execution Runbooks
 
-**Milestone:** 17 — Create protected-live execution runbooks  
+**Milestone:** 17 — Create protected-live execution runbooks
 **Status:** Repository-only preparation; no live action is authorized by this document
 
 This document is the approval-gated execution plan for BDFA's blocked live
