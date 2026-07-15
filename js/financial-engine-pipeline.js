@@ -1,6 +1,7 @@
 import { buildUnifiedModelFromMockData } from './mock-data-bridge.js';
 import { calculatePlanningSummary } from './planning-engine.js';
 import { calculateFinancialTruth } from './financial-truth-engine.js';
+import { calculatePlanningScenarios, calculateRetirementProjection } from './retirement-planning-engine.js';
 
 /**
  * BDFA Financial Engine Pipeline
@@ -15,10 +16,10 @@ import { calculateFinancialTruth } from './financial-truth-engine.js';
  *
  * Current implementation scope:
  * - Build a Unified Financial Model from supplied mock data.
- * - Return Planning Engine summary outputs plus empty forecast and decision
- *   output containers.
+ * - Return Planning Engine summary outputs plus age-55 planning forecast
+ *   outputs and an empty decision output container.
  * - Planning Engine summary calculations only.
- * - No forecasting calculations.
+ * - Forecasting is limited to explicit, illustrative age-55 scenarios.
  * - No decision calculations.
  * - No DOM access.
  * - No application wiring.
@@ -44,7 +45,7 @@ import { calculateFinancialTruth } from './financial-truth-engine.js';
 export function runFinancialPipeline(mockData = {}) {
   const financialModel = buildUnifiedModelFromMockData(mockData);
   const planningOutputs = runPlanningEngine(financialModel);
-  const forecastOutputs = runForecastEngine(planningOutputs);
+  const forecastOutputs = runForecastEngine(financialModel);
   const decisionOutputs = runDecisionEngine(planningOutputs, forecastOutputs);
   const financialTruth = calculateFinancialTruth(financialModel);
 
@@ -75,12 +76,13 @@ export function runPlanningEngine(unifiedModel) {
  * Run the Forecast Engine step.
  *
  * @param {object} planningOutputs - Planning Engine outputs.
- * @returns {object} Empty forecast output container.
+ * @returns {object} Illustrative age-55 forecast outputs.
  */
-export function runForecastEngine(planningOutputs) {
-  void planningOutputs;
-
-  return {};
+export function runForecastEngine(financialModel = {}, assumptions = {}) {
+  return {
+    retirementProjection: calculateRetirementProjection(financialModel, assumptions),
+    scenarios: calculatePlanningScenarios(financialModel, assumptions),
+  };
 }
 
 /**

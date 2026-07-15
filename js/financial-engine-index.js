@@ -20,3 +20,4 @@ export * from './unified-model-builder.js';
 export * from './financial-engine-pipeline.js';
 export * from './planning-state.js';
 export * from './financial-truth-engine.js';
+export * from './retirement-planning-engine.js';

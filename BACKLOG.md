@@ -215,7 +215,7 @@ authentication, RLS, provider credential, or deployment changes were made.
 
 ## Milestone 10 — Planning toward age 55
 
-**Status:** Pending
+**Status:** Complete — repository-only, assumption-driven planning outputs are implemented and verified. Live normalized provider data, tax methodology, and deployment remain outside this milestone.
 
 **Issue:** #122
 
@@ -230,6 +230,15 @@ After source data and calculations are trustworthy, add:
 - assumptions, confidence ranges, and explainable results
 
 **Recommended level:** 4X for methodology, followed by 3X implementation phases.
+
+**Evidence:** `js/retirement-planning-engine.js` computes deterministic age-55
+projections, low/base/high return ranges, part-time-income and mortgage-paid-off
+scenarios, HSA and healthcare projections, required monthly cash flow, explicit
+assumptions, confidence metadata, and plain-English explanations.
+`scripts/test-retirement-planning.mjs` covers representative synthetic cases;
+`docs/RETIREMENT_PLANNING.md` records the methodology and boundaries. No
+database, authentication, RLS, provider credential, or deployment changes were
+made.
 
 ## Deprioritized unless direction changes
 
