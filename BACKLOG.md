@@ -289,7 +289,7 @@ financial data change was made.
 
 ## Milestone 13 — Build normalized source-data fixtures and reconciliation tests
 
-**Status:** Pending
+**Status:** Complete — repository-only synthetic normalized fixtures and reconciliation tests are implemented. No real financial records, provider calls, credentials, production identifiers, database, authentication, RLS, or deployment changes were made.
 
 Create representative normalized source-data fixtures that exercise the full BDFA model without using Chris's private account data.
 
@@ -307,6 +307,8 @@ Add synthetic fixtures for:
 Use these fixtures to verify source-to-derived reconciliation across financial truth, connection health, and age-55 planning. No real financial records, provider calls, credentials, or production identifiers may be added.
 
 **Recommended level:** 3X.
+
+**Evidence:** `scripts/fixtures/normalized-source-fixtures.mjs` provides complete, stale/partial, duplicate, and missing-data normalized snapshots covering cash, debt, investments, recurring items, assets, liabilities, and investment activity. `scripts/test-normalized-source-reconciliation.mjs` verifies deterministic financial truth, age-55 planning, source counts, connection-health metadata, duplicate visibility, and insufficient-data behavior. `scripts/ci.sh` runs the reconciliation suite.
 
 ## Milestone 14 — Add import, export, and recovery controls for source data
 

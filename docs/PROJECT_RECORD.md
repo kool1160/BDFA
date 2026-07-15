@@ -183,3 +183,11 @@ Financial calculations were unchanged. Source-data contracts were unchanged. Thi
 - Browser/mobile verification: static responsive code inspection completed on 2026-07-10 for iPhone-width Accounts header spacing, Monthly Flow week overflow safeguards, two-line timeline wrapping, section spacing, and premium Analytics visuals.
 - Vercel preview verification: Ready preview verified on 2026-07-10.
 - Production verification: pending production deployment; this task must not be marked fully complete until the final production commit SHA and production smoke-test result are recorded.
+
+## Milestone 13 — Normalized Source Fixtures And Reconciliation Tests
+
+- Status: Complete — repository-only synthetic fixture and reconciliation milestone.
+- Files: `scripts/fixtures/normalized-source-fixtures.mjs`, `scripts/test-normalized-source-reconciliation.mjs`, and `scripts/ci.sh`.
+- Coverage: complete cash, debt, investment, recurring-item, asset, liability, and investment-activity records; healthy, stale/partial, duplicate/error, and missing/reauthentication-required sync-health states.
+- Verification: deterministic financial truth and age-55 planning outputs, source-count reconciliation, duplicate visibility, stale timestamp ordering, and insufficient-data behavior all pass through `bash scripts/ci.sh`.
+- Safety boundary: no real financial records, provider calls, credentials, production identifiers, database, authentication, RLS, or deployment changes.
