@@ -392,7 +392,7 @@ Do not call real provider APIs, add provider SDKs, store credentials, or create 
 
 ## Milestone 17 — Create protected-live execution runbooks
 
-**Status:** Pending
+**Status:** Complete — repository-only protected-live execution checklists and rollback plans are recorded. No live action was performed.
 
 Create the exact approval checklists and rollback plans for the blocked protected milestones so live work can be done deliberately when Chris approves it.
 
@@ -411,6 +411,14 @@ Cover:
 This is documentation and verification planning only. Do not perform live Supabase, Auth, provider, billing, or credential actions.
 
 **Recommended level:** 4X.
+
+**Evidence:** `docs/PROTECTED_LIVE_EXECUTION_RUNBOOKS.md` coordinates the
+approval gates, pre-change backups, verification checks, rollback and emergency
+containment steps for owner/Auth/RLS execution, backend and secret-management
+selection, Plaid Sandbox setup, the first live institution, HealthEquity and
+secondary-provider evaluation, normalized migration verification, and token
+deletion/disconnection. No credentials, provider calls, live database/Auth/RLS
+changes, paid services, or financial calculations were used.
 
 ## Milestone 18 — Add portfolio analytics depth
 
