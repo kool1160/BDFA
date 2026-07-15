@@ -1,5 +1,15 @@
 # BDFA Project Record
 
+## Milestone 18 — Add Portfolio Analytics Depth
+
+- Date completed: 2026-07-15
+- Scope: Repository-only derived portfolio analytics from existing source records.
+- Implementation: `js/portfolio-analytics.js` computes allocation by asset class and account type, concentration risk, symbol overlap, dividends and interest, account-level contribution/gain breakdowns, HSA/401(k) contribution progress, and explicit realized/unrealized gain availability. `js/financial-truth-dashboard.js`, `index.html`, and `css/financial-truth.css` surface compact portfolio analytics with partial and missing-data states.
+- Financial methodology: Performance is reported only from explicitly labeled investment activity or holding fields; balances alone never produce gain outputs. Concentration is a current-value diagnostic, not a performance claim.
+- Runtime/database/authentication/RLS: Static browser behavior only. No dependency, backend, provider, database, migration, Auth, RLS, credential, token, or deployment change.
+- Verification: `node scripts/test-portfolio-analytics.mjs`, `node scripts/test-financial-truth.mjs`, `bash scripts/ci.sh`, and `git diff --check` passed.
+- Status: Complete — live normalized provider/database integration remains separately protected.
+
 ## Milestone 17 — Protected-Live Execution Runbooks
 
 - Date completed: 2026-07-15

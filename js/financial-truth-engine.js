@@ -5,6 +5,8 @@
  * never mutates input data, performs I/O, or renders UI.
  */
 
+import { calculatePortfolioAnalytics } from './portfolio-analytics.js';
+
 const FREQUENCY_MULTIPLIERS = Object.freeze({
   weekly: 52 / 12,
   biweekly: 26 / 12,
@@ -66,6 +68,7 @@ function calculatePortfolio(investments, investmentTransactions) {
     total: sum(investments, investmentAmount),
     allocation: [...byGroup].map(([label, amount]) => ({ label, amount })),
     investmentTransactions: investmentTransactions.map(row => ({ ...row })),
+    analytics: calculatePortfolioAnalytics(investments, investmentTransactions),
   };
 }
 
