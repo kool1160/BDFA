@@ -87,6 +87,10 @@
       <article class="card"><span class="summary-heading"><span class="card-icon growth-icon" aria-hidden="true">↗</span><span class="label">Investments</span></span><strong id="investmentTotal" class="money-growth">$487,642</strong></article>
       <article class="card"><span class="summary-heading"><span class="card-icon debt-icon" aria-hidden="true">−</span><span class="label">Debt</span></span><strong id="debtTotal" class="money-debt">-$40,667</strong></article>
     </section>
+    <section class="trust-strip" data-mobile-view="overview" aria-label="Dashboard data trust">
+      <span class="trust-strip-label">Data trust</span>
+      <p id="dashboardTrustSummary">Numbers are based on the source records currently on this device.</p>
+    </section>
 
     <section class="financial-truth-section" data-mobile-view="overview" aria-labelledby="financialTruthTitle">
       <div class="financial-truth-heading">
@@ -97,6 +101,8 @@
         </div>
         <span class="financial-truth-status" id="financialTruthStatus">Waiting for source data</span>
       </div>
+      <p class="trust-explanation" id="financialTruthFreshness">Freshness is evaluated from the latest saved source timestamp.</p>
+      <p class="trust-audit" id="financialTruthAudit">Audit trail will appear when source data is available.</p>
       <div class="financial-truth-grid" id="financialTruthSummary" aria-live="polite"></div>
       <div class="portfolio-analytics-panel" aria-labelledby="portfolioAnalyticsTitle">
         <div class="planning-output-heading">

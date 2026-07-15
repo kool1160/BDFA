@@ -246,3 +246,10 @@ Financial calculations were unchanged. Source-data contracts were unchanged. Thi
 - Implementation: `js/monthly-flow-intelligence.js` derives recurring monthly flow, near-term dated events, cash after obligations, recurring charge groups, bill-change signals, and explicit stale, partial, missing-transaction, and ambiguous-transaction warnings. `index.html`, `js/monthly-flow-runtime-base.js`, and `css/monthly-planning.css` surface the results.
 - Verification: `bash scripts/ci.sh`, `node scripts/test-monthly-flow-intelligence.mjs`, changed-file syntax checks, and `git diff --check` passed on 2026-07-15.
 - Safety boundary: no provider calls, credentials, live database/Auth/RLS changes, deployment, or live financial records were used. Ambiguous transactions remain visible and are not silently classified.
+
+## Milestone 20 — Freshness, confidence, and audit explanations
+
+- Status: Complete — repository-only trust and explainability milestone.
+- Implementation: js/data-trust.js evaluates source counts, saved-source freshness, confidence labels, and degraded-data warnings without changing financial calculations. index.html, js/financial-truth-dashboard.js, and css/financial-truth.css surface dashboard trust, per-metric source audits, freshness, confidence, and no-data/degraded-data explanations.
+- Verification: node scripts/test-data-trust.mjs, node scripts/test-dashboard-integration.mjs, bash scripts/ci.sh, changed-file syntax checks, and git diff --check passed on 2026-07-15.
+- Safety boundary: no provider connectivity, credentials, live database/Auth/RLS changes, deployment, source-data contract changes, or financial methodology changes were made. Provider source timestamps remain unavailable until protected backend/provider milestones are executed.
