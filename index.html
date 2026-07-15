@@ -460,6 +460,11 @@
           <h3>Incoming income</h3>
           <div id="monthlyFlowIncomeList" class="monthly-flow-income-list" aria-live="polite"></div>
         </section>
+        <section class="monthly-flow-intelligence-section" aria-label="Monthly Flow intelligence">
+          <h3>Bill intelligence</h3>
+          <div id="monthlyFlowIntelligenceSummary" class="monthly-flow-intelligence-grid" aria-live="polite"></div>
+          <div id="monthlyFlowIntelligenceWarnings" class="monthly-flow-intelligence-warnings" role="status" aria-live="polite"></div>
+        </section>
         <div class="monthly-summary-bar" aria-label="Monthly Flow summary placeholders">
           <div class="monthly-summary-item">
             <span>Monthly Income</span>
@@ -708,6 +713,7 @@
   <script src="js/investmentSummary.js"></script>
   <script src="js/allocationSummary.js"></script>
   <script src="js/monthly-flow-runtime.js"></script>
+  <script type="module" src="js/monthly-flow-intelligence.js"></script>
   <script src="js/analytics.js"></script>
   <script src="js/mobile-views.js"></script>
   <script type="module" src="js/financial-truth-dashboard.js"></script>

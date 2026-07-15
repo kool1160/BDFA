@@ -444,7 +444,7 @@ All outputs must remain derived from source records and clearly label missing or
 
 ## Milestone 19 — Add Monthly Flow and bill intelligence
 
-**Status:** Pending
+**Status:** Complete — repository-only Monthly Flow intelligence is implemented and verified. Live normalized provider/database integration remains outside this milestone.
 
 Make BDFA better at explaining monthly cash movement from source records.
 
@@ -460,6 +460,17 @@ Add:
 Do not classify ambiguous transactions silently. Missing or partial source data must be visible in the output.
 
 **Recommended level:** 3X.
+
+**Evidence:** `js/monthly-flow-intelligence.js` computes recurring monthly flow,
+dated near-term income and bill events, available cash after near-term
+obligations, recurring-charge groups, bill-change signals, and explicit stale,
+partial, missing-transaction, and ambiguous-transaction warnings. The Monthly
+Flow section in `index.html`, `js/monthly-flow-runtime-base.js`, and
+`css/monthly-planning.css` surface these outputs without silently classifying
+ambiguous transactions. `scripts/test-monthly-flow-intelligence.mjs` covers
+representative synthetic records and is included in `scripts/ci.sh`. No
+database, authentication, RLS, provider credential, deployment, or live
+financial data changes were made.
 
 ## Milestone 20 — Add freshness, confidence, and audit explanations across the app
 
