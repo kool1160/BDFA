@@ -541,6 +541,19 @@
         <p id="authStatus" class="auth-status">Local mode</p>
         <p id="cloudDirtyIndicator" class="cloud-dirty-indicator" hidden>Local changes not saved to cloud.</p>
         <p id="cloudLastSync" class="cloud-last-sync">Using local save only</p>
+        <div class="connection-health" id="connectionHealth" aria-live="polite" aria-label="Connection health">
+          <div class="connection-health-heading">
+            <span class="label">Connection health</span>
+            <span class="connection-health-badge" id="connectionHealthBadge">Local only</span>
+          </div>
+          <dl class="connection-health-details">
+            <div><dt>Last successful sync</dt><dd id="connectionLastSuccess">Not yet</dd></div>
+            <div><dt>Last attempted sync</dt><dd id="connectionLastAttempt">Not yet</dd></div>
+            <div><dt>Cloud snapshot timestamp</dt><dd id="connectionSourceTimestamp">Unavailable</dd></div>
+          </dl>
+          <p class="connection-health-warning" id="connectionHealthWarning" hidden></p>
+          <button id="cloudRefreshButton" type="button" class="ghost-button" disabled>Refresh connection</button>
+        </div>
         <p id="localBackupCreatedAt" class="cloud-backup-timestamp" hidden></p>
         <p id="statusMessage" class="status-message" hidden></p>
       </article>
@@ -617,6 +630,7 @@
   <script src="js/supabase-config.js"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/data-adapter.js"></script>
+  <script src="js/connection-health.js"></script>
   <script src="js/app.js"></script>
   <script src="js/accountGroups.js"></script>
   <script src="js/billDueDays.js"></script>

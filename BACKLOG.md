@@ -162,7 +162,7 @@ The second provider must normalize into the same BDFA data model. The interface 
 
 ## Milestone 8 — Connection health and automatic sync
 
-**Status:** Pending
+**Status:** Complete — repository-only connection health and automatic refresh are implemented for the existing owner-authenticated Supabase snapshot path. Provider-level source timestamps, partial institution data, and provider-specific reauthentication remain dependent on the secure provider backend and normalized connection model.
 
 **Issue:** #120
 
@@ -180,6 +180,8 @@ Add:
 - recovery from failed or interrupted syncs
 
 **Recommended level:** 3X.
+
+**Evidence:** `js/connection-health.js` records sync attempts and successful saves/loads, shows stale/error/reauthentication/pending-local states, supports manual refresh, and schedules authenticated browser refreshes. `js/data-adapter.js` emits sync lifecycle events without changing financial data contracts. `index.html` and `css/utility-cards.css` expose the health panel. No database, authentication, RLS, provider credential, or financial calculation changes were made.
 
 ## Milestone 9 — Complete financial truth
 

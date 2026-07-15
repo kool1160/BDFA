@@ -212,6 +212,12 @@
     }));
   }
 
+  function dispatchCloudSyncEvent(detail) {
+    window.dispatchEvent(new CustomEvent('bdfa:cloud-sync', {
+      detail: { ...detail, attemptedAt: detail.attemptedAt || new Date().toISOString() }
+    }));
+  }
+
   function getSupabaseClient() {
     return window.BDFA.supabaseClient || null;
   }
@@ -362,12 +368,15 @@
   function saveCloudSnapshot(sourceData) {
     const supabaseClient = getSupabaseClient();
     const validation = validateSourceSnapshot(sourceData);
+    const attemptedAt = new Date().toISOString();
 
     if (!validation.valid) {
+      dispatchCloudSyncEvent({ status: 'invalid', attemptedAt, error: 'Local snapshot is invalid.' });
       return Promise.resolve({ status: 'invalid' });
     }
 
     if (!supabaseClient || !supabaseClient.isConfigured()) {
+      dispatchCloudSyncEvent({ status: 'local', attemptedAt });
       return Promise.resolve({ status: 'local' });
     }
 
@@ -378,6 +387,9 @@
         if (result.status === 'saved') {
           setLocalChangesPendingCloudSave(false);
           setLastKnownCloudUpdatedAt(result.updatedAt || null);
+          dispatchCloudSyncEvent({ status: 'saved', attemptedAt, sourceTimestamp: result.updatedAt || null });
+        } else if (result.status === 'failed') {
+          dispatchCloudSyncEvent({ status: 'failed', attemptedAt, error: 'Cloud save failed.' });
         }
 
         return result;
@@ -471,8 +483,12 @@
   async function loadCloudSnapshot(options = {}) {
     const { applySnapshot = true, saveMissingSnapshot = true } = options;
     const supabaseClient = getSupabaseClient();
+    const attemptedAt = new Date().toISOString();
+
+    dispatchCloudSyncEvent({ status: 'attempted', attemptedAt });
 
     if (!supabaseClient || !supabaseClient.isConfigured()) {
+      dispatchCloudSyncEvent({ status: 'local', attemptedAt });
       return { status: 'local', data: getSourceData() };
     }
 
@@ -482,6 +498,7 @@
       const validation = validateSourceSnapshot(result.data);
 
       if (!validation.valid) {
+        dispatchCloudSyncEvent({ status: 'invalid', attemptedAt, error: 'Cloud snapshot is invalid.' });
         dispatchCloudStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
         return { status: 'invalid', data: getSourceData(), error: null };
       }
@@ -496,6 +513,7 @@
         const localSourceData = getPublicSourceData();
 
         if (!sourceSnapshotsMatch(localSourceData, cloudSourceData)) {
+          dispatchCloudSyncEvent({ status: 'local-dirty', attemptedAt, sourceTimestamp: result.updatedAt || null });
           dispatchCloudStatus('Local changes not saved to cloud. Startup cloud load was skipped.', 'neutral');
           return { status: 'local-dirty', data: getSourceData(), updatedAt: result.updatedAt || null, error: null };
         }
@@ -504,10 +522,12 @@
       }
 
       if (!createPreCloudRestoreBackup({ preserveExistingValidBackup: true })) {
+        dispatchCloudSyncEvent({ status: 'backup-failed', attemptedAt, sourceTimestamp: result.updatedAt || null, error: 'Local backup failed.' });
         return { status: 'backup-failed', data: getSourceData(), error: null };
       }
 
       if (!persistSourceData(cloudSourceData, { rejectInvalid: true, syncCloud: false, markCloudDirty: false })) {
+        dispatchCloudSyncEvent({ status: 'invalid', attemptedAt, sourceTimestamp: result.updatedAt || null, error: 'Cloud snapshot is invalid.' });
         dispatchCloudStatus('Cloud snapshot is invalid. Local data was kept.', 'error');
         return { status: 'invalid', data: getSourceData(), error: null };
       }
@@ -515,6 +535,7 @@
       setLocalChangesPendingCloudSave(false);
       setLastKnownCloudUpdatedAt(result.updatedAt || null);
       dispatchSourceDataUpdated(currentSourceData);
+      dispatchCloudSyncEvent({ status: 'loaded', attemptedAt, sourceTimestamp: result.updatedAt || null });
       return { status: result.status, data: getSourceData(), updatedAt: result.updatedAt || null, error: null };
     }
 
@@ -522,14 +543,22 @@
       const saveResult = await saveCloudSnapshot(getPublicSourceData());
 
       if (saveResult.status === 'saved') {
+        dispatchCloudSyncEvent({ status: 'saved-initial', attemptedAt, sourceTimestamp: saveResult.updatedAt || null });
         return { status: 'saved-initial', data: getSourceData(), updatedAt: saveResult.updatedAt || null, error: null };
       }
 
       if (saveResult.status === 'failed') {
+        dispatchCloudSyncEvent({ status: 'failed', attemptedAt, error: saveResult.error ? 'Cloud save failed.' : null });
         return { status: 'initial-save-failed', data: getSourceData(), updatedAt: saveResult.updatedAt || null, error: saveResult.error };
       }
     }
 
+    dispatchCloudSyncEvent({
+      status: result.status,
+      attemptedAt,
+      sourceTimestamp: result.updatedAt || null,
+      error: result.error ? 'Cloud sync failed.' : null
+    });
     return { status: result.status, data: getSourceData(), updatedAt: result.updatedAt || null, error: result.error };
   }
 
