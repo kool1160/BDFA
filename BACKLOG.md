@@ -185,7 +185,7 @@ Add:
 
 ## Milestone 9 — Complete financial truth
 
-**Status:** Pending
+**Status:** Complete — repository-only derived financial truth is implemented and verified. Live normalized provider/database integration remains a later protected milestone.
 
 **Issue:** #121
 
@@ -205,6 +205,13 @@ Build trusted outputs from normalized source data:
 Every derived number must remain traceable to source records and covered by representative tests.
 
 **Recommended level:** 3X for contained calculations; 4X when defining portfolio-performance or retirement methodology.
+
+**Evidence:** `js/financial-truth-engine.js` computes deterministic net worth,
+cash flow, transactions, portfolio allocation, contributions/gains, account-type
+contributions, and liability payoff outputs from normalized source data.
+`js/financial-engine-pipeline.js` returns those outputs and
+`scripts/test-financial-truth.mjs` verifies representative cases. No database,
+authentication, RLS, provider credential, or deployment changes were made.
 
 ## Milestone 10 — Planning toward age 55
 

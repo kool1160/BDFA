@@ -1,5 +1,6 @@
 import { buildUnifiedModelFromMockData } from './mock-data-bridge.js';
 import { calculatePlanningSummary } from './planning-engine.js';
+import { calculateFinancialTruth } from './financial-truth-engine.js';
 
 /**
  * BDFA Financial Engine Pipeline
@@ -45,15 +46,17 @@ export function runFinancialPipeline(mockData = {}) {
   const planningOutputs = runPlanningEngine(financialModel);
   const forecastOutputs = runForecastEngine(planningOutputs);
   const decisionOutputs = runDecisionEngine(planningOutputs, forecastOutputs);
+  const financialTruth = calculateFinancialTruth(financialModel);
 
   return {
     financialModel,
     planningOutputs,
     forecastOutputs,
     decisionOutputs,
+    financialTruth,
     metadata: {
       source: 'mock-dashboard',
-      pipelineVersion: 'phase-2-skeleton',
+      pipelineVersion: 'phase-3-financial-truth',
     },
   };
 }

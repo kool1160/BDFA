@@ -32,4 +32,8 @@ echo "::group::Static asset integrity"
 python3 scripts/check-static-site.py
 echo "::endgroup::"
 
+echo "::group::Financial truth representative checks"
+node scripts/test-financial-truth.mjs
+echo "::endgroup::"
+
 echo "BDFA repository checks passed."
