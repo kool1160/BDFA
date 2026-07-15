@@ -242,7 +242,7 @@ made.
 
 ## Milestone 11 — Surface financial truth and age-55 planning in the dashboard
 
-**Status:** Pending
+**Status:** Complete — repository-only dashboard integration is implemented and verified. Live normalized provider/database integration remains outside this milestone.
 
 Wire the completed repository-only engines into visible, owner-facing dashboard sections without changing provider connections or live database schema.
 
@@ -257,6 +257,8 @@ Add:
 This milestone should use existing source data paths only. Do not add Plaid, provider credentials, live Supabase migrations, Auth/RLS changes, paid services, or new financial recommendations.
 
 **Recommended level:** 3X for contained UI integration; 4X only if methodology or security boundaries change.
+
+**Evidence:** `js/financial-truth-dashboard.js` renders financial-truth summary cards and age-55 planning scenario cards from the existing source-data path, with explicit missing-assumption and source-freshness messaging. `scripts/test-dashboard-integration.mjs` verifies representative derived values and required dashboard hooks. No provider, database, authentication, RLS, or financial-methodology changes were made.
 
 ## Milestone 12 — Add manual source records for assets, liabilities, and planning assumptions
 

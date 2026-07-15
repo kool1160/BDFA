@@ -19,6 +19,7 @@
   <link rel="stylesheet" href="css/icons.css" />
   <link rel="stylesheet" href="css/forms.css" />
   <link rel="stylesheet" href="css/monthly-planning.css" />
+  <link rel="stylesheet" href="css/financial-truth.css" />
   <link rel="stylesheet" href="css/analytics.css" />
   <link rel="stylesheet" href="css/utility-cards.css" />
   <link rel="stylesheet" href="css/panels.css" />
@@ -85,6 +86,29 @@
       <article class="card"><span class="summary-heading"><span class="card-icon positive-icon" aria-hidden="true">$</span><span class="label">Cash</span></span><strong id="cashTotal" class="money-positive">$14,208</strong></article>
       <article class="card"><span class="summary-heading"><span class="card-icon growth-icon" aria-hidden="true">↗</span><span class="label">Investments</span></span><strong id="investmentTotal" class="money-growth">$487,642</strong></article>
       <article class="card"><span class="summary-heading"><span class="card-icon debt-icon" aria-hidden="true">−</span><span class="label">Debt</span></span><strong id="debtTotal" class="money-debt">-$40,667</strong></article>
+    </section>
+
+    <section class="financial-truth-section" data-mobile-view="overview" aria-labelledby="financialTruthTitle">
+      <div class="financial-truth-heading">
+        <div>
+          <span class="label">Derived picture</span>
+          <h2 id="financialTruthTitle">Your financial picture.</h2>
+          <p>Numbers are calculated from the source records currently on this device.</p>
+        </div>
+        <span class="financial-truth-status" id="financialTruthStatus">Waiting for source data</span>
+      </div>
+      <div class="financial-truth-grid" id="financialTruthSummary" aria-live="polite"></div>
+      <div class="planning-output-panel" aria-labelledby="planningOutputTitle">
+        <div class="planning-output-heading">
+          <div>
+            <span class="label">Age-55 planning</span>
+            <h3 id="planningOutputTitle">Illustrative scenarios.</h3>
+          </div>
+          <span class="planning-output-status" id="planningOutputStatus">Waiting for assumptions</span>
+        </div>
+        <div class="planning-output-grid" id="planningOutputSummary" aria-live="polite"></div>
+        <p class="planning-output-note" id="planningOutputNote">These outputs are assumption-based scenarios, not recommendations or predictions.</p>
+      </div>
     </section>
 
     <section class="panel-grid">
@@ -639,5 +663,6 @@
   <script src="js/monthly-flow-runtime.js"></script>
   <script src="js/analytics.js"></script>
   <script src="js/mobile-views.js"></script>
+  <script type="module" src="js/financial-truth-dashboard.js"></script>
 </body>
 </html>
