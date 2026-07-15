@@ -240,6 +240,199 @@ assumptions, confidence metadata, and plain-English explanations.
 database, authentication, RLS, provider credential, or deployment changes were
 made.
 
+## Milestone 11 — Surface financial truth and age-55 planning in the dashboard
+
+**Status:** Pending
+
+Wire the completed repository-only engines into visible, owner-facing dashboard sections without changing provider connections or live database schema.
+
+Add:
+
+- financial-truth summary cards for net worth, cash after bills, recurring flow, debt, and portfolio total
+- age-55 planning cards for base projection, required monthly cash flow, part-time scenario, mortgage-paid scenario, HSA projection, and assumptions
+- clear labels that outputs are derived, assumption-based, and only as fresh as the current source records
+- empty, stale, and missing-data states
+- representative UI or DOM tests where practical
+
+This milestone should use existing source data paths only. Do not add Plaid, provider credentials, live Supabase migrations, Auth/RLS changes, paid services, or new financial recommendations.
+
+**Recommended level:** 3X for contained UI integration; 4X only if methodology or security boundaries change.
+
+## Milestone 12 — Add manual source records for assets, liabilities, and planning assumptions
+
+**Status:** Pending
+
+Create a practical manual-entry source-data path for records that may not sync automatically yet.
+
+Add:
+
+- manual home and vehicle asset records
+- manual mortgage, loan, and liability records
+- manual planning assumptions for age, target age, annual contributions, healthcare cost, part-time income, and mortgage payment
+- validation and safe defaults
+- clear provenance labels showing manually entered versus synced data
+- snapshot compatibility so manual records survive save/load
+
+Manual data is fallback source data, not a replacement for automatic syncing. Do not store secrets, account numbers, or provider tokens. Do not execute live database migrations without explicit approval.
+
+**Recommended level:** 3X.
+
+## Milestone 13 — Build normalized source-data fixtures and reconciliation tests
+
+**Status:** Pending
+
+Create representative normalized source-data fixtures that exercise the full BDFA model without using Chris's private account data.
+
+Add synthetic fixtures for:
+
+- checking and savings accounts
+- credit cards
+- mortgage and vehicle debt
+- brokerage, 401(k), and HSA holdings
+- investment transactions, dividends, interest, contributions, and gains
+- recurring income and bills
+- manual assets and liabilities
+- stale, partial, duplicate, and missing provider data
+
+Use these fixtures to verify source-to-derived reconciliation across financial truth, connection health, and age-55 planning. No real financial records, provider calls, credentials, or production identifiers may be added.
+
+**Recommended level:** 3X.
+
+## Milestone 14 — Add import, export, and recovery controls for source data
+
+**Status:** Pending
+
+Improve Chris's ability to back up, move, and recover BDFA source data while normalized provider syncing is still protected.
+
+Add:
+
+- export of redacted source-data snapshots
+- import validation before replacing or merging source data
+- duplicate and stale-record warnings
+- recovery from a bad local or cloud snapshot
+- visible backup timestamp and source count summary
+- tests proving derived outputs are regenerated from source records after import
+
+Exports must not include secrets, provider access tokens, account numbers, or sensitive logs. Any live provider or Supabase schema changes remain blocked without explicit approval.
+
+**Recommended level:** 3X, with 4X review if export scope changes to include sensitive records.
+
+## Milestone 15 — Prepare normalized Supabase schema and RLS migration drafts
+
+**Status:** Pending
+
+Prepare repository-only SQL and runbooks for the normalized BDFA data model without applying them to the live Supabase project.
+
+Add drafts for:
+
+- owner-scoped normalized tables
+- RLS policies for one approved owner
+- connection metadata and sync run records
+- account, balance, transaction, holding, investment transaction, liability, recurring item, manual asset, and valuation records
+- indexes and uniqueness constraints for reconciliation
+- rollback notes and verification steps
+
+This milestone must not execute SQL against the live project. It should produce reviewable migration files, tests or static checks where practical, and a clear approval checklist for live execution.
+
+**Recommended level:** 4X.
+
+## Milestone 16 — Build provider-adapter contract and sandbox stubs
+
+**Status:** Pending
+
+Create the provider-neutral adapter contract that Plaid and any secondary provider must satisfy before live integration.
+
+Add:
+
+- adapter interfaces for institutions, accounts, balances, transactions, holdings, investment activity, liabilities, and connection health
+- sandbox stub adapters with deterministic fake responses
+- normalization tests that convert adapter output into the BDFA source model
+- error, stale, partial, reauthentication, duplicate, and disconnected states
+- redaction rules for logs and UI events
+
+Do not call real provider APIs, add provider SDKs, store credentials, or create backend secrets in this milestone.
+
+**Recommended level:** 3X, with 4X review if the adapter boundary affects token handling.
+
+## Milestone 17 — Create protected-live execution runbooks
+
+**Status:** Pending
+
+Create the exact approval checklists and rollback plans for the blocked protected milestones so live work can be done deliberately when Chris approves it.
+
+Cover:
+
+- single-owner Supabase/Auth/RLS execution
+- secure backend runtime selection
+- provider secret storage
+- Plaid Sandbox credential setup
+- first live institution connection
+- HealthEquity or secondary-provider evaluation
+- live migration verification
+- token deletion and account disconnection
+- backup and rollback before each protected change
+
+This is documentation and verification planning only. Do not perform live Supabase, Auth, provider, billing, or credential actions.
+
+**Recommended level:** 4X.
+
+## Milestone 18 — Add portfolio analytics depth
+
+**Status:** Pending
+
+Expand investment analytics after the basic financial truth engine is visible and tested.
+
+Add derived outputs for:
+
+- allocation by asset class and account type
+- concentration risk
+- overlapping holdings where source symbols are available
+- dividends and interest totals
+- contribution versus gain breakdown by account
+- HSA and 401(k) contribution progress
+- realized and unrealized gain placeholders with clear missing-data states
+
+All outputs must remain derived from source records and clearly label missing or partial investment data. Do not infer performance from balances alone.
+
+**Recommended level:** 3X for contained calculations; 4X for performance methodology.
+
+## Milestone 19 — Add Monthly Flow and bill intelligence
+
+**Status:** Pending
+
+Make BDFA better at explaining monthly cash movement from source records.
+
+Add:
+
+- Monthly Flow summary from recurring income, recurring bills, and transactions
+- upcoming bills and income timeline
+- bill-change detection from source records where available
+- subscription and recurring charge grouping
+- available cash after near-term obligations
+- stale or incomplete transaction warnings
+
+Do not classify ambiguous transactions silently. Missing or partial source data must be visible in the output.
+
+**Recommended level:** 3X.
+
+## Milestone 20 — Add freshness, confidence, and audit explanations across the app
+
+**Status:** Pending
+
+Make every major number explain what it is based on, how fresh it is, and how confident BDFA is in the source data.
+
+Add:
+
+- source-count and last-updated explanations on major dashboard numbers
+- confidence labels for complete, partial, stale, manual-only, and missing data
+- drill-down audit text for net worth, Monthly Flow, portfolio allocation, and age-55 planning
+- warnings when snapshot data is older than expected
+- no-data and degraded-data states that are obvious without being noisy
+
+This milestone should not change provider connectivity or financial methodology. It should make trust and freshness visible.
+
+**Recommended level:** 3X.
+
 ## Deprioritized unless direction changes
 
 - public onboarding
