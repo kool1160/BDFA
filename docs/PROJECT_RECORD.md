@@ -1,5 +1,16 @@
 # BDFA Project Record
 
+## Milestone 17 — Protected-Live Execution Runbooks
+
+- Date completed: 2026-07-15
+- Scope: Repository-only approval checklists, verification gates, backup requirements, rollback plans, and emergency containment guidance for blocked live milestones.
+- Implementation: `docs/PROTECTED_LIVE_EXECUTION_RUNBOOKS.md` covers single-owner Supabase/Auth/RLS execution, backend runtime and secret storage selection, Plaid Sandbox setup, first live institution connection, HealthEquity/secondary-provider evaluation, normalized migration verification, and token deletion/disconnection.
+- Runtime/database/authentication/RLS: Unchanged. No runtime was selected, no deployment occurred, no SQL or Auth/RLS action was executed, and no live project was accessed.
+- Privacy/security: No credentials, tokens, personal identifiers, raw provider payloads, balances, or production data were handled. The runbook requires redacted evidence and secure execution-time inputs.
+- Financial impact: No financial formulas, source data, provider data, or derived outputs changed.
+- Verification: `bash scripts/ci.sh` and `git diff --check` passed; documentation and existing static safety checks were reviewed.
+- Status: Complete — live execution remains blocked until Chris separately approves each protected action and the prerequisite evidence.
+
 ## Milestone 12 — Add Manual Source Records for Assets, Liabilities, and Planning Assumptions
 
 - Date completed: 2026-07-15
