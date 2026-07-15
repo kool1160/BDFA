@@ -60,6 +60,10 @@ echo "::group::Normalized source reconciliation representative checks"
 node scripts/test-normalized-source-reconciliation.mjs
 echo "::endgroup::"
 
+echo "::group::Monthly Flow intelligence representative checks"
+node scripts/test-monthly-flow-intelligence.mjs
+echo "::endgroup::"
+
 echo "::group::Source import/export recovery representative checks"
 node scripts/test-source-recovery.mjs
 echo "::endgroup::"

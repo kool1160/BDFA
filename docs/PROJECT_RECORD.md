@@ -239,3 +239,10 @@ Financial calculations were unchanged. Source-data contracts were unchanged. Thi
 - Verification: `node scripts/test-provider-adapter-contract.mjs`, `bash scripts/ci.sh`, and `git diff --check` passed.
 - Boundaries: No provider SDK, network call, credential, access token, backend secret, database, Auth/RLS, deployment, or financial formula change was made.
 - Status: Complete — future provider implementations require separate sandbox coverage and protected backend/token-persistence approval before live integration.
+
+## Milestone 19 — Monthly Flow and bill intelligence
+
+- Status: Complete — repository-only Monthly Flow intelligence milestone.
+- Implementation: `js/monthly-flow-intelligence.js` derives recurring monthly flow, near-term dated events, cash after obligations, recurring charge groups, bill-change signals, and explicit stale, partial, missing-transaction, and ambiguous-transaction warnings. `index.html`, `js/monthly-flow-runtime-base.js`, and `css/monthly-planning.css` surface the results.
+- Verification: `bash scripts/ci.sh`, `node scripts/test-monthly-flow-intelligence.mjs`, changed-file syntax checks, and `git diff --check` passed on 2026-07-15.
+- Safety boundary: no provider calls, credentials, live database/Auth/RLS changes, deployment, or live financial records were used. Ambiguous transactions remain visible and are not silently classified.

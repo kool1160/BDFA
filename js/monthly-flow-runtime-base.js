@@ -856,6 +856,35 @@ function resetMonthlyFlowSelectedMonthToCurrent() {
   renderMonthlyFlow(monthlyFlowSourceData || { accounts: [], bills: [], recurringIncome: [] });
 }
 
+function renderMonthlyFlowIntelligence(sourceData) {
+  const summaryTarget = document.getElementById('monthlyFlowIntelligenceSummary');
+  const warningTarget = document.getElementById('monthlyFlowIntelligenceWarnings');
+  const calculate = window.BDFA && window.BDFA.calculateMonthlyFlowIntelligence;
+  if (!summaryTarget || !warningTarget || typeof calculate !== 'function') return;
+  const intelligence = calculate(sourceData, { now: new Date() });
+  const cards = [
+    ['Next 30 days', `${intelligence.upcomingEvents.length} dated events`],
+    ['After near-term obligations', monthlyFlowMoney.format(intelligence.nearTerm.availableCashAfterObligations)],
+    ['Recurring charges', `${intelligence.recurringCharges.length} grouped`],
+    ['Bill changes', `${intelligence.billChanges.length} detected`]
+  ];
+  summaryTarget.replaceChildren(...cards.map(([label, value]) => {
+    const card = document.createElement('div');
+    const cardLabel = document.createElement('span');
+    const cardValue = document.createElement('strong');
+    cardLabel.textContent = label;
+    cardValue.textContent = value;
+    card.append(cardLabel, cardValue);
+    return card;
+  }));
+  const details = [...intelligence.billChanges.map(change => `${change.name} ${change.direction} by ${monthlyFlowMoney.format(Math.abs(change.difference))}.`), ...intelligence.recurringCharges.map(group => `${group.name}: ${monthlyFlowMoney.format(group.averageAmount)} average across ${group.occurrences} charges.`)];
+  warningTarget.replaceChildren(...[...intelligence.warnings, ...details].map(message => {
+    const item = document.createElement('p');
+    item.textContent = message;
+    return item;
+  }));
+}
+
 function renderMonthlyFlowMonthControls() {
   const labelTarget = document.getElementById('monthlyFlowSelectedMonthLabel');
   const currentButton = document.getElementById('monthlyFlowCurrentMonth');
@@ -1101,6 +1130,7 @@ function renderMonthlyFlow(sourceData) {
   renderMonthlyFlowLowestCashPointDetail(lowestPoint);
   renderMonthlyFlowCashTimeline(cashAvailable, timeline.timelineEvents, lowestPoint);
   renderMonthlyFlowIncome(timeline.incomeRows);
+  renderMonthlyFlowIntelligence(sourceData);
 
   if (!target) {
     return;
@@ -1153,5 +1183,6 @@ function wireMonthlyFlowMonthControls() {
 
 window.BDFA.refreshMonthlyFlow = refreshMonthlyFlow;
 window.addEventListener('bdfa:source-data-updated', refreshMonthlyFlow);
+window.addEventListener('bdfa:monthly-flow-intelligence-ready', () => renderMonthlyFlow(monthlyFlowSourceData || {}));
 wireMonthlyFlowMonthControls();
 refreshMonthlyFlow();
