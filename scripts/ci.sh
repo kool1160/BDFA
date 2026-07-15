@@ -60,4 +60,8 @@ echo "::group::Source import/export recovery representative checks"
 node scripts/test-source-recovery.mjs
 echo "::endgroup::"
 
+echo "::group::Provider adapter contract and sandbox checks"
+node scripts/test-provider-adapter-contract.mjs
+echo "::endgroup::"
+
 echo "BDFA repository checks passed."

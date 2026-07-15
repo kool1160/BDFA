@@ -208,3 +208,13 @@ Financial calculations were unchanged. Source-data contracts were unchanged. Thi
 - Verification: `python3 scripts/check-normalized-schema-draft.py`, `bash scripts/ci.sh`, and `git diff --check` passed. SQL was not executed or connected to Supabase.
 - Runtime/database/authentication/RLS/financial impact: No runtime, live database, Auth, RLS, provider, credential, or financial-calculation changes were made.
 - Status: Complete — live catalog preflight, owner bootstrap, migration execution, and destructive rollback require explicit approval and a separately verified Milestone 2 foundation.
+
+## Milestone 16 — Provider adapter contract and sandbox stubs
+
+- Scope: Repository-only provider-neutral adapter boundary and deterministic sandbox fixtures.
+- Files: `js/provider-adapter-contract.js`, `scripts/test-provider-adapter-contract.mjs`, `docs/PROVIDER_ADAPTER_CONTRACT.md`, and `scripts/ci.sh`.
+- Contract: Institutions, accounts, balances, transactions, holdings, investment activity, liabilities, and connection health are exposed through a sandbox-only adapter interface and normalized into the established source shape.
+- Coverage: Healthy, stale, partial, reauthentication-required, duplicate-records, and disconnected states; unsupported datasets; and redaction of token, credential, authorization, cookie, password, and account-number-shaped fields.
+- Verification: `node scripts/test-provider-adapter-contract.mjs`, `bash scripts/ci.sh`, and `git diff --check` passed.
+- Boundaries: No provider SDK, network call, credential, access token, backend secret, database, Auth/RLS, deployment, or financial formula change was made.
+- Status: Complete — future provider implementations require separate sandbox coverage and protected backend/token-persistence approval before live integration.
