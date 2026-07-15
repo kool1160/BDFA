@@ -60,6 +60,15 @@
 - Verification: `bash scripts/ci.sh` passed; `git diff --check` passed.
 - Status: Blocked — actual Sandbox coverage requires approval of the backend/runtime and secret-management boundary, authorized Sandbox access, and Chris's confirmed institution inventory.
 
+## Milestone 7 — Secondary Connector Selection Preparation
+
+- Date assessed: 2026-07-15
+- Scope: Repository-only assessment of the minimum required secondary connector.
+- Repository reconciliation: Milestone 6 has not run. There is no confirmed institution inventory, no institution-level Plaid Sandbox result, and no demonstrated data-class gap from which to select a secondary provider. HealthEquity remains an explicitly required but unverified test case.
+- Decision: No provider can be selected safely yet. The backlog requires the secondary provider to be chosen only from gaps proven during Milestone 6; the existing aggregation strategy names possible provider families but does not constitute coverage evidence.
+- Preparation: Existing normalized model and aggregation strategy preserve a provider-independent adapter boundary. No adapter, backend runtime, dependency, API call, credential, token, database change, authentication/RLS change, or UI/financial calculation change was made.
+- Status: Blocked — complete Milestone 6 first, including approval of the protected Sandbox backend/runtime and secret-management boundary, authorized non-production credentials, and Chris's confirmed institutions/account types. After evidence identifies the gap, select the narrowest connector and prepare its adapter contract against the normalized model.
+
 ## Vercel Operational Note
 
 - Vercel Node.js version changed from 24.x to 22.x LTS after preview deployments failed during build-container initialization. Redeploy succeeded after the change.
