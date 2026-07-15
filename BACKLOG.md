@@ -148,7 +148,7 @@ production financial data were used.
 
 ## Milestone 7 — Add the minimum required secondary connector
 
-**Status:** Pending
+**Status:** Blocked — Milestone 6 has not produced institution-level Plaid gap evidence, and HealthEquity coverage remains unverified. Provider selection, Sandbox credentials, backend/runtime execution, and production access require the preceding approval and evidence gates.
 
 **Issue:** #119
 
@@ -157,6 +157,8 @@ Choose a second provider only from the gaps proven during Milestone 6, with Heal
 The second provider must normalize into the same BDFA data model. The interface should not depend on which provider supplied an account.
 
 **Recommended level:** 3X, with a 4X review for credential storage or major security boundaries.
+
+**Prepared evidence:** `docs/PROJECT_RECORD.md` records the repository reconciliation and exact prerequisites. No secondary provider was selected, no provider runtime or dependency was added, and no credentials or external provider calls were used.
 
 ## Milestone 8 — Connection health and automatic sync
 
