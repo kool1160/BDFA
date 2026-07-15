@@ -312,7 +312,7 @@ Use these fixtures to verify source-to-derived reconciliation across financial t
 
 ## Milestone 14 — Add import, export, and recovery controls for source data
 
-**Status:** Pending
+**Status:** Complete — repository-only export, import validation, merge analysis, and local recovery controls are implemented and verified.
 
 Improve Chris's ability to back up, move, and recover BDFA source data while normalized provider syncing is still protected.
 
@@ -328,6 +328,15 @@ Add:
 Exports must not include secrets, provider access tokens, account numbers, or sensitive logs. Any live provider or Supabase schema changes remain blocked without explicit approval.
 
 **Recommended level:** 3X, with 4X review if export scope changes to include sensitive records.
+
+**Evidence:** `js/data-adapter.js` now creates redacted versioned source exports,
+validates export envelopes, reports duplicate and stale-record warnings, merges
+validated snapshots by record ID, and stores a local recovery backup. `index.html`
+and `js/app.js` expose validation-before-replace import behavior, export download,
+backup timestamp/source summary, and recovery restore controls. `scripts/test-source-recovery.mjs`
+verifies redaction, merge/recovery behavior, and regeneration of derived outputs
+from imported source records. No database, authentication, RLS, provider
+credential, or financial formula changes were made.
 
 ## Milestone 15 — Prepare normalized Supabase schema and RLS migration drafts
 

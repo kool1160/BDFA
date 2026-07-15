@@ -17,6 +17,7 @@
   const preCloudRestoreBackupKey = 'bdfa.preCloudRestoreBackup';
   const localChangesPendingCloudSaveKey = 'bdfa.localChangesPendingCloudSave';
   const lastKnownCloudUpdatedAtKey = 'bdfa.lastKnownCloudUpdatedAt';
+  const recoveryBackupKey = 'bdfa.sourceRecoveryBackup';
 
   const requiredSourceCollections = ['accounts', 'bills', 'allocations', 'investments'];
   const optionalSourceCollections = ['assets', 'liabilities', 'recurringIncome', 'transactions'];
@@ -376,6 +377,107 @@
     };
   }
 
+  function redactExportValue(value, key = '') {
+    const sensitiveKey = /(token|secret|password|credential|account.?number|routing.?number|access.?key|provider.?payload|log)/i.test(key);
+
+    if (sensitiveKey) {
+      return undefined;
+    }
+
+    if (Array.isArray(value)) {
+      return value.map(item => redactExportValue(item)).filter(item => item !== undefined);
+    }
+
+    if (value && typeof value === 'object') {
+      return Object.entries(value).reduce((result, [entryKey, entryValue]) => {
+        const redacted = redactExportValue(entryValue, entryKey);
+        if (redacted !== undefined) result[entryKey] = redacted;
+        return result;
+      }, {});
+    }
+
+    return value;
+  }
+
+  function createSourceExport(sourceData) {
+    const validation = validateSourceSnapshot(sourceData || getPublicSourceData());
+    if (!validation.valid) return null;
+    return {
+      format: 'bdfa-source-export',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      sourceData: redactExportValue(validation.data),
+      summary: summarizeSourceSnapshot(validation.data).summary
+    };
+  }
+
+  function unwrapSourceImport(value) {
+    if (value && value.format === 'bdfa-source-export' && value.sourceData) {
+      return { sourceData: value.sourceData, exportedAt: value.exportedAt || null };
+    }
+    return { sourceData: value, exportedAt: null };
+  }
+
+  function analyzeSourceImport(imported, current = getPublicSourceData()) {
+    const incoming = unwrapSourceImport(imported);
+    const importedValidation = validateSourceSnapshot(incoming.sourceData);
+    const currentValidation = validateSourceSnapshot(current);
+    if (!importedValidation.valid || !currentValidation.valid) {
+      return { valid: false, duplicateIds: [], stale: false, summary: null };
+    }
+
+    const duplicateIds = [];
+    sourceCollections.forEach(collection => {
+      const seen = new Set();
+      importedValidation.data[collection].forEach(row => {
+        if (row.id && seen.has(row.id)) duplicateIds.push(`${collection}:${row.id}`);
+        if (row.id) seen.add(row.id);
+      });
+    });
+    const exportedTime = incoming.exportedAt ? Date.parse(incoming.exportedAt) : NaN;
+    const currentRows = sourceCollections.flatMap(collection => currentValidation.data[collection]);
+    const currentTime = Math.max(...currentRows.map(row => Date.parse(row.updatedAt || row.createdAt || '')).filter(Number.isFinite), 0);
+    return {
+      valid: true,
+      duplicateIds,
+      stale: Number.isFinite(exportedTime) && exportedTime < currentTime,
+      summary: summarizeSourceSnapshot(importedValidation.data).summary
+    };
+  }
+
+  function mergeSourceSnapshots(current, imported) {
+    const currentValidation = validateSourceSnapshot(current);
+    const importedValidation = validateSourceSnapshot(unwrapSourceImport(imported).sourceData);
+    if (!currentValidation.valid || !importedValidation.valid) return null;
+    const merged = {};
+    sourceCollections.forEach(collection => {
+      const importedRows = importedValidation.data[collection];
+      const importedIds = new Set(importedRows.map(row => row.id));
+      merged[collection] = [...currentValidation.data[collection].filter(row => !importedIds.has(row.id)), ...importedRows];
+    });
+    merged.planningAssumptions = importedValidation.data.planningAssumptions;
+    return merged;
+  }
+
+  function createRecoveryBackup(sourceData = getPublicSourceData()) {
+    const validation = validateSourceSnapshot(sourceData);
+    if (!validation.valid) return false;
+    try {
+      localStorage.setItem(recoveryBackupKey, JSON.stringify({ createdAt: new Date().toISOString(), sourceData: validation.data }));
+      return true;
+    } catch { return false; }
+  }
+
+  function readRecoveryBackup() {
+    try {
+      const backup = JSON.parse(localStorage.getItem(recoveryBackupKey) || 'null');
+      const validation = validateSourceSnapshot(backup && backup.sourceData);
+      return validation.valid ? { valid: true, createdAt: backup.createdAt || null, data: validation.data } : { valid: false, data: null };
+    } catch { return { valid: false, data: null }; }
+  }
+
+  function clearRecoveryBackup() { localStorage.removeItem(recoveryBackupKey); }
+
   function compareSourceSnapshots(localSnapshot, cloudSnapshot) {
     const localValidation = validateSourceSnapshot(localSnapshot);
     const cloudValidation = validateSourceSnapshot(cloudSnapshot);
@@ -637,6 +739,13 @@
     compareSourceSnapshots,
     saveLocalSourceData,
     saveCloudSnapshot,
-    loadCloudSnapshot
+    loadCloudSnapshot,
+    createSourceExport,
+    unwrapSourceImport,
+    analyzeSourceImport,
+    mergeSourceSnapshots,
+    createRecoveryBackup,
+    readRecoveryBackup,
+    clearRecoveryBackup
   };
 }());

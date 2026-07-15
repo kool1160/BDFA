@@ -1512,13 +1512,31 @@ function importDemoData() {
   try {
     const importedData = JSON.parse(rawImport);
 
-    if (!isValidImport(importedData)) {
+    const adapter = window.BDFA.dataAdapter;
+    const importSource = adapter && typeof adapter.unwrapSourceImport === 'function'
+      ? adapter.unwrapSourceImport(importedData).sourceData
+      : importedData;
+    const analysis = adapter && typeof adapter.analyzeSourceImport === 'function'
+      ? adapter.analyzeSourceImport(importedData, getExportData())
+      : null;
+
+    if (!isValidImport(importSource) || (analysis && !analysis.valid)) {
       showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
       return;
     }
 
-    const normalizedImportSnapshot = getValidImportSnapshot(importedData);
+    const normalizedImportSnapshot = getValidImportSnapshot(importSource);
 
+    if (analysis && (analysis.duplicateIds.length || analysis.stale)) {
+      const warnings = [];
+      if (analysis.duplicateIds.length) warnings.push(`${analysis.duplicateIds.length} duplicate record ID(s)`);
+      if (analysis.stale) warnings.push('the export is older than current source records');
+      if (!confirm(`Import warning: ${warnings.join(' and ')}. Replace current source data anyway?`)) return;
+    } else if (!confirm('Import this validated snapshot and replace the current local source data?')) {
+      return;
+    }
+
+    if (adapter && typeof adapter.createRecoveryBackup === 'function') adapter.createRecoveryBackup(getExportData());
     if (!normalizedImportSnapshot || !applyImportedData(normalizedImportSnapshot)) {
       showStatus('Import failed. That JSON does not match the BDFA demo format.', 'error');
       return;
@@ -2540,7 +2558,10 @@ async function handleSignOut() {
 }
 
 function exportDemoData() {
-  const exportedJson = JSON.stringify(window.BDFA.dataAdapter.exportData(getExportData()), null, 2);
+  const exportData = typeof window.BDFA.dataAdapter.createSourceExport === 'function'
+    ? window.BDFA.dataAdapter.createSourceExport(getExportData())
+    : window.BDFA.dataAdapter.exportData(getExportData());
+  const exportedJson = JSON.stringify(exportData, null, 2);
   const exportField = document.getElementById('exportData');
 
   if (exportField) {
@@ -2552,12 +2573,45 @@ function exportDemoData() {
   const link = document.createElement('a');
 
   link.href = url;
-  link.download = 'bdfa-demo-data.json';
+  link.download = 'bdfa-source-export.json';
   document.body.appendChild(link);
   link.click();
   link.remove();
   URL.revokeObjectURL(url);
-  showStatus('Demo data exported as JSON.');
+  showStatus('Redacted source data exported as JSON.');
+}
+
+function updateRecoveryBackupControl() {
+  const adapter = window.BDFA.dataAdapter;
+  const backup = adapter && typeof adapter.readRecoveryBackup === 'function' ? adapter.readRecoveryBackup() : { valid: false };
+  const restore = document.getElementById('restoreRecoveryBackupButton');
+  const summary = document.getElementById('recoveryBackupSummary');
+  if (restore) restore.disabled = !backup.valid;
+  if (summary) {
+    summary.hidden = !backup.valid;
+    summary.textContent = backup.valid ? `Recovery backup · ${formatLocalBackupTime(backup.createdAt)}` : '';
+  }
+}
+
+function createRecoveryBackup() {
+  const adapter = window.BDFA.dataAdapter;
+  if (!adapter || !adapter.createRecoveryBackup || !adapter.createRecoveryBackup(getExportData())) {
+    showStatus('Recovery backup could not be created.', 'error');
+    return;
+  }
+  updateRecoveryBackupControl();
+  showStatus('Recovery backup created locally.');
+}
+
+function restoreRecoveryBackup() {
+  const adapter = window.BDFA.dataAdapter;
+  const backup = adapter && adapter.readRecoveryBackup ? adapter.readRecoveryBackup() : { valid: false };
+  if (!backup.valid || !confirm('Restore the local recovery backup and replace current source data?')) return;
+  if (!applyImportedData(backup.data)) {
+    showStatus('Recovery backup could not be restored.', 'error');
+    return;
+  }
+  showStatus('Recovery backup restored. Derived outputs were recalculated.');
 }
 
 function resetDemoData() {
@@ -2646,6 +2700,8 @@ addOptionalEventListener('recurringIncomeCancel', 'click', resetRecurringIncomeF
 addOptionalEventListener('recurringIncomeList', 'click', handleRecurringIncomeActions);
 addOptionalEventListener('importButton', 'click', importDemoData);
 addOptionalEventListener('exportButton', 'click', exportDemoData);
+addOptionalEventListener('createRecoveryBackupButton', 'click', createRecoveryBackup);
+addOptionalEventListener('restoreRecoveryBackupButton', 'click', restoreRecoveryBackup);
 addOptionalEventListener('resetButton', 'click', resetDemoData);
 addOptionalEventListener('communityFeedbackForm', 'submit', saveCommunityFeedbackDraft);
 addOptionalEventListener('communityFeedbackClear', 'click', clearCommunityFeedbackDraft);
@@ -2689,6 +2745,7 @@ document.querySelectorAll('[data-toggle]').forEach(button => {
 });
 
 applySourceDataSnapshot(window.BDFA.dataAdapter.loadSourceData(demoData));
+updateRecoveryBackupControl();
 hydrateCommunityFeedbackDraft();
 hydrateLocalChangesPendingCloudSave();
 renderAllSections();

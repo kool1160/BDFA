@@ -52,4 +52,8 @@ echo "::group::Normalized source reconciliation representative checks"
 node scripts/test-normalized-source-reconciliation.mjs
 echo "::endgroup::"
 
+echo "::group::Source import/export recovery representative checks"
+node scripts/test-source-recovery.mjs
+echo "::endgroup::"
+
 echo "BDFA repository checks passed."
