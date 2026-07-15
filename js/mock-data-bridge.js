@@ -33,6 +33,8 @@ export function buildUnifiedModelFromMockData(mockData = {}) {
     recurringBills: mapMockBills(mockData.bills),
     recurringIncome: mapMockIncome(mockData.recurringIncome || mockData.income),
     investments: mapMockInvestments(mockData.investments),
+    investmentTransactions: toArray(mockData.investmentTransactions),
+    liabilities: toArray(mockData.liabilities),
     allocations: mapMockAllocations(mockData.allocations),
   });
 }
@@ -119,6 +121,9 @@ export function mapMockInvestments(mockInvestments = []) {
     name: investment.name,
     detail: investment.detail,
     balance: investment.amount,
+    accountType: investment.accountType,
+    assetClass: investment.assetClass,
+    contributionAmount: investment.contributionAmount,
     source: 'mock-dashboard',
   }));
 }
