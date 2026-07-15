@@ -1,5 +1,17 @@
 # BDFA Project Record
 
+## Milestone 10 — Planning Toward Age 55
+
+- Date completed: 2026-07-15
+- Scope: Repository-only, deterministic age-55 planning methodology and forecast integration.
+- Implementation: `js/retirement-planning-engine.js` produces explicit low/base/high return projections, part-time income and mortgage-paid-off scenarios, HSA and healthcare projections, required monthly cash flow, assumptions, confidence metadata, and explanations. `js/financial-engine-pipeline.js` exposes these outputs through the forecast stage.
+- Methodology: `docs/RETIREMENT_PLANNING.md` documents formulas, assumptions, missing-data behavior, and boundaries. Outputs are illustrative and do not model taxes, Social Security, withdrawal ordering, or insurance eligibility.
+- Privacy: No personal account identifiers, balances, credentials, tokens, production identifiers, or provider calls were added or handled.
+- Runtime: Forecast engine behavior changed only through side-effect-free repository modules; no UI wiring or deployment occurred.
+- Database/authentication/RLS: Unchanged. No migration or live Supabase action was performed.
+- Verification: `node scripts/test-retirement-planning.mjs`, `node scripts/test-financial-truth.mjs`, `bash scripts/ci.sh`, and `git diff --check` passed.
+- Status: Complete — future tax/withdrawal methodology or live normalized-data integration requires a separately scoped, high-risk milestone.
+
 ## Milestone 5 — Secure Provider Backend Preparation
 
 - Date prepared: 2026-07-15

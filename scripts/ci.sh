@@ -36,4 +36,8 @@ echo "::group::Financial truth representative checks"
 node scripts/test-financial-truth.mjs
 echo "::endgroup::"
 
+echo "::group::Retirement planning representative checks"
+node scripts/test-retirement-planning.mjs
+echo "::endgroup::"
+
 echo "BDFA repository checks passed."
