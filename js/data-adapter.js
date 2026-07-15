@@ -9,6 +9,8 @@
     allocations: 'bdfa.mockAllocations',
     investments: 'bdfa.mockInvestments',
     assets: 'bdfa.mockAssets',
+    liabilities: 'bdfa.mockLiabilities',
+    planningAssumptions: 'bdfa.planningAssumptions',
     recurringIncome: 'bdfa.mockRecurringIncome',
     transactions: 'bdfa.transactions'
   };
@@ -17,7 +19,7 @@
   const lastKnownCloudUpdatedAtKey = 'bdfa.lastKnownCloudUpdatedAt';
 
   const requiredSourceCollections = ['accounts', 'bills', 'allocations', 'investments'];
-  const optionalSourceCollections = ['assets', 'recurringIncome', 'transactions'];
+  const optionalSourceCollections = ['assets', 'liabilities', 'recurringIncome', 'transactions'];
   const sourceCollections = [...requiredSourceCollections, ...optionalSourceCollections];
   let currentSourceData = null;
   let cloudSavePromise = Promise.resolve();
@@ -97,9 +99,30 @@
     };
   }
 
+  function normalizeLiability(row) {
+    const liability = row && typeof row === 'object' && !Array.isArray(row) ? row : {};
+    const now = new Date().toISOString();
+    return {
+      id: getRequiredString(liability.id).trim() || createId('liability'),
+      name: getRequiredString(liability.name).trim(),
+      type: getRequiredString(liability.type) || 'Other',
+      amount: Math.max(0, getFiniteAmount(liability.amount)),
+      monthlyPayment: Math.max(0, getFiniteAmount(liability.monthlyPayment)),
+      annualRate: Math.max(0, getFiniteAmount(liability.annualRate)),
+      notes: getOptionalString(liability.notes),
+      source: getRequiredString(liability.source) || 'manual',
+      createdAt: getRequiredString(liability.createdAt) || now,
+      updatedAt: getRequiredString(liability.updatedAt) || now
+    };
+  }
+
   function normalizeCollection(collection, rows) {
     if (collection === 'transactions') {
       return Array.isArray(rows) ? rows.map(normalizeTransaction) : [];
+    }
+
+    if (collection === 'liabilities') {
+      return Array.isArray(rows) ? rows.map(normalizeLiability) : [];
     }
 
     return Array.isArray(rows) ? clone(rows) : [];
@@ -148,7 +171,26 @@
       }
     }
 
+    sourceData.planningAssumptions = normalizePlanningAssumptions(snapshot.planningAssumptions);
+
     return { valid: true, data: sourceData };
+  }
+
+  function normalizePlanningAssumptions(value) {
+    const input = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+    const numeric = key => {
+      const amount = Number(input[key]);
+      return Number.isFinite(amount) && amount >= 0 ? amount : null;
+    };
+    return {
+      currentAge: numeric('currentAge'),
+      targetAge: numeric('targetAge') || 55,
+      annualContributions: numeric('annualContributions') || 0,
+      annualHealthcareCost: numeric('annualHealthcareCost') || 0,
+      partTimeAnnualIncome: numeric('partTimeAnnualIncome') || 0,
+      mortgageMonthlyPayment: numeric('mortgageMonthlyPayment') || 0,
+      source: getRequiredString(input.source) || 'manual'
+    };
   }
 
   function sourceSnapshotsMatch(firstSnapshot, secondSnapshot) {
@@ -229,6 +271,7 @@
     sourceCollections.forEach(collection => {
       snapshot[collection] = Array.isArray(sourceData[collection]) ? clone(sourceData[collection]) : [];
     });
+    snapshot.planningAssumptions = clone(sourceData.planningAssumptions || {});
 
     return snapshot;
   }
@@ -327,6 +370,7 @@
         recurringIncomeCount: sourceData.recurringIncome.length,
         assetCount: sourceData.assets.length,
         transactionCount: sourceData.transactions.length,
+        liabilityCount: sourceData.liabilities.length,
         accountsAmount: getRowsTotal(sourceData.accounts)
       }
     };
@@ -408,6 +452,12 @@
         sourceData[collection] = storedSourceData[collection];
       }
     });
+    let storedAssumptions = defaultSourceData.planningAssumptions;
+    const storedAssumptionsText = localStorage.getItem(storageKeys.planningAssumptions);
+    if (storedAssumptionsText) {
+      try { storedAssumptions = JSON.parse(storedAssumptionsText); } catch { storedAssumptions = defaultSourceData.planningAssumptions; }
+    }
+    sourceData.planningAssumptions = normalizePlanningAssumptions(storedAssumptions);
 
     currentSourceData = clone(sourceData);
 
@@ -431,6 +481,7 @@
     sourceCollections.forEach(collection => {
       saveRows(collection, currentSourceData[collection]);
     });
+    localStorage.setItem(storageKeys.planningAssumptions, JSON.stringify(currentSourceData.planningAssumptions));
 
     if (markCloudDirty) {
       setLocalChangesPendingCloudSave(true);
@@ -473,6 +524,7 @@
     sourceCollections.forEach(collection => {
       localStorage.removeItem(storageKeys[collection]);
     });
+    localStorage.removeItem(storageKeys.planningAssumptions);
 
     currentSourceData = clone(demoData);
     saveCloudSnapshot(currentSourceData);

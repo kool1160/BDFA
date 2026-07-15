@@ -36,6 +36,9 @@ export function buildUnifiedModelFromMockData(mockData = {}) {
     investmentTransactions: toArray(mockData.investmentTransactions),
     liabilities: toArray(mockData.liabilities),
     allocations: mapMockAllocations(mockData.allocations),
+    assets: toArray(mockData.assets),
+    transactions: toArray(mockData.transactions),
+    userPreferences: mockData.planningAssumptions || {},
   });
 }
 

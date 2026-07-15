@@ -44,4 +44,8 @@ echo "::group::Dashboard integration representative checks"
 node scripts/test-dashboard-integration.mjs
 echo "::endgroup::"
 
+echo "::group::Manual source record representative checks"
+node scripts/test-manual-source-records.mjs
+echo "::endgroup::"
+
 echo "BDFA repository checks passed."

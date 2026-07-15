@@ -182,6 +182,40 @@
       </section>
 
       <section class="panel" data-mobile-view="overview">
+        <button class="panel-title" data-toggle="liabilities"><span class="panel-label"><span class="section-heading"><span class="section-icon debt-icon" aria-hidden="true">−</span><span>Loans & liabilities</span></span><span class="panel-helper">Track debts that are not synced automatically yet.</span></span><span class="panel-summary money-debt" id="liabilitiesSummary">$0</span><span>⌄</span></button>
+        <div class="panel-body" id="liabilities">
+          <p class="panel-copy">Manual records are labeled and saved with your snapshot. Never enter account numbers or provider credentials.</p>
+          <form class="edit-form" id="liabilityForm">
+            <input type="hidden" id="liabilityId" />
+            <label><span>Name</span><input id="liabilityName" type="text" placeholder="Mortgage" required /></label>
+            <label><span>Type</span><select id="liabilityType" required><option>Mortgage</option><option>Vehicle Loan</option><option>Student Loan</option><option>Personal Loan</option><option>Other</option></select></label>
+            <label><span>Balance</span><input id="liabilityAmount" type="number" min="0" inputmode="decimal" step="0.01" placeholder="200000" required /></label>
+            <label><span>Monthly payment</span><input id="liabilityMonthlyPayment" type="number" min="0" inputmode="decimal" step="0.01" placeholder="1500" /></label>
+            <label><span>Annual rate (%)</span><input id="liabilityAnnualRate" type="number" min="0" inputmode="decimal" step="0.01" placeholder="6.5" /></label>
+            <label><span>Notes</span><input id="liabilityNotes" type="text" placeholder="Manual estimate" /></label>
+            <div class="form-actions"><button type="submit" id="liabilitySubmit">Add Liability</button><button type="button" id="liabilityCancel" class="ghost-button" hidden>Cancel</button></div>
+          </form>
+          <div id="liabilitiesList"></div>
+        </div>
+      </section>
+
+      <section class="panel" data-mobile-view="overview">
+        <button class="panel-title" data-toggle="planningAssumptions"><span class="panel-label"><span class="section-heading"><span class="section-icon growth-icon" aria-hidden="true">◎</span><span>Age-55 assumptions</span></span><span class="panel-helper">Set the inputs used by illustrative planning scenarios.</span></span><span class="panel-summary" id="planningAssumptionsSummary">Manual</span><span>⌄</span></button>
+        <div class="panel-body" id="planningAssumptions">
+          <p class="panel-copy">These are assumptions, not recommendations or predictions. Safe defaults are used when a value is blank.</p>
+          <form class="edit-form" id="planningAssumptionsForm">
+            <label><span>Current age</span><input id="planningCurrentAge" type="number" min="0" max="120" step="1" placeholder="45" /></label>
+            <label><span>Target age</span><input id="planningTargetAge" type="number" min="1" max="120" step="1" value="55" required /></label>
+            <label><span>Annual contributions</span><input id="planningAnnualContributions" type="number" min="0" inputmode="decimal" step="0.01" placeholder="24000" /></label>
+            <label><span>Annual healthcare cost</span><input id="planningAnnualHealthcareCost" type="number" min="0" inputmode="decimal" step="0.01" placeholder="12000" /></label>
+            <label><span>Part-time annual income</span><input id="planningPartTimeAnnualIncome" type="number" min="0" inputmode="decimal" step="0.01" placeholder="20000" /></label>
+            <label><span>Mortgage monthly payment</span><input id="planningMortgageMonthlyPayment" type="number" min="0" inputmode="decimal" step="0.01" placeholder="1500" /></label>
+            <div class="form-actions"><button type="submit">Save Assumptions</button></div>
+          </form>
+        </div>
+      </section>
+
+      <section class="panel" data-mobile-view="overview">
         <button class="panel-title" data-toggle="allocations"><span class="panel-label"><span class="section-heading"><span class="section-icon caution-icon" aria-hidden="true">◌</span><span>Allocations</span></span><span class="panel-helper" id="allocationsMix" hidden></span></span><span class="panel-summary money-caution" id="allocationsSummary">$0</span><span>⌄</span></button>
         <div class="panel-body" id="allocations">
           <form class="edit-form" id="allocationForm">

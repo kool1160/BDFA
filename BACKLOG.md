@@ -262,7 +262,7 @@ This milestone should use existing source data paths only. Do not add Plaid, pro
 
 ## Milestone 12 — Add manual source records for assets, liabilities, and planning assumptions
 
-**Status:** Pending
+**Status:** Complete — repository-only manual source entry and snapshot compatibility are implemented; live normalized persistence remains separately protected.
 
 Create a practical manual-entry source-data path for records that may not sync automatically yet.
 
@@ -278,6 +278,14 @@ Add:
 Manual data is fallback source data, not a replacement for automatic syncing. Do not store secrets, account numbers, or provider tokens. Do not execute live database migrations without explicit approval.
 
 **Recommended level:** 3X.
+
+**Evidence:** `index.html` and `js/app.js` provide validated manual asset, liability,
+and age-55 assumption forms with provenance labels. `js/data-adapter.js` preserves
+liabilities and planning assumptions across local and existing cloud snapshots.
+`js/financial-engine-pipeline.js` consumes saved assumptions, and
+`scripts/test-manual-source-records.mjs` verifies representative source-to-derived
+behavior. No live database, authentication, RLS, provider credential, or production
+financial data change was made.
 
 ## Milestone 13 — Build normalized source-data fixtures and reconciliation tests
 

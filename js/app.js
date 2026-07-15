@@ -52,6 +52,8 @@ const demoData = {
     { id: 'brokerage', name: 'Brokerage', detail: 'Taxable investing', amount: 105102 }
   ],
   assets: [],
+  liabilities: [],
+  planningAssumptions: {},
   transactions: [],
   recurringIncome: [
     { id: 'primary-paycheck', name: 'Primary Paycheck', amount: 2100, frequency: 'biweekly', nextPayDay: '2026-07-08' },
@@ -321,7 +323,8 @@ function cloneSourceData(sourceData) {
   return JSON.parse(JSON.stringify(sourceData));
 }
 
-const sourceDataCollections = ['accounts', 'bills', 'allocations', 'investments', 'assets', 'recurringIncome', 'transactions'];
+const sourceDataCollections = ['accounts', 'bills', 'allocations', 'investments', 'assets', 'liabilities', 'recurringIncome', 'transactions'];
+const liabilityTypes = ['Mortgage', 'Vehicle Loan', 'Student Loan', 'Personal Loan', 'Other'];
 
 function createSourceDataId(prefix = 'item') {
   return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
@@ -379,6 +382,10 @@ function applySourceDataSnapshot(sourceData) {
       data[collection] = normalizeSourceCollection(collection, sourceData[collection]);
     }
   });
+  data.liabilities = Array.isArray(sourceData.liabilities) ? normalizeSourceCollection('liabilities', sourceData.liabilities) : [];
+  data.planningAssumptions = sourceData.planningAssumptions && typeof sourceData.planningAssumptions === 'object'
+    ? { ...sourceData.planningAssumptions }
+    : {};
 }
 
 function validateSourceSnapshot(sourceData) {
@@ -414,6 +421,8 @@ function resetFormsAfterSourceDataChange() {
   resetInvestmentForm();
   resetAssetForm();
   resetRecurringIncomeForm();
+  resetLiabilityForm();
+  resetPlanningAssumptionsForm();
 }
 
 function applyPersistedSourceData(sourceData) {
@@ -443,7 +452,7 @@ function getDashboardTotals() {
   const cash = total(data.accounts.filter(account => account.type === 'Cash'));
   const investments = total(data.investments);
   const assets = getAssetsTotal();
-  const debt = Math.abs(total(data.accounts.filter(account => account.amount < 0)));
+  const debt = Math.abs(total(data.accounts.filter(account => account.amount < 0))) + data.liabilities.reduce((sum, row) => sum + row.amount, 0);
   const bills = getMonthlyBillsTotal();
   const allocations = total(data.allocations);
 
@@ -855,7 +864,7 @@ function renderAssets() {
     <div class="row editable-row">
       <div>
         <strong>${asset.name}</strong>
-        <small>${asset.type}${asset.notes ? ` · ${asset.notes}` : ''}</small>
+        <small>${asset.type} · ${asset.source === 'manual' || !asset.source ? 'Manual source' : 'Synced source'}${asset.notes ? ` · ${asset.notes}` : ''}</small>
       </div>
       <strong>${money.format(asset.value)}</strong>
       <div class="row-actions" aria-label="Asset actions">
@@ -869,6 +878,99 @@ function renderAssets() {
 function renderAssetsDashboard() {
   renderAssets();
   renderDashboardTotals();
+}
+
+function getLiabilitiesTotal() {
+  return data.liabilities.reduce((sum, row) => sum + (Number.isFinite(row.amount) ? row.amount : 0), 0);
+}
+
+function resetLiabilityForm() {
+  const form = document.getElementById('liabilityForm');
+  if (!form) return;
+  form.reset();
+  document.getElementById('liabilityId').value = '';
+  document.getElementById('liabilityType').value = 'Mortgage';
+  document.getElementById('liabilitySubmit').textContent = 'Add Liability';
+  document.getElementById('liabilityCancel').hidden = true;
+}
+
+function renderLiabilities() {
+  const target = document.getElementById('liabilitiesList');
+  if (!target) return;
+  setMoneyText('liabilitiesSummary', -getLiabilitiesTotal());
+  if (!data.liabilities.length) {
+    target.innerHTML = getEmptyState('No manual liabilities yet', 'Add a mortgage, vehicle loan, or other debt that is not synced yet.');
+    return;
+  }
+  target.innerHTML = data.liabilities.map(row => `
+    <div class="row editable-row"><div><strong>${row.name}</strong><small>${row.type} · Manual source${row.notes ? ` · ${row.notes}` : ''}</small></div><strong>${money.format(row.amount)}</strong><div class="row-actions" aria-label="Liability actions"><button type="button" data-edit-liability="${row.id}">Edit</button><button type="button" data-delete-liability="${row.id}">Delete</button></div></div>
+  `).join('');
+}
+
+function getLiabilityFormData() {
+  const name = document.getElementById('liabilityName').value.trim();
+  const type = document.getElementById('liabilityType').value;
+  const amount = Number(document.getElementById('liabilityAmount').value);
+  const monthlyPayment = Number(document.getElementById('liabilityMonthlyPayment').value || 0);
+  const annualRate = Number(document.getElementById('liabilityAnnualRate').value || 0);
+  if (!name || !liabilityTypes.includes(type) || !Number.isFinite(amount) || amount < 0 || !Number.isFinite(monthlyPayment) || monthlyPayment < 0 || !Number.isFinite(annualRate) || annualRate < 0) return null;
+  return { id: document.getElementById('liabilityId').value, name, type, amount, monthlyPayment, annualRate, notes: document.getElementById('liabilityNotes').value.trim(), source: 'manual' };
+}
+
+function handleLiabilitySubmit(event) {
+  event.preventDefault();
+  const formData = getLiabilityFormData();
+  if (!formData) return;
+  if (formData.id) data.liabilities = data.liabilities.map(row => row.id === formData.id ? { ...row, ...formData } : row);
+  else data.liabilities.push({ ...formData, id: crypto.randomUUID() });
+  saveAllRows();
+  resetLiabilityForm();
+  renderLiabilities();
+  renderDashboardTotals();
+  dispatchSourceDataUpdated();
+}
+
+function handleLiabilityActions(event) {
+  const editId = event.target.dataset.editLiability;
+  const deleteId = event.target.dataset.deleteLiability;
+  if (editId) {
+    const row = data.liabilities.find(item => item.id === editId);
+    if (!row) return;
+    document.getElementById('liabilityId').value = row.id;
+    document.getElementById('liabilityName').value = row.name;
+    document.getElementById('liabilityType').value = liabilityTypes.includes(row.type) ? row.type : 'Other';
+    document.getElementById('liabilityAmount').value = row.amount;
+    document.getElementById('liabilityMonthlyPayment').value = row.monthlyPayment || '';
+    document.getElementById('liabilityAnnualRate').value = row.annualRate || '';
+    document.getElementById('liabilityNotes').value = row.notes || '';
+    document.getElementById('liabilitySubmit').textContent = 'Save Liability';
+    document.getElementById('liabilityCancel').hidden = false;
+  }
+  if (deleteId) {
+    data.liabilities = data.liabilities.filter(row => row.id !== deleteId);
+    saveAllRows(); resetLiabilityForm(); renderLiabilities(); renderDashboardTotals(); dispatchSourceDataUpdated();
+  }
+}
+
+function resetPlanningAssumptionsForm() {
+  const form = document.getElementById('planningAssumptionsForm');
+  if (!form) return;
+  const assumptions = data.planningAssumptions || {};
+  document.getElementById('planningCurrentAge').value = assumptions.currentAge ?? '';
+  document.getElementById('planningTargetAge').value = assumptions.targetAge ?? 55;
+  document.getElementById('planningAnnualContributions').value = assumptions.annualContributions || '';
+  document.getElementById('planningAnnualHealthcareCost').value = assumptions.annualHealthcareCost || '';
+  document.getElementById('planningPartTimeAnnualIncome').value = assumptions.partTimeAnnualIncome || '';
+  document.getElementById('planningMortgageMonthlyPayment').value = assumptions.mortgageMonthlyPayment || '';
+}
+
+function handlePlanningAssumptionsSubmit(event) {
+  event.preventDefault();
+  const numberOrNull = id => { const value = Number(document.getElementById(id).value); return Number.isFinite(value) && value >= 0 ? value : null; };
+  const targetAge = numberOrNull('planningTargetAge');
+  if (!targetAge) return;
+  data.planningAssumptions = { currentAge: numberOrNull('planningCurrentAge'), targetAge, annualContributions: numberOrNull('planningAnnualContributions') || 0, annualHealthcareCost: numberOrNull('planningAnnualHealthcareCost') || 0, partTimeAnnualIncome: numberOrNull('planningPartTimeAnnualIncome') || 0, mortgageMonthlyPayment: numberOrNull('planningMortgageMonthlyPayment') || 0, source: 'manual' };
+  saveAllRows(); resetPlanningAssumptionsForm(); dispatchSourceDataUpdated(); showStatus('Planning assumptions saved.');
 }
 
 function getAssetFormData() {
@@ -906,7 +1008,8 @@ function handleAssetSubmit(event) {
       name: formData.name,
       type: formData.type,
       value: formData.value,
-      notes: formData.notes
+      notes: formData.notes,
+      source: 'manual'
     });
   }
 
@@ -1228,6 +1331,8 @@ function renderAllSections() {
   renderAllocations();
   renderInvestments();
   renderAssets();
+  renderLiabilities();
+  resetPlanningAssumptionsForm();
   renderRecurringIncome();
   renderDashboardTotals();
 }
@@ -1315,7 +1420,7 @@ function isValidAllocationRow(row) {
 }
 
 function areImportRowsValid(sourceData) {
-  const { accounts, bills, allocations, investments, assets, recurringIncome, transactions } = sourceData;
+  const { accounts, bills, allocations, investments, assets, liabilities, recurringIncome, transactions } = sourceData;
   const accountsValid = accounts.every(account => (
     account &&
     isText(account.id) &&
@@ -1336,6 +1441,7 @@ function areImportRowsValid(sourceData) {
     allocations.every(isValidAllocationRow) &&
     investments.every(isBasicMoneyRow) &&
     assets.every(isValidAssetRow) &&
+    liabilities.every(row => isText(row.id) && isText(row.name) && liabilityTypes.includes(row.type) && isAmount(row.amount) && row.amount >= 0) &&
     recurringIncomeValid &&
     Array.isArray(transactions);
 }
@@ -1436,6 +1542,8 @@ function getExportData() {
     investments: data.investments,
     recurringIncome: data.recurringIncome,
     assets: data.assets,
+    liabilities: data.liabilities,
+    planningAssumptions: data.planningAssumptions,
     transactions: data.transactions
   };
 }
@@ -2463,6 +2571,8 @@ function resetDemoData() {
   data.allocations = freshData.allocations;
   data.investments = freshData.investments;
   data.assets = freshData.assets;
+  data.liabilities = freshData.liabilities || [];
+  data.planningAssumptions = freshData.planningAssumptions || {};
   data.recurringIncome = freshData.recurringIncome;
   data.transactions = freshData.transactions;
   resetAccountForm();
@@ -2470,6 +2580,8 @@ function resetDemoData() {
   resetAllocationForm();
   resetInvestmentForm();
   resetAssetForm();
+  resetLiabilityForm();
+  resetPlanningAssumptionsForm();
   resetRecurringIncomeForm();
   renderAllSections();
   setLocalChangesPendingCloudSave(true);
@@ -2523,6 +2635,10 @@ addOptionalEventListener('investmentForm', 'submit', handleInvestmentSubmit);
 addOptionalEventListener('assetForm', 'submit', handleAssetSubmit);
 addOptionalEventListener('assetCancel', 'click', resetAssetForm);
 addOptionalEventListener('assetsList', 'click', handleAssetActions);
+addOptionalEventListener('liabilityForm', 'submit', handleLiabilitySubmit);
+addOptionalEventListener('liabilityCancel', 'click', resetLiabilityForm);
+addOptionalEventListener('liabilitiesList', 'click', handleLiabilityActions);
+addOptionalEventListener('planningAssumptionsForm', 'submit', handlePlanningAssumptionsSubmit);
 addOptionalEventListener('investmentCancel', 'click', resetInvestmentForm);
 addOptionalEventListener('investmentsList', 'click', handleInvestmentActions);
 addOptionalEventListener('recurringIncomeForm', 'submit', handleRecurringIncomeSubmit);
