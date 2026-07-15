@@ -49,6 +49,17 @@
 - Financial calculations or source-data contracts changed: No.
 - Status: Approval required before live catalog access, applying the transaction, changing Auth/signup settings, using test identities, or deploying the prepared client.
 
+## Milestone 6 — Plaid Sandbox Coverage Preparation
+
+- Date prepared: 2026-07-15
+- Scope: Repository-only Sandbox coverage protocol and redacted evidence template.
+- Runtime/backend: No provider runtime or dependency added; server boundary remains undecided.
+- Credentials/data: No Plaid credentials, provider tokens, real institutions, personal identifiers, or raw provider payloads used.
+- Database/authentication/RLS: Unchanged; no live project access or protected execution performed.
+- Financial calculations/source contracts: Unchanged.
+- Verification: `bash scripts/ci.sh` passed; `git diff --check` passed.
+- Status: Blocked — actual Sandbox coverage requires approval of the backend/runtime and secret-management boundary, authorized Sandbox access, and Chris's confirmed institution inventory.
+
 ## Vercel Operational Note
 
 - Vercel Node.js version changed from 24.x to 22.x LTS after preview deployments failed during build-container initialization. Redeploy succeeded after the change.

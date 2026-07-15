@@ -129,7 +129,7 @@ database, authentication, RLS, or financial calculation change was made.
 
 ## Milestone 6 — Prove Plaid coverage
 
-**Status:** Pending
+**Status:** Blocked — the repository-only Sandbox protocol is prepared, but backend/runtime selection, Plaid Sandbox credentials, and Chris's institution inventory require explicit approval before execution.
 
 **Issue:** #118
 
@@ -139,6 +139,12 @@ database, authentication, RLS, or financial calculation change was made.
 - Do not assume Plaid covers every account.
 
 **Recommended level:** 3X.
+
+**Prepared evidence:** `docs/PLAID_SANDBOX_COVERAGE_PROTOCOL.md` defines the
+redacted institution-by-institution test record, required data classes,
+refresh/reauthentication checks, retry-deduplication evidence, and decision
+rule. No Plaid API calls, credentials, backend runtime, database, auth/RLS, or
+production financial data were used.
 
 ## Milestone 7 — Add the minimum required secondary connector
 
