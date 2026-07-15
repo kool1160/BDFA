@@ -1,5 +1,15 @@
 # BDFA Project Record
 
+## Milestone 11 — Surface Financial Truth and Age-55 Planning in the Dashboard
+
+- Date completed: 2026-07-15
+- Scope: Repository-only wiring of the verified financial-truth and age-55 planning engines into the owner-facing dashboard.
+- Implementation: `js/financial-truth-dashboard.js` renders net worth, cash after bills, recurring monthly flow, debt, portfolio total, base projection, required monthly cash flow, part-time and mortgage-paid scenarios, HSA projection, and assumption/freshness states. `css/financial-truth.css` provides responsive mobile-first presentation. Existing source records remain the input path.
+- Verification: `bash scripts/ci.sh`, including `scripts/test-dashboard-integration.mjs`, JavaScript syntax, static asset integrity, financial truth, retirement planning, and security preparation checks, passed. `git diff --check` passed.
+- Privacy and security: No secrets, identifiers, provider calls, credentials, production tokens, database changes, Auth changes, or RLS changes were added.
+- Financial impact: Existing deterministic engines and formulas were not changed. Missing current-age planning data is shown as `Needs age` rather than presented as a completed projection.
+- Status: Complete — live normalized provider/database integration and manual planning assumptions remain separately scoped.
+
 ## Milestone 10 — Planning Toward Age 55
 
 - Date completed: 2026-07-15

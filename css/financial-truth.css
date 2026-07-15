@@ -1,0 +1,98 @@
+.financial-truth-section {
+  display: grid;
+  gap: 18px;
+  margin-top: 22px;
+  padding: 26px;
+  border: 1px solid rgba(159, 231, 192, 0.14);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(145deg, rgba(159, 231, 192, 0.07), rgba(255, 255, 255, 0.035));
+}
+
+.financial-truth-heading,
+.planning-output-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.financial-truth-heading h2,
+.planning-output-heading h3 {
+  margin: 10px 0 6px;
+}
+
+.financial-truth-heading p,
+.planning-output-note {
+  margin: 0;
+  color: rgba(169, 169, 181, 0.92);
+}
+
+.financial-truth-status,
+.planning-output-status {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.11);
+  border-radius: 999px;
+  color: rgba(247, 247, 251, 0.7);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.financial-truth-grid,
+.planning-output-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.financial-truth-card {
+  display: grid;
+  min-width: 0;
+  gap: 9px;
+  padding: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  background: rgba(5, 5, 7, 0.22);
+}
+
+.financial-truth-card .label {
+  color: rgba(247, 247, 251, 0.62);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.financial-truth-card strong {
+  overflow-wrap: anywhere;
+  color: rgba(247, 247, 251, 0.97);
+  font-size: clamp(1.25rem, 3vw, 1.75rem);
+  letter-spacing: -0.04em;
+}
+
+.financial-truth-card p {
+  margin: 0;
+  color: rgba(169, 169, 181, 0.82);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.planning-output-panel {
+  display: grid;
+  gap: 16px;
+  padding-top: 6px;
+}
+
+@media (max-width: 900px) {
+  .financial-truth-grid,
+  .planning-output-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .financial-truth-section { padding: 20px 16px; }
+  .financial-truth-heading,
+  .planning-output-heading { display: grid; }
+  .financial-truth-status,
+  .planning-output-status { width: fit-content; }
+  .financial-truth-grid,
+  .planning-output-grid { grid-template-columns: 1fr; }
+}

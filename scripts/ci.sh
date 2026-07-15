@@ -40,4 +40,8 @@ echo "::group::Retirement planning representative checks"
 node scripts/test-retirement-planning.mjs
 echo "::endgroup::"
 
+echo "::group::Dashboard integration representative checks"
+node scripts/test-dashboard-integration.mjs
+echo "::endgroup::"
+
 echo "BDFA repository checks passed."
