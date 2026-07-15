@@ -45,7 +45,7 @@ import { calculatePlanningScenarios, calculateRetirementProjection } from './ret
 export function runFinancialPipeline(mockData = {}) {
   const financialModel = buildUnifiedModelFromMockData(mockData);
   const planningOutputs = runPlanningEngine(financialModel);
-  const forecastOutputs = runForecastEngine(financialModel);
+  const forecastOutputs = runForecastEngine(financialModel, financialModel.userPreferences);
   const decisionOutputs = runDecisionEngine(planningOutputs, forecastOutputs);
   const financialTruth = calculateFinancialTruth(financialModel);
 

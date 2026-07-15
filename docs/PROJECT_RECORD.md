@@ -1,5 +1,15 @@
 # BDFA Project Record
 
+## Milestone 12 — Add Manual Source Records for Assets, Liabilities, and Planning Assumptions
+
+- Date completed: 2026-07-15
+- Scope: Repository-only manual fallback source entry for assets, liabilities, and age-55 planning assumptions.
+- Implementation: `index.html` and `js/app.js` add validated liability and assumption forms, manual provenance labels, editing/deletion, safe defaults, and existing asset provenance. `js/data-adapter.js` preserves the new records in local storage and the existing complete snapshot path. `js/financial-engine-pipeline.js` passes saved assumptions into the planning engine.
+- Financial impact: Existing formulas were unchanged. Manual liabilities feed debt/net-worth summaries and mortgage planning inputs; assumptions feed illustrative age-55 scenarios.
+- Privacy/security: No secrets, account numbers, provider tokens, personal identifiers, provider calls, live database changes, Auth changes, or RLS changes were made.
+- Verification: `bash scripts/ci.sh` passed, including `scripts/test-manual-source-records.mjs`, JavaScript syntax, static asset integrity, security preparation, financial truth, retirement planning, and dashboard integration checks. `git diff --check` passed.
+- Status: Complete — normalized provider persistence and live database execution remain separately protected milestones.
+
 ## Milestone 11 — Surface Financial Truth and Age-55 Planning in the Dashboard
 
 - Date completed: 2026-07-15
