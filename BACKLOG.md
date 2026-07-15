@@ -100,7 +100,7 @@ RLS, provider credential, or financial calculation changes were made.
 
 ## Milestone 5 — Build the secure provider backend
 
-**Status:** Pending
+**Status:** Blocked — repository-only security design and implementation preparation is recorded, but backend runtime/deployment selection, live Supabase owner/RLS/Auth foundation, provider selection, secret management, credentials, and production access require Chris's explicit approval.
 
 **Issue:** #117
 
@@ -120,6 +120,12 @@ Add server-side capabilities for:
 No provider secret or permanent access token may reach browser code.
 
 **Recommended level:** 4X for security design and token storage; 3X for contained provider endpoints after the design is approved.
+
+**Prepared evidence:** `docs/SECURE_PROVIDER_BACKEND_DESIGN.md` defines the
+server boundary, token lifecycle, endpoint contract, webhook and sync
+invariants, redaction rules, approval-gated implementation sequence, and
+acceptance evidence. No backend runtime, dependency, provider credential,
+database, authentication, RLS, or financial calculation change was made.
 
 ## Milestone 6 — Prove Plaid coverage
 

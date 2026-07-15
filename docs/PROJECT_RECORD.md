@@ -1,5 +1,15 @@
 # BDFA Project Record
 
+## Milestone 5 — Secure Provider Backend Preparation
+
+- Date prepared: 2026-07-15
+- Scope: Repository-only security design and implementation preparation up to the protected backend/provider boundary.
+- Design: `docs/SECURE_PROVIDER_BACKEND_DESIGN.md` defines the authenticated server API boundary, token lifecycle, webhook verification, redacted logging, owner scoping, normalization requirements, and Sandbox-first sequence.
+- Repository reconciliation: BDFA remains a static frontend with no server runtime, dependency manifest, backend deployment target, provider selection, or approved live owner/RLS/Auth foundation.
+- Privacy: No provider credentials, access tokens, account identifiers, balances, test identities, or production identifiers were added or handled.
+- Runtime/database/authentication/RLS/financial calculations: Unchanged. No backend, migration, live Supabase action, provider call, or financial calculation change was made.
+- Status: Approval required before selecting the runtime/deployment and secret-management boundaries, implementing token persistence/endpoints, using provider credentials, applying live database/security changes, or deploying. Milestone 2's live owner/RLS/Auth foundation should precede durable provider persistence.
+
 ## Milestone 4 — Normalized Financial Model Design
 
 - Date completed: 2026-07-13
