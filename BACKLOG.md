@@ -363,7 +363,18 @@ This milestone must not execute SQL against the live project. It should produce 
 
 ## Milestone 16 — Build provider-adapter contract and sandbox stubs
 
-**Status:** Pending
+**Status:** Complete — repository-only provider-neutral contract, deterministic sandbox scenarios, normalization, and redaction tests are implemented. Real provider APIs, SDKs, credentials, backend secrets, database, Auth/RLS, and deployment remain outside this milestone.
+
+**Evidence:** `js/provider-adapter-contract.js` defines the required datasets,
+health states, sandbox-only adapter boundary, source-model normalization, and
+redaction helper. `scripts/test-provider-adapter-contract.mjs` verifies healthy,
+stale, partial, reauthentication, duplicate, and disconnected scenarios plus
+unsupported datasets and redacted events. `docs/PROVIDER_ADAPTER_CONTRACT.md`
+records the contract and future provider implementation gates. `bash scripts/ci.sh`
+passes with the new contract suite included.
+
+**Recommended level:** 3X for the next contained adapter implementation; 4X
+review remains required if token handling or protected persistence is introduced.
 
 Create the provider-neutral adapter contract that Plaid and any secondary provider must satisfy before live integration.
 
