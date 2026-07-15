@@ -474,7 +474,7 @@ financial data changes were made.
 
 ## Milestone 20 — Add freshness, confidence, and audit explanations across the app
 
-**Status:** Pending
+**Status:** Complete — repository-only trust, freshness, and audit explanations are implemented and verified. Live provider freshness remains dependent on the protected backend/provider milestones.
 
 Make every major number explain what it is based on, how fresh it is, and how confident BDFA is in the source data.
 

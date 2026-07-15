@@ -1,4 +1,5 @@
 import { runFinancialPipeline } from './financial-engine-pipeline.js';
+import { evaluateDataTrust, metricAudit } from './data-trust.js';
 
 const money = new Intl.NumberFormat('en-US', {
   style: 'currency',
@@ -35,16 +36,20 @@ function render() {
   const projection = pipeline.forecastOutputs.retirementProjection;
   const scenarios = pipeline.forecastOutputs.scenarios;
   const analytics = truth.portfolio.analytics;
+  const connectionState = typeof window.BDFA?.connectionHealth?.getState === 'function'
+    ? window.BDFA.connectionHealth.getState()
+    : {};
+  const trust = evaluateDataTrust(sourceData, connectionState);
 
   summary.innerHTML = summaryCards.map(([id, label, detail]) => cardMarkup(
     label,
-    detail,
+    metricAudit(detail, metricCollections(id), trust),
     formatSummaryValue(id, truth),
   )).join('');
 
   planning.innerHTML = planningCards.map(([id, label, detail]) => cardMarkup(
     label,
-    detail,
+    metricAudit(detail, ['accounts', 'investments', 'liabilities', 'recurringIncome'], trust),
     formatPlanningValue(id, projection, scenarios),
   )).join('');
   portfolio.innerHTML = [
@@ -55,13 +60,26 @@ function render() {
     ['Unrealized gains', analytics.performance.unrealizedGains.status === 'available' ? money.format(analytics.performance.unrealizedGains.value) : 'Missing activity', 'Requires an explicit source value.'],
   ].map(([label, value, detail]) => cardMarkup(label, detail, value)).join('');
 
-  setText('financialTruthStatus', `Derived · ${Object.values(truth.sourceCounts).reduce((sum, count) => sum + count, 0)} source records`);
+  setText('financialTruthStatus', trust.label + ' · ' + trust.totalRecords + ' source records');
+  setText('financialTruthFreshness', (trust.freshness + ' ' + trust.warning).trim());
+  setText('dashboardTrustSummary', (trust.label + '. ' + trust.freshness + ' ' + trust.warning).trim());
+  setText('financialTruthAudit', 'Audit trail: ' + trust.totalRecords + ' source records across ' + Object.values(trust.counts).filter(Boolean).length + ' data groups. Every displayed number below is recalculated from those records.');
   setText('planningOutputStatus', projection.status === 'illustrative' ? 'Assumption-based' : 'Missing planning assumptions');
   setText('planningOutputNote', projection.status === 'illustrative'
     ? `${projection.confidence.explanation} Source data is only as fresh as the latest saved snapshot.`
     : 'Add a current age to the planning source data before age-55 projections can be calculated. Source data is only as fresh as the latest saved snapshot.');
   setText('portfolioAnalyticsStatus', analytics.dataQuality.status === 'available' ? 'Activity available' : analytics.dataQuality.status === 'partial' ? 'Partial investment data' : 'Waiting for holdings');
   setText('portfolioAnalyticsNote', `${analytics.performance.note} ${analytics.dataQuality.missing.length ? `Missing: ${analytics.dataQuality.missing.join(', ')}.` : 'Source records cover the displayed analytics.'}`);
+}
+
+function metricCollections(id) {
+  return ({
+    netWorth: ['accounts', 'investments', 'assets', 'liabilities'],
+    cashAfterBills: ['accounts', 'bills'],
+    cashFlow: ['recurringIncome', 'bills'],
+    debt: ['accounts', 'liabilities'],
+    portfolio: ['investments'],
+  })[id] || [];
 }
 
 function formatSummaryValue(id, truth) {
