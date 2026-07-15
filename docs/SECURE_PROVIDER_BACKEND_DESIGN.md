@@ -121,4 +121,3 @@ The following are required before this milestone can be marked complete:
 - partial/stale/reauthentication states remain visible;
 - recovery and token deletion behavior is verified; and
 - Sandbox verification is recorded for each provider-supported data class.
-
