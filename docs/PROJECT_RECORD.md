@@ -197,3 +197,14 @@ Financial calculations were unchanged. Source-data contracts were unchanged. Thi
 - Implementation: `js/data-adapter.js` provides a versioned redacted export envelope, duplicate/stale analysis, ID-based merge support, and recovery backup APIs. `index.html` and `js/app.js` provide validation-before-replace import warnings, export download, backup timestamp/source summary, and recovery restore controls.
 - Verification: `bash scripts/ci.sh` passed, including `scripts/test-source-recovery.mjs`, which verifies sensitive-key redaction, merge/recovery behavior, and derived output regeneration from imported source records. `git diff --check` passed.
 - Boundaries: No secrets, provider credentials, account numbers, sensitive logs, live database changes, authentication/RLS changes, provider calls, or financial formula changes.
+
+## Milestone 15 — Normalized Supabase Schema and RLS Migration Drafts
+
+- Date completed: 2026-07-15
+- Scope: Repository-only preparation of the normalized relational schema, owner-scoped RLS policy draft, rollback draft, and live-execution runbook.
+- Files: `supabase/migrations/20260715_normalized_financial_schema.sql`, `supabase/migrations/20260715_normalized_financial_schema.rollback.sql`, `docs/NORMALIZED_SCHEMA_MIGRATION_RUNBOOK.md`, and `scripts/check-normalized-schema-draft.py`.
+- Model coverage: Institutions, connections, accounts and provider sources, balances, securities, transactions, holdings, investment transactions, liabilities and observations, recurring items, manual assets and valuations, sync runs, and connection events.
+- Security design: Every normalized table has an owner index, forced RLS, authenticated CRUD grants, and a policy requiring `auth.uid() = user_id` plus `private.is_current_user_approved()`. The draft contains no owner identity or secret.
+- Verification: `python3 scripts/check-normalized-schema-draft.py`, `bash scripts/ci.sh`, and `git diff --check` passed. SQL was not executed or connected to Supabase.
+- Runtime/database/authentication/RLS/financial impact: No runtime, live database, Auth, RLS, provider, credential, or financial-calculation changes were made.
+- Status: Complete — live catalog preflight, owner bootstrap, migration execution, and destructive rollback require explicit approval and a separately verified Milestone 2 foundation.

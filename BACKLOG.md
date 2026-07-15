@@ -340,7 +340,7 @@ credential, or financial formula changes were made.
 
 ## Milestone 15 — Prepare normalized Supabase schema and RLS migration drafts
 
-**Status:** Pending
+**Status:** Complete — repository-only SQL drafts, rollback notes, verification runbook, and static safety checks are prepared. No SQL was executed against Supabase.
 
 Prepare repository-only SQL and runbooks for the normalized BDFA data model without applying them to the live Supabase project.
 
@@ -356,6 +356,10 @@ Add drafts for:
 This milestone must not execute SQL against the live project. It should produce reviewable migration files, tests or static checks where practical, and a clear approval checklist for live execution.
 
 **Recommended level:** 4X.
+
+**Evidence:** `supabase/migrations/20260715_normalized_financial_schema.sql` defines 16 owner-scoped normalized tables, reconciliation constraints, indexes, and approved-owner RLS policies. `supabase/migrations/20260715_normalized_financial_schema.rollback.sql` records the destructive rollback draft. `docs/NORMALIZED_SCHEMA_MIGRATION_RUNBOOK.md` records prerequisites, verification, recovery, and approval gates. `scripts/check-normalized-schema-draft.py` runs through `scripts/ci.sh`.
+
+**Boundary:** Live catalog inspection, owner bootstrap, migration execution, RLS/Auth changes, and destructive rollback remain blocked pending explicit approval and the Milestone 2 security foundation.
 
 ## Milestone 16 — Build provider-adapter contract and sandbox stubs
 
